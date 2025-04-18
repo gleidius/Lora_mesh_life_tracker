@@ -121,6 +121,22 @@ static HardwareSerial S_Serial(UART2_RX, UART2_TX);
       MySerial1.println(range_speed);
     }
 
+    void set_SRC_ADDR(int SRC){                     // функция изменения собственного адреса 
+      String range_speed = String(SRC);
+      String at = "AT+SRC_ADDR=";
+      String save = ",1";
+      at.concat(range_speed);
+      at.concat(save);
+      S_Serial.println(at);
+      MySerial1.print("Собственный адрес = ");
+      MySerial1.println(range_speed);
+
+      while(S_Serial.available()){
+        byte buff123 = S_Serial.read();
+        MySerial1.write(buff123);
+      }
+    }
+
 void setup(){                            //========================== SETUP ===========================
 
   for (int i = 0; i < switchesSize; i++)      // инициализируем свичи
@@ -128,7 +144,7 @@ void setup(){                            //========================== SETUP ====
     pinMode(switches[i], INPUT_PULLUP);
   }
 
-    pinMode(STM_BTN1, INPUT);                 // инициализируем кнопочки
+    pinMode(STM_BTN1, INPUT_PULLUP);                 // инициализируем кнопочки
     pinMode(LORA_PA0, INPUT);
     pinMode(LORA_RST, INPUT);
 
@@ -161,12 +177,10 @@ void setup(){                            //========================== SETUP ====
     // базовые настроечки
   send_command("AT+POWER=14,0");                           // устанавливаем базовую мощность
   send_command("AT+SRC_ADDR=1,0");                        // задаем собственный адрес
-  send_command("AT+DST_ADDR=5,0");                        // задаем целевой адрес
+  send_command("AT+DST_ADDR=404,0");                        // задаем целевой адрес
   send_command("AT+OPTION=1,0");                          // задаем режим передачи (1 - unicast (одноадресная))
   send_command("AT+RATE=0");                              // устанавливаем параметр скорость/дальность
 
-
-  
   // инициализируем SIM868
   // pressing SIM868 PWRK pin to boot it
   digitalWrite(SIM_PWRK, HIGH);
@@ -178,20 +192,9 @@ void setup(){                            //========================== SETUP ====
   digitalWrite(SIM_PWRK, HIGH);
   digitalWrite(LED_PC13, LOW);
   delay(3000);
-  
-  MySerial3.write("AT+CSCLK=1\n");
-  delay(100); 
-  while(MySerial3.available()){
-    byte buff123 = MySerial3.read();
-    MySerial1.write(buff123);
-  }
-  digitalWrite(SIM_SLEEP, HIGH);
-  delay(3000);
-  digitalWrite(SIM_SLEEP, LOW);
-
-  
-  
-  MySerial3.write("AT+CGNSPWR=1\n");
+ 
+  MySerial1.println("===============================================================");
+  MySerial3.write("AT+CGNSPWR=1\n");        // подаем питание на GPS
   delay(100); 
   while(MySerial3.available()){
     byte buff123 = MySerial3.read();
@@ -199,20 +202,196 @@ void setup(){                            //========================== SETUP ====
   }
 }
 
-
 void loop(){                            // ======================== LOOP ===============================
+  int butt_count = 1;
+  int SRC_ADDR = 1;
 
-  digitalWrite(SIM_SLEEP, HIGH);
-  delay(3000);
-  digitalWrite(SIM_SLEEP, LOW);
+  display.clearDisplay();
+  display.setCursor(0, 0);
+  display.println(" === LIFE TRACKER ===");
+
+  display.print("!!Power (3), dBm: ");
+  int Power_Xpos = display.getCursorX(); // позиция Х курсора при написании мощности
+  int Power_Ypos = display.getCursorY(); // позиция Y курсора при написании мощности
+  display.println("14");
+
+  display.print("!!Pause (2), ms: ");
+  int Pause_Xpos = display.getCursorX(); // позиция Х курсора при написании мощности
+  int Pause_Ypos = display.getCursorY(); // позиция Y курсора при написании мощности
+  display.println("600");
+
+  display.print("SRC_ADDR: ");
+  int SADDR_Xpos = display.getCursorX(); // позиция Х курсора при написании мощности
+  int SADDR_Ypos = display.getCursorY(); // позиция Y курсора при написании мощности
+  display.println("1");
+
+  display.print("S/R (4): ");
+  int SR_Xpos = display.getCursorX(); // позиция Х курсора при написании мощности
+  int SR_Ypos = display.getCursorY(); // позиция Y курсора при написании мощности
+  display.println("0");
+
+  display.print("Mode (6): ");
+  int Mode_Xpos = display.getCursorX(); // позиция Х курсора при написании мощности
+  int Mode_Ypos = display.getCursorY(); // позиция Y курсора при написании мощности
+  display.println("Not");
+
+  display.print("!!Status: ");
+  int Stat_Xpos = display.getCursorX(); // позиция Х курсора при написании мощности
+  int Stat_Ypos = display.getCursorY(); // позиция Y курсора при написании мощности
+  display.println("Setup");
+
+  display.display();
+
+  while (true)
+  {
+/*                           // =============================== ПОЛУЧЕНИЕ КООРДИНАТ ==============================
+      MySerial3.write("AT+CGNSINF\n");
+      delay(100); 
+      while(MySerial3.available()){
+        byte buff123 = MySerial3.read();
+        MySerial1.write(buff123);
+      }
+      delay(5000);*/
   
-  while(true){
-    MySerial3.write("AT+CGNSINF\n");
-  delay(100); 
-  while(MySerial3.available()){
-    byte buff123 = MySerial3.read();
-    MySerial1.write(buff123);
-  }
-  delay(5000);
+    if (digitalRead(STM_SW6)== false){          // ========================= MODE ================================
+      display.setCursor(Mode_Xpos, Mode_Ypos);
+      display.fillRect(Mode_Xpos, Mode_Ypos, 128, 8, SSD1306_BLACK);
+      display.print("Mesh");
+      display.display();
+
+      S_Serial.println("56.45205 84.96131 450 1.5 50 2"); // отправляем пакет
+      delay(2000);
+      
+    }
+    else if (digitalRead(STM_SW6)== true){
+      display.setCursor(Mode_Xpos, Mode_Ypos);
+      display.fillRect(Mode_Xpos, Mode_Ypos, 128, 8, SSD1306_BLACK);
+      display.print("Internet");
+      display.display();
+
+    }
+
+    if (digitalRead(STM_BTN1)== false){  // ========================== SPEED/RANGE ======================================
+      //LORA_RST, LORA_PA0, STM_BTN1
+      butt_count++;
+      MySerial1.print(butt_count);
+      if (butt_count == 1)
+      {
+        //setup_delay = 1000;
+        set_rs(0);
+        MySerial1.println("S/R=0");
+
+        display.setCursor(SR_Xpos, SR_Ypos);
+        display.fillRect(SR_Xpos, SR_Ypos, 128, 8, SSD1306_BLACK);
+        display.print("0");
+        display.display();
+      }
+      if (butt_count == 2)
+      {
+        //setup_delay = 1000;
+        set_rs(1);
+        MySerial1.println("S/R=1");
+
+        display.setCursor(SR_Xpos, SR_Ypos);
+        display.fillRect(SR_Xpos, SR_Ypos, 128, 8, SSD1306_BLACK);
+        display.print("1");
+        display.display();
+      }
+      if (butt_count == 3)
+      {
+        //setup_delay = 3000;
+        set_rs(2);
+        butt_count = 0;
+        MySerial1.println("S/R=2");
+
+        display.setCursor(SR_Xpos, SR_Ypos);
+        display.fillRect(SR_Xpos, SR_Ypos, 128, 8, SSD1306_BLACK);
+        display.print("2");
+        display.display();
+      }
+    }
+
+    if (digitalRead(LORA_PA0)== false){   // ========================= SRC_ADDR =================================
+      SRC_ADDR ++;
+      set_SRC_ADDR(SRC_ADDR);
+
+      display.setCursor(SADDR_Xpos, SADDR_Ypos);
+      display.fillRect(SADDR_Xpos, SADDR_Ypos, 128, 8, SSD1306_BLACK);
+      display.print(SRC_ADDR);
+      display.display();
+
+      if(SRC_ADDR==100){
+        SRC_ADDR = 0;
+      }
+    }
+
+    if (digitalRead(STM_SW2) == true){ // устанавливаем паузы между передачами
+    
+      switch_count++;
+      if (switch_count == 1)
+      {
+        test_delay = set_pause(600);
+
+        display.setCursor(Pause_Xpos, Pause_Ypos);
+        display.fillRect(Pause_Xpos, Pause_Ypos, 128, 8, SSD1306_BLACK);
+        display.print("600");
+        display.display();
+      }
+      if (switch_count == 2)
+      {
+        test_delay = set_pause(1200);
+
+        display.setCursor(Pause_Xpos, Pause_Ypos);
+        display.fillRect(Pause_Xpos, Pause_Ypos, 128, 8, SSD1306_BLACK);
+        display.print("1200");
+        display.display();
+      }
+      if (switch_count == 3)
+      {
+        test_delay = set_pause(2000);
+
+        display.setCursor(Pause_Xpos, Pause_Ypos);
+        display.fillRect(Pause_Xpos, Pause_Ypos, 128, 8, SSD1306_BLACK);
+        display.print("2000");
+        display.display();
+      }
+      if (switch_count == 4)
+      {
+        test_delay = set_pause(3000);
+
+        display.setCursor(Pause_Xpos, Pause_Ypos);
+        display.fillRect(Pause_Xpos, Pause_Ypos, 128, 8, SSD1306_BLACK);
+        display.print("3000");
+        display.display();
+      }
+      if (switch_count == 5)
+      {
+        test_delay = set_pause(5000);
+        switch_count = 0;
+
+        display.setCursor(Pause_Xpos, Pause_Ypos);
+        display.fillRect(Pause_Xpos, Pause_Ypos, 128, 8, SSD1306_BLACK);
+        display.print("5000");
+        display.display();
+      }
+    }
+
+    if (digitalRead(STM_SW3) == true) { // переключаем мощность
+      enc_count--;
+      set_power(enc_count); // устанавливаем мощность
+
+      display.setCursor(Power_Xpos, Power_Ypos);
+      display.fillRect(Power_Xpos, Power_Ypos, 128, 8, SSD1306_BLACK);
+      display.print(enc_count);
+      display.display();
+
+      if (enc_count == -9)
+      {
+        enc_count = 16;
+      }
+      read_SSerial();
+    }
+
+  delay(500);
   }
 }
