@@ -205,15 +205,16 @@ void setup(){                            //========================== SETUP ====
 void loop(){                            // ======================== LOOP ===============================
   int butt_count = 1;
   int SRC_ADDR = 1;
+  int power_counter = 22;
 
   display.clearDisplay();
   display.setCursor(0, 0);
   display.println(" === LIFE TRACKER ===");
 
-  display.print("!!Power (3), dBm: ");
+  display.print("Power (3), dBm: ");
   int Power_Xpos = display.getCursorX(); // позиция Х курсора при написании мощности
   int Power_Ypos = display.getCursorY(); // позиция Y курсора при написании мощности
-  display.println("14");
+  display.println("22");
 
   display.print("!!Pause (2), ms: ");
   int Pause_Xpos = display.getCursorX(); // позиция Х курсора при написании мощности
@@ -253,7 +254,7 @@ void loop(){                            // ======================== LOOP =======
       }
       delay(5000);*/
   
-    if (digitalRead(STM_SW6)== false){          // ========================= MODE ================================
+    if (digitalRead(STM_SW6)== false){          // ========================= MODE AND SENDING ================================
       display.setCursor(Mode_Xpos, Mode_Ypos);
       display.fillRect(Mode_Xpos, Mode_Ypos, 128, 8, SSD1306_BLACK);
       display.print("Mesh");
@@ -324,70 +325,71 @@ void loop(){                            // ======================== LOOP =======
         SRC_ADDR = 0;
       }
     }
+/*
+if (digitalRead(STM_SW2) == true){ // устанавливаем паузы между передачами
 
-    if (digitalRead(STM_SW2) == true){ // устанавливаем паузы между передачами
-    
-      switch_count++;
-      if (switch_count == 1)
-      {
-        test_delay = set_pause(600);
+switch_count++;
+if (switch_count == 1)
+{
+  test_delay = set_pause(600);
+  
+  display.setCursor(Pause_Xpos, Pause_Ypos);
+  display.fillRect(Pause_Xpos, Pause_Ypos, 128, 8, SSD1306_BLACK);
+  display.print("600");
+  display.display();
+}
+if (switch_count == 2)
+{
+  test_delay = set_pause(1200);
+  
+  display.setCursor(Pause_Xpos, Pause_Ypos);
+  display.fillRect(Pause_Xpos, Pause_Ypos, 128, 8, SSD1306_BLACK);
+  display.print("1200");
+  display.display();
+}
+if (switch_count == 3)
+{
+  test_delay = set_pause(2000);
+  
+  display.setCursor(Pause_Xpos, Pause_Ypos);
+  display.fillRect(Pause_Xpos, Pause_Ypos, 128, 8, SSD1306_BLACK);
+  display.print("2000");
+  display.display();
+}
+if (switch_count == 4)
+{
+  test_delay = set_pause(3000);
+  
+  display.setCursor(Pause_Xpos, Pause_Ypos);
+  display.fillRect(Pause_Xpos, Pause_Ypos, 128, 8, SSD1306_BLACK);
+  display.print("3000");
+  display.display();
+}
+if (switch_count == 5)
+{
+  test_delay = set_pause(5000);
+  switch_count = 0;
+  
+  display.setCursor(Pause_Xpos, Pause_Ypos);
+  display.fillRect(Pause_Xpos, Pause_Ypos, 128, 8, SSD1306_BLACK);
+  display.print("5000");
+  display.display();
+}
+}
+*/
 
-        display.setCursor(Pause_Xpos, Pause_Ypos);
-        display.fillRect(Pause_Xpos, Pause_Ypos, 128, 8, SSD1306_BLACK);
-        display.print("600");
-        display.display();
-      }
-      if (switch_count == 2)
-      {
-        test_delay = set_pause(1200);
+if (digitalRead(STM_SW3) == true) { // переключаем мощность
+power_counter--;
+set_power(power_counter); // устанавливаем мощность
 
-        display.setCursor(Pause_Xpos, Pause_Ypos);
-        display.fillRect(Pause_Xpos, Pause_Ypos, 128, 8, SSD1306_BLACK);
-        display.print("1200");
-        display.display();
-      }
-      if (switch_count == 3)
-      {
-        test_delay = set_pause(2000);
-
-        display.setCursor(Pause_Xpos, Pause_Ypos);
-        display.fillRect(Pause_Xpos, Pause_Ypos, 128, 8, SSD1306_BLACK);
-        display.print("2000");
-        display.display();
-      }
-      if (switch_count == 4)
-      {
-        test_delay = set_pause(3000);
-
-        display.setCursor(Pause_Xpos, Pause_Ypos);
-        display.fillRect(Pause_Xpos, Pause_Ypos, 128, 8, SSD1306_BLACK);
-        display.print("3000");
-        display.display();
-      }
-      if (switch_count == 5)
-      {
-        test_delay = set_pause(5000);
-        switch_count = 0;
-
-        display.setCursor(Pause_Xpos, Pause_Ypos);
-        display.fillRect(Pause_Xpos, Pause_Ypos, 128, 8, SSD1306_BLACK);
-        display.print("5000");
-        display.display();
-      }
-    }
-
-    if (digitalRead(STM_SW3) == true) { // переключаем мощность
-      enc_count--;
-      set_power(enc_count); // устанавливаем мощность
-
-      display.setCursor(Power_Xpos, Power_Ypos);
-      display.fillRect(Power_Xpos, Power_Ypos, 128, 8, SSD1306_BLACK);
-      display.print(enc_count);
+display.setCursor(Power_Xpos, Power_Ypos);
+display.fillRect(Power_Xpos, Power_Ypos, 128, 8, SSD1306_BLACK);
+display.print(power_counter);
       display.display();
 
-      if (enc_count == -9)
+      if (power_counter == -9)
       {
-        enc_count = 16;
+        power_counter = 23;
       }
       read_SSerial();
     }
