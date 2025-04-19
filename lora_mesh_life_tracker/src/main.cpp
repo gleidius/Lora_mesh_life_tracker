@@ -292,7 +292,7 @@ void loop(){                            // ======================== LOOP =======
       display.print("Mesh");
       display.display();
 
-      S_Serial.println(lattitude + space + lontitude + wrong_data + space + status_count); // отправляем пакет
+      S_Serial.println(lattitude + space + lontitude + wrong_data + space + status_count); // отправляем пакет // если нету модуля то заменить аргументы в скобках на строку: "56.45205 84.96131 450 1.5 50 2"
       MySerial1.print("pack = ");
       MySerial1.println(lattitude + space + lontitude + wrong_data + space + status_count);
       delay(2000);
