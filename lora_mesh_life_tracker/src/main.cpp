@@ -206,6 +206,13 @@ void loop(){                            // ======================== LOOP =======
   int butt_count = 1;
   int SRC_ADDR = 1;
   int power_counter = 22;
+  char GPS_buff[150] = "Nothing";
+  int GPS_buff_index =0;
+  String GPS_str="Nothing";
+  String lattitude="Error_lattitude";
+  String lontitude="Error_lontitude";
+
+  int index1=0;
 
   display.clearDisplay();
   display.setCursor(0, 0);
@@ -245,22 +252,46 @@ void loop(){                            // ======================== LOOP =======
 
   while (true)
   {
-/*                           // =============================== ПОЛУЧЕНИЕ КООРДИНАТ ==============================
+                           // =============================== ПОЛУЧЕНИЕ КООРДИНАТ ==============================
       MySerial3.write("AT+CGNSINF\n");
-      delay(100); 
+      
       while(MySerial3.available()){
+        
         byte buff123 = MySerial3.read();
-        MySerial1.write(buff123);
+        //MySerial1.write(buff123);
+        GPS_buff[GPS_buff_index] = buff123;
+        GPS_buff_index++;
       }
-      delay(5000);*/
-  
+      GPS_str=String(GPS_buff);
+      
+      GPS_buff_index=0;
+
+      index1 = (GPS_str.indexOf(".")+5);
+      GPS_str = GPS_str.substring(index1);
+      MySerial1.print("GPS =");
+      MySerial1.println(GPS_str);
+      
+      lattitude = GPS_str.substring(0,GPS_str.indexOf(","));
+      lontitude = GPS_str.substring(GPS_str.indexOf(",")+1);
+      MySerial1.print("Lat= ");
+      MySerial1.println(lattitude);
+      MySerial1.print("Lon= ");
+      MySerial1.println(lontitude);
+      MySerial1.println("\n");
+      String wrong_data = " 450 1.5 50 2";
+      String space = " ";
+      String GPS_TO_SEND = "";
+
+      
+
+
     if (digitalRead(STM_SW6)== false){          // ========================= MODE AND SENDING ================================
       display.setCursor(Mode_Xpos, Mode_Ypos);
       display.fillRect(Mode_Xpos, Mode_Ypos, 128, 8, SSD1306_BLACK);
       display.print("Mesh");
       display.display();
 
-      S_Serial.println("56.45205 84.96131 450 1.5 50 2"); // отправляем пакет
+      S_Serial.println(lattitude + space + lontitude + wrong_data); // отправляем пакет
       delay(2000);
       
     }
@@ -325,7 +356,7 @@ void loop(){                            // ======================== LOOP =======
         SRC_ADDR = 0;
       }
     }
-/*
+/*       устанавливаем паузы между передачами
 if (digitalRead(STM_SW2) == true){ // устанавливаем паузы между передачами
 
 switch_count++;
