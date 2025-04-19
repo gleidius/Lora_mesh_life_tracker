@@ -204,6 +204,7 @@ void setup(){                            //========================== SETUP ====
 
 void loop(){                            // ======================== LOOP ===============================
   int butt_count = 1;
+  int status_count = 0;
   int SRC_ADDR = 1;
   int power_counter = 22;
   char GPS_buff[150] = "Nothing";
@@ -243,7 +244,7 @@ void loop(){                            // ======================== LOOP =======
   int Mode_Ypos = display.getCursorY(); // позиция Y курсора при написании мощности
   display.println("Not");
 
-  display.print("!!Status: ");
+  display.print("Status: ");
   int Stat_Xpos = display.getCursorX(); // позиция Х курсора при написании мощности
   int Stat_Ypos = display.getCursorY(); // позиция Y курсора при написании мощности
   display.println("Setup");
@@ -278,7 +279,7 @@ void loop(){                            // ======================== LOOP =======
       MySerial1.print("Lon= ");
       MySerial1.println(lontitude);
       MySerial1.println("\n");
-      String wrong_data = " 450 1.5 50 2";
+      String wrong_data = " 450 1.5 50";
       String space = " ";
       String GPS_TO_SEND = "";
 
@@ -291,7 +292,9 @@ void loop(){                            // ======================== LOOP =======
       display.print("Mesh");
       display.display();
 
-      S_Serial.println(lattitude + space + lontitude + wrong_data); // отправляем пакет
+      S_Serial.println(lattitude + space + lontitude + wrong_data + space + status_count); // отправляем пакет
+      MySerial1.print("pack = ");
+      MySerial1.println(lattitude + space + lontitude + wrong_data + space + status_count);
       delay(2000);
       
     }
@@ -341,6 +344,39 @@ void loop(){                            // ======================== LOOP =======
         display.print("2");
         display.display();
       }
+    }
+
+    if(digitalRead(LORA_RST)== false){      // ========================== STATUS ========================== (не забыть добавить изменение статуса в пакет)
+      status_count++;
+      if (status_count == 1){
+        display.setCursor(Stat_Xpos, Stat_Ypos);
+        display.fillRect(Stat_Xpos, Stat_Ypos, 128, 8, SSD1306_BLACK);
+        display.print("Ground");           // на земле
+        display.display();
+        
+      } 
+      if (status_count == 2){
+        display.setCursor(Stat_Xpos, Stat_Ypos);
+        display.fillRect(Stat_Xpos, Stat_Ypos, 128, 8, SSD1306_BLACK);
+        display.print("Sky");          // в небе
+        display.display();
+        
+      } 
+      if (status_count == 3){
+        display.setCursor(Stat_Xpos, Stat_Ypos);
+        display.fillRect(Stat_Xpos, Stat_Ypos, 128, 8, SSD1306_BLACK);
+        display.print("Picked up");          // подбор
+        display.display();
+        
+      } 
+      if (status_count == 4){
+        display.setCursor(Stat_Xpos, Stat_Ypos);
+        display.fillRect(Stat_Xpos, Stat_Ypos, 128, 8, SSD1306_BLACK);
+        display.print("SOS");          // SOS соответствует 0 в status_counter
+        display.display();
+        status_count = 0;
+      } 
+      delay(100);
     }
 
     if (digitalRead(LORA_PA0)== false){   // ========================= SRC_ADDR =================================
