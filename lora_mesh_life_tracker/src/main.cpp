@@ -204,7 +204,7 @@ void setup(){                            //========================== SETUP ====
 
 void loop(){                            // ======================== LOOP ===============================
   int butt_count = 1;
-  int status_count = 0;
+  int status_count = 1;
   int SRC_ADDR = 1;
   int power_counter = 22;
   char GPS_buff[150] = "Nothing";
@@ -247,7 +247,7 @@ void loop(){                            // ======================== LOOP =======
   display.print("Status: ");
   int Stat_Xpos = display.getCursorX(); // позиция Х курсора при написании мощности
   int Stat_Ypos = display.getCursorY(); // позиция Y курсора при написании мощности
-  display.println("Setup");
+  display.println("Ground");
 
   display.display();
 
