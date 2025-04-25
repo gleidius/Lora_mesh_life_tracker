@@ -244,10 +244,13 @@ void loop()
   int SRC_ADDR = 1;
   int power_counter = 22;
   char GPS_buff[150] = "Nothing";
+  char CONNECT_buf[150] = "Nothing";
+  int CONNECT_buf_index = 0;
   int GPS_buff_index = 0;
   bool connect_flag = 0;
 
   String GPS_str = "GPS";
+  String connect = "connect";
   String lattitude = "lattitude";
   String lontitude = "lontitude";
   String altitude = "altitude";
@@ -467,35 +470,48 @@ void loop()
             byte buff123 = MySerial3.read();
             MySerial1.write(buff123);
           }
-          delay(1000);
+          //delay(1000);
 
           MySerial3.println("AT+CIPSTART=\"TCP\",\"103.90.75.178\",5000");
-
+          CONNECT_buf_index = 0;
+          delay(3000);
           // Читаем ответ
+          /*while (!MySerial3.available())
+          {
+           MySerial1.print(".");
+          }*/
           while (MySerial3.available())
           {
             byte buff123 = MySerial3.read();
             MySerial1.write(buff123);
+            CONNECT_buf[CONNECT_buf_index] = buff123;
+            CONNECT_buf_index++;
           }
-          delay(3000);
-          connect_flag = 0; // флажок наличия соединения              !!!!!!!==!!!!!!=====!!!!!!!!!===!!!!!!=======!!!!!!====!!!!!===!!!=!!!!!
+          connect = String(CONNECT_buf);
+          MySerial1.print("connect = ");
+          MySerial1.println(connect);
+
+          if (connect.lastIndexOf("FAIL")!=-1){
+            MySerial1.println("Not connect(((((((");
+            connect_flag = 0; 
+          }
+          else{
+            connect_flag = 1;
+          }
         }
-        String dataTransmit = Module_ADDR +" "+ lattitude +" "+ lontitude +" "+ altitude +" "+ wrong_data +" "+ speed +" "+ status_count +" "+course;
-        MySerial1.println("Sending data to server ===>");
-        MySerial3.println("AT+CIPSEND="+String(dataTransmit.length()));
-        MySerial1.print("Sizeof= ");
-        MySerial1.println("AT+CIPSEND="+String(dataTransmit.length()));
-        delay(100);
-        /*// Читаем ответ
-          while (MySerial3.available())
-          {
-            byte buff123 = MySerial3.read();
-            Serial.write(buff123);
-            }*/
         
-        MySerial3.println(dataTransmit); // отправляем пакет // если нету модуля то заменить аргументы в скобках на строку: "56.45205 84.96131 450 1.5 50 2"
-        MySerial1.print("pack = ");
-        MySerial1.println(dataTransmit);
+        if(connect_flag==1){
+          String dataTransmit = Module_ADDR +" "+ lattitude +" "+ lontitude +" "+ altitude +" "+ wrong_data +" "+ speed +" "+ status_count +" "+course;
+          MySerial1.println("Sending data to server ===>");
+          MySerial3.println("AT+CIPSEND="+String(dataTransmit.length()));
+          MySerial1.print("Sizeof= ");
+          MySerial1.println("AT+CIPSEND="+String(dataTransmit.length()));
+          delay(100);
+          
+          MySerial3.println(dataTransmit); // отправляем пакет // если нету модуля то заменить аргументы в скобках на строку: "56.45205 84.96131 450 1.5 50 2"
+          MySerial1.print("pack = ");
+          MySerial1.println(dataTransmit);
+        }
       }
     }
 
