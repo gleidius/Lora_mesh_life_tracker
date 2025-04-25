@@ -187,10 +187,9 @@ void setup()
   int NUM_KEYS = 2;
   char buff;
   char buff2[NUM_KEYS];
-  delay(5000); ///////// нужен чтобы успеть открыть монитор порта потом кдалить!!!!!!
+  delay(5000); ///////// нужен чтобы успеть открыть монитор порта потом удалить!!!!!!
                // базовые настроечки
   send_command("AT+POWER=14,0");     // устанавливаем базовую мощность
-  //send_command("AT+SRC_ADDR=1,0");   // задаем собственный адрес
   send_command("AT+DST_ADDR=404,0"); // задаем целевой адрес
   send_command("AT+OPTION=1,0");     // задаем режим передачи (1 - unicast (одноадресная))
   send_command("AT+RATE=0");         // устанавливаем параметр скорость/дальность
@@ -220,6 +219,7 @@ void setup()
 void loop()
 { // ======================== LOOP ===============================
 
+  // задаем адрес модуля е52 используя в качестве адреса последние 4 цифры МАС адреса
   char MAC_buff[50] = "1010";
   int MAC_buff_index = 0;
 
@@ -236,13 +236,7 @@ void loop()
   String MAC_addr = String(MAC_buff);
   String Module_ADDR = MAC_addr.substring(MAC_addr.indexOf(",") + 5, MAC_addr.indexOf(",") + 9);
   MySerial1.println(Module_ADDR);
-
   send_command("AT+SRC_ADDR="+Module_ADDR+",1");
-
-/*
-  char* hexstr = MAC_buff;
-int addr = (int) strtol(hexstr, NULL, 16);        
-MySerial1.println(addr);*/
 
   unsigned long start_time = millis(); // таймер
   int butt_count = 1;
@@ -252,9 +246,14 @@ MySerial1.println(addr);*/
   char GPS_buff[150] = "Nothing";
   int GPS_buff_index = 0;
   bool connect_flag = 0;
-  String GPS_str = "Nothing";
-  String lattitude = "Error_lattitude";
-  String lontitude = "Error_lontitude";
+
+  String GPS_str = "GPS";
+  String lattitude = "lattitude";
+  String lontitude = "lontitude";
+  String altitude = "altitude";
+  String speed = "speed";
+  String course = "course";
+  String wrong_data = "1.5";
 
   int index1 = 0;
 
@@ -303,18 +302,16 @@ MySerial1.println(addr);*/
 
   while (true)
   {
-    
-    
     MySerial1.println(millis());
     // ========================= MODE AND SENDING ================================
     if ((millis() - start_time) >= 10000)
     {
       start_time = millis();
     
-      // =============================== ПОЛУЧЕНИЕ КООРДИНАТ ==============================
+      // =============================== ПОЛУЧЕНИЕ ТЕЛЕМЕТРИИ ==============================
     MySerial1.println("Get GPS");
     MySerial3.write("AT+CGNSINF\n");
-    //delay(100);
+    
     while (MySerial3.available())
     {
       byte buff123 = MySerial3.read();
@@ -323,6 +320,7 @@ MySerial1.println(addr);*/
       GPS_buff_index++;
     }
     GPS_str = String(GPS_buff);
+    //GPS_str = "1,1,20240208183233.000,55.643222,37.336658,336.55,0.00,323.0,1,,0.9,1.2,0.8,,12,10,9,,33,,";//подмена для отладки
 
     GPS_buff_index = 0;
 
@@ -332,16 +330,53 @@ MySerial1.println(addr);*/
     MySerial1.println(GPS_str);
 
     lattitude = GPS_str.substring(0, GPS_str.indexOf(","));
-    lontitude = GPS_str.substring(GPS_str.indexOf(",") + 1, GPS_str.indexOf(",") + 10);
+    lontitude = GPS_str.substring(GPS_str.indexOf(",")+1);
+    altitude = lontitude.substring(lontitude.indexOf(",")+1);
+    speed = altitude.substring(altitude.indexOf(",")+1);
+    course = speed.substring(speed.indexOf(",")+1);
+
+    lontitude = lontitude.substring(0, lontitude.indexOf(","));
+    altitude = altitude.substring(0, altitude.indexOf(","));
+    speed = speed.substring(0, speed.indexOf(","));
+    course = course.substring(0, course.indexOf(","));
+
     MySerial1.print("Lat= ");
     MySerial1.println(lattitude);
     MySerial1.print("Lon= ");
     MySerial1.println(lontitude);
-    MySerial1.println("\n");
-    String wrong_data = " 450 1.5 50";
-    String space = " ";
-    String GPS_TO_SEND = "";
-    String test_ADDR = "AAAA";
+    MySerial1.print("Alt= ");
+    MySerial1.println(altitude);
+    MySerial1.print("Spd= ");
+    MySerial1.println(speed);
+    MySerial1.print("Crs= ");
+    MySerial1.println(course);
+
+    MySerial1.print("len_lat= ");
+    MySerial1.println(lattitude.length());
+    MySerial1.print("len_lon= ");
+    MySerial1.println(lontitude.length());
+    MySerial1.print("len_alt= ");
+    MySerial1.println(altitude.length());
+    MySerial1.print("len_spd= ");
+    MySerial1.println(speed.length());
+    MySerial1.print("len_crs= ");
+    MySerial1.println(course.length());
+
+    if(lattitude.length()<7){
+      lattitude = "err_lat";
+    }
+    if(lontitude.length()<7){
+      lontitude = "err_lon";
+    }
+    if(altitude.length()<3){
+      altitude = "err_alt";
+    }
+    if(speed.length()<3){
+      speed = "err_spd";
+    }
+    if(course.length()<3){
+      course = "err_crs";
+    }
 
       if (digitalRead(STM_SW6) == false)
       { // ======================== MESH ============================
@@ -350,15 +385,13 @@ MySerial1.println(addr);*/
         display.print("Mesh");
         display.display();
 
-        S_Serial.println(lattitude + space + lontitude + wrong_data + space + status_count); // отправляем пакет // если нету модуля то заменить аргументы в скобках на строку: "56.45205 84.96131 450 1.5 50 2"
+        S_Serial.println(lattitude +" "+ lontitude +" "+ altitude +" "+ wrong_data +" "+ speed +" "+ status_count +" "+course); // отправляем пакет // если нету модуля то заменить аргументы в скобках на строку: "56.45205 84.96131 450 1.5 50 2"
         MySerial1.print("pack = ");
-        MySerial1.println(lattitude + space + lontitude + wrong_data + space + status_count);
+        MySerial1.println(lattitude +" "+ lontitude +" "+ altitude +" "+ wrong_data +" "+ speed +" "+ status_count +" "+course);
         // delay(2000);
       }
       else if (digitalRead(STM_SW6) == true)
       { // ======================== INTERNET ===========================
-
-        //delay(5000); // !!!!!!!!!!!!!!!!!!!!!! УДалить !!!!!!!!!!!!!!!!!!1
         display.setCursor(Mode_Xpos, Mode_Ypos);
         display.fillRect(Mode_Xpos, Mode_Ypos, 128, 8, SSD1306_BLACK);
         display.print("Internet");
@@ -445,9 +478,9 @@ MySerial1.println(addr);*/
             MySerial1.write(buff123);
           }
           delay(3000);
-          connect_flag = 1; // флажок наличия соединения
+          connect_flag = 0; // флажок наличия соединения              !!!!!!!==!!!!!!=====!!!!!!!!!===!!!!!!=======!!!!!!====!!!!!===!!!=!!!!!
         }
-        String dataTransmit = Module_ADDR + space + lattitude + space + lontitude + wrong_data + space + status_count;
+        String dataTransmit = Module_ADDR +" "+ lattitude +" "+ lontitude +" "+ altitude +" "+ wrong_data +" "+ speed +" "+ status_count +" "+course;
         MySerial1.println("Sending data to server ===>");
         MySerial3.println("AT+CIPSEND="+String(dataTransmit.length()));
         MySerial1.print("Sizeof= ");
@@ -463,7 +496,6 @@ MySerial1.println(addr);*/
         MySerial3.println(dataTransmit); // отправляем пакет // если нету модуля то заменить аргументы в скобках на строку: "56.45205 84.96131 450 1.5 50 2"
         MySerial1.print("pack = ");
         MySerial1.println(dataTransmit);
-        // delay(2000);
       }
     }
 
