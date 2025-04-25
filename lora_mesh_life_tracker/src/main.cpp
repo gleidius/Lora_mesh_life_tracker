@@ -297,6 +297,7 @@ void loop()
   display.display();
 
   MySerial3.println("AT+CIPCLOSE");
+  delay(500);
   while (MySerial3.available())
   {
     byte buff123 = MySerial3.read();
@@ -305,16 +306,17 @@ void loop()
 
   while (true)
   {
-    MySerial1.println(millis());
+    //MySerial1.println(millis());
     // ========================= MODE AND SENDING ================================
-    if ((millis() - start_time) >= 10000)
+    if ((millis() - start_time) >= 5000)
     {
       start_time = millis();
+      MySerial1.println("==================================================================================");
     
       // =============================== ПОЛУЧЕНИЕ ТЕЛЕМЕТРИИ ==============================
     MySerial1.println("Get GPS");
     MySerial3.write("AT+CGNSINF\n");
-    
+    delay(10);
     while (MySerial3.available())
     {
       byte buff123 = MySerial3.read();
@@ -329,8 +331,8 @@ void loop()
 
     index1 = (GPS_str.indexOf(".") + 5);
     GPS_str = GPS_str.substring(index1);
-    MySerial1.print("GPS =");
-    MySerial1.println(GPS_str);
+    /*MySerial1.print("GPS =");
+    MySerial1.println(GPS_str);*/
 
     lattitude = GPS_str.substring(0, GPS_str.indexOf(","));
     lontitude = GPS_str.substring(GPS_str.indexOf(",")+1);
@@ -377,7 +379,7 @@ void loop()
     if(speed.length()<3){
       speed = "err_spd";
     }
-    if(course.length()<3){
+    if(course.length()<1){
       course = "err_crs";
     }
 
