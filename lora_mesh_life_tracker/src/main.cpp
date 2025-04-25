@@ -495,11 +495,12 @@ void loop()
             MySerial1.println("Not connect(((((((");
             connect_flag = 0; 
           }
-          else{
+          else if (connect.lastIndexOf("CONNECT OK")!=-1){
+            MySerial1.println("CONNECT)))))))))");
             connect_flag = 1;
           }
         }
-        
+
         if(connect_flag==1){
           String dataTransmit = Module_ADDR +" "+ lattitude +" "+ lontitude +" "+ altitude +" "+ wrong_data +" "+ speed +" "+ status_count +" "+course;
           MySerial1.println("Sending data to server ===>");
