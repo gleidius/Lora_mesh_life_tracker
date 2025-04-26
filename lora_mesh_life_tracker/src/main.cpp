@@ -150,6 +150,90 @@ void set_SRC_ADDR(int SRC)
   }
 }
 
+void read_SIM868() // функция чтения ответа от SIM868
+{
+  while (MySerial3.available())
+  {
+    byte buff123 = MySerial3.read();
+    MySerial1.write(buff123);
+  }
+}
+
+void draw_pos(int x_pos, int y_pos, String text)// функция отрисовки по позиции, закрашивая строку
+{
+  display.setCursor(x_pos, y_pos);
+  display.fillRect(x_pos, y_pos, 128, 8, SSD1306_BLACK);
+  display.print(text);
+  display.display();
+}
+
+void send_to_server_SIM868(String dataTransmit)  // отправляем данные на сервер используя SIM868
+{
+  MySerial1.println("Sending data to server ===>");
+  MySerial3.println("AT+CIPSEND=" + String(dataTransmit.length()));
+  MySerial1.print("Sizeof= ");
+  MySerial1.println("AT+CIPSEND=" + String(dataTransmit.length()));
+  delay(100);
+
+  MySerial3.println(dataTransmit); // отправляем пакет // если нету модуля то заменить аргументы в скобках на строку: "56.45205 84.96131 450 1.5 50 2"
+  MySerial1.print("pack = ");
+  MySerial1.println(dataTransmit);
+}
+
+bool check_connect_to_server() // функция проверки соединения с сервером
+{
+  bool connect_flag = 0;
+  String connect ="connect";
+  char CONNECT_buf[150] = "Nothing";
+  int CONNECT_buf_index = 0;
+
+  while (MySerial3.available())
+          {
+            byte buff123 = MySerial3.read();
+            MySerial1.write(buff123);
+            CONNECT_buf[CONNECT_buf_index] = buff123;
+            CONNECT_buf_index++;
+          }
+          connect = String(CONNECT_buf);
+          MySerial1.print("connect = ");
+          MySerial1.println(connect);
+
+          if (connect.lastIndexOf("FAIL") != -1)
+          {
+            MySerial1.println("Not connect(((((((");
+            connect_flag = 0;
+          }
+          else if (connect.lastIndexOf("CONNECT OK") != -1)
+          {
+            MySerial1.println("CONNECT)))))))))");
+            connect_flag = 1;
+          }
+
+          return(connect_flag);
+}
+
+int Next_status(int status_count, int Stat_Xpos, int Stat_Ypos){
+  status_count++;
+      if (status_count == 1)
+      {
+        draw_pos(Stat_Xpos, Stat_Ypos, "Ground");
+      }
+      if (status_count == 2)
+      {
+        draw_pos(Stat_Xpos, Stat_Ypos, "Sky");
+      }
+      if (status_count == 3)
+      {
+        draw_pos(Stat_Xpos, Stat_Ypos, "Picked up");
+      }
+      if (status_count == 4)
+      {
+        draw_pos(Stat_Xpos, Stat_Ypos, "SOS");
+        status_count = 0;
+      }
+      delay(100);
+      return(status_count);
+}
 void setup()
 { //========================== SETUP ===========================
 
@@ -187,8 +271,8 @@ void setup()
   int NUM_KEYS = 2;
   char buff;
   char buff2[NUM_KEYS];
-  delay(5000); ///////// нужен чтобы успеть открыть монитор порта потом удалить!!!!!!
-               // базовые настроечки
+  delay(5000);                       ///////// нужен чтобы успеть открыть монитор порта потом удалить!!!!!!
+                                     // базовые настроечки
   send_command("AT+POWER=14,0");     // устанавливаем базовую мощность
   send_command("AT+DST_ADDR=404,0"); // задаем целевой адрес
   send_command("AT+OPTION=1,0");     // задаем режим передачи (1 - unicast (одноадресная))
@@ -236,7 +320,7 @@ void loop()
   String MAC_addr = String(MAC_buff);
   String Module_ADDR = MAC_addr.substring(MAC_addr.indexOf(",") + 5, MAC_addr.indexOf(",") + 9);
   MySerial1.println(Module_ADDR);
-  send_command("AT+SRC_ADDR="+Module_ADDR+",1");
+  send_command("AT+SRC_ADDR=" + Module_ADDR + ",1");
 
   unsigned long start_time = millis(); // таймер
   int butt_count = 1;
@@ -244,13 +328,13 @@ void loop()
   int SRC_ADDR = 1;
   int power_counter = 22;
   char GPS_buff[150] = "Nothing";
-  char CONNECT_buf[150] = "Nothing";
-  int CONNECT_buf_index = 0;
+  //char CONNECT_buf[150] = "Nothing";
+  //int CONNECT_buf_index = 0;
   int GPS_buff_index = 0;
   bool connect_flag = 0;
 
   String GPS_str = "GPS";
-  String connect = "connect";
+  //String connect = "connect";
   String lattitude = "lattitude";
   String lontitude = "lontitude";
   String altitude = "altitude";
@@ -262,22 +346,17 @@ void loop()
 
   display.clearDisplay();
   display.setCursor(0, 0);
-  display.println("    === "+Module_ADDR+" ===");
+  display.println("    === " + Module_ADDR + " ===");
 
   display.print("Power (3), dBm: ");
   int Power_Xpos = display.getCursorX(); // позиция Х курсора при написании мощности
   int Power_Ypos = display.getCursorY(); // позиция Y курсора при написании мощности
   display.println("22");
 
-  display.print("!!Pause (2), ms: ");
+  display.print("!!!!Pause (2), ms: ");
   int Pause_Xpos = display.getCursorX(); // позиция Х курсора при написании мощности
   int Pause_Ypos = display.getCursorY(); // позиция Y курсора при написании мощности
   display.println("600");
-
-  display.print("SRC_ADDR: ");
-  int SADDR_Xpos = display.getCursorX(); // позиция Х курсора при написании мощности
-  int SADDR_Ypos = display.getCursorY(); // позиция Y курсора при написании мощности
-  display.println("1");
 
   display.print("S/R (4): ");
   int SR_Xpos = display.getCursorX(); // позиция Х курсора при написании мощности
@@ -306,214 +385,139 @@ void loop()
 
   while (true)
   {
-    //MySerial1.println(millis());
-    // ========================= MODE AND SENDING ================================
+    // MySerial1.println(millis());
+    //  ========================= MODE AND SENDING ================================
     if ((millis() - start_time) >= 5000)
     {
       start_time = millis();
       MySerial1.println("==================================================================================");
-    
+
       // =============================== ПОЛУЧЕНИЕ ТЕЛЕМЕТРИИ ==============================
-    MySerial1.println("Get GPS");
-    MySerial3.write("AT+CGNSINF\n");
-    delay(10);
-    while (MySerial3.available())
-    {
-      byte buff123 = MySerial3.read();
-      MySerial1.write(buff123);
-      GPS_buff[GPS_buff_index] = buff123;
-      GPS_buff_index++;
-    }
-    GPS_str = String(GPS_buff);
-    //GPS_str = "1,1,20240208183233.000,55.643222,37.336658,336.55,0.00,323.0,1,,0.9,1.2,0.8,,12,10,9,,33,,";//подмена для отладки
+      MySerial1.println("Get GPS");
+      MySerial3.write("AT+CGNSINF\n");
+      delay(10);
+      while (MySerial3.available())
+      {
+        byte buff123 = MySerial3.read();
+        MySerial1.write(buff123);
+        GPS_buff[GPS_buff_index] = buff123;
+        GPS_buff_index++;
+      }
+      GPS_str = String(GPS_buff);
+      // GPS_str = "1,1,20240208183233.000,55.643222,37.336658,336.55,0.00,323.0,1,,0.9,1.2,0.8,,12,10,9,,33,,";//подмена для отладки
 
-    GPS_buff_index = 0;
+      GPS_buff_index = 0;
 
-    index1 = (GPS_str.indexOf(".") + 5);
-    GPS_str = GPS_str.substring(index1);
-    /*MySerial1.print("GPS =");
-    MySerial1.println(GPS_str);*/
+      index1 = (GPS_str.indexOf(".") + 5);
+      GPS_str = GPS_str.substring(index1);
+      /*MySerial1.print("GPS =");
+      MySerial1.println(GPS_str);*/
 
-    lattitude = GPS_str.substring(0, GPS_str.indexOf(","));
-    lontitude = GPS_str.substring(GPS_str.indexOf(",")+1);
-    altitude = lontitude.substring(lontitude.indexOf(",")+1);
-    speed = altitude.substring(altitude.indexOf(",")+1);
-    course = speed.substring(speed.indexOf(",")+1);
+      lattitude = GPS_str.substring(0, GPS_str.indexOf(","));
+      lontitude = GPS_str.substring(GPS_str.indexOf(",") + 1);
+      altitude = lontitude.substring(lontitude.indexOf(",") + 1);
+      speed = altitude.substring(altitude.indexOf(",") + 1);
+      course = speed.substring(speed.indexOf(",") + 1);
 
-    lontitude = lontitude.substring(0, lontitude.indexOf(","));
-    altitude = altitude.substring(0, altitude.indexOf(","));
-    speed = speed.substring(0, speed.indexOf(","));
-    course = course.substring(0, course.indexOf(","));
+      lontitude = lontitude.substring(0, lontitude.indexOf(","));
+      altitude = altitude.substring(0, altitude.indexOf(","));
+      speed = speed.substring(0, speed.indexOf(","));
+      course = course.substring(0, course.indexOf(","));
 
-    MySerial1.print("Lat= ");
-    MySerial1.println(lattitude);
-    MySerial1.print("Lon= ");
-    MySerial1.println(lontitude);
-    MySerial1.print("Alt= ");
-    MySerial1.println(altitude);
-    MySerial1.print("Spd= ");
-    MySerial1.println(speed);
-    MySerial1.print("Crs= ");
-    MySerial1.println(course);
+      MySerial1.print("Lat= ");
+      MySerial1.println(lattitude);
+      MySerial1.print("Lon= ");
+      MySerial1.println(lontitude);
+      MySerial1.print("Alt= ");
+      MySerial1.println(altitude);
+      MySerial1.print("Spd= ");
+      MySerial1.println(speed);
+      MySerial1.print("Crs= ");
+      MySerial1.println(course);
 
-    MySerial1.print("len_lat= ");
-    MySerial1.println(lattitude.length());
-    MySerial1.print("len_lon= ");
-    MySerial1.println(lontitude.length());
-    MySerial1.print("len_alt= ");
-    MySerial1.println(altitude.length());
-    MySerial1.print("len_spd= ");
-    MySerial1.println(speed.length());
-    MySerial1.print("len_crs= ");
-    MySerial1.println(course.length());
+      MySerial1.print("len_lat= ");
+      MySerial1.println(lattitude.length());
+      MySerial1.print("len_lon= ");
+      MySerial1.println(lontitude.length());
+      MySerial1.print("len_alt= ");
+      MySerial1.println(altitude.length());
+      MySerial1.print("len_spd= ");
+      MySerial1.println(speed.length());
+      MySerial1.print("len_crs= ");
+      MySerial1.println(course.length());
 
-    if(lattitude.length()<7){
-      lattitude = "err_lat";
-    }
-    if(lontitude.length()<7){
-      lontitude = "err_lon";
-    }
-    if(altitude.length()<3){
-      altitude = "err_alt";
-    }
-    if(speed.length()<3){
-      speed = "err_spd";
-    }
-    if(course.length()<1){
-      course = "err_crs";
-    }
+      if (lattitude.length() < 7)
+      {
+        lattitude = "-1";
+      }
+      if (lontitude.length() < 7)
+      {
+        lontitude = "-1";
+      }
+      if (altitude.length() < 3)
+      {
+        altitude = "-1";
+      }
+      if (speed.length() < 3)
+      {
+        speed = "-1";
+      }
+      if (course.length() < 1)
+      {
+        course = "-1";
+      }
 
       if (digitalRead(STM_SW6) == false)
       { // ======================== MESH ============================
-        display.setCursor(Mode_Xpos, Mode_Ypos);
-        display.fillRect(Mode_Xpos, Mode_Ypos, 128, 8, SSD1306_BLACK);
-        display.print("Mesh");
-        display.display();
+        draw_pos(Mode_Xpos, Mode_Ypos, "Mesh");
 
-        S_Serial.println(lattitude +" "+ lontitude +" "+ altitude +" "+ wrong_data +" "+ speed +" "+ status_count +" "+course); // отправляем пакет // если нету модуля то заменить аргументы в скобках на строку: "56.45205 84.96131 450 1.5 50 2"
+        String data_transmitt = lattitude + " " + lontitude + " " + altitude + " " + wrong_data + " " + speed + " " + status_count + " " + course;
+        S_Serial.println(data_transmitt); // отправляем пакет // если нету модуля то заменить аргументы в data_transmitt на строку: "56.45205 84.96131 450 1.5 50 2"
         MySerial1.print("pack = ");
-        MySerial1.println(lattitude +" "+ lontitude +" "+ altitude +" "+ wrong_data +" "+ speed +" "+ status_count +" "+course);
-        // delay(2000);
+        MySerial1.println(data_transmitt);
       }
       else if (digitalRead(STM_SW6) == true)
       { // ======================== INTERNET ===========================
-        display.setCursor(Mode_Xpos, Mode_Ypos);
-        display.fillRect(Mode_Xpos, Mode_Ypos, 128, 8, SSD1306_BLACK);
-        display.print("Internet");
-        display.display();
+        draw_pos(Mode_Xpos, Mode_Ypos, "Internet");
 
         if (connect_flag == 0)
         {
           MySerial3.println("ATE0");
-
-          // Читаем ответ
           while (MySerial3.available())
-          {
-            byte buff123 = MySerial3.read();
-            MySerial1.write(buff123);
-          }
+            read_SIM868();
           delay(1000);
 
           MySerial3.println("AT+CSQ");
-
-          // Читаем ответ
-          while (MySerial3.available())
-          {
-            byte buff123 = MySerial3.read();
-            MySerial1.write(buff123);
-          }
+          read_SIM868();
           delay(1000);
 
           MySerial3.println("AT+CREG?");
-
-          // Читаем ответ
-          while (MySerial3.available())
-          {
-            byte buff123 = MySerial3.read();
-            MySerial1.write(buff123);
-          }
+          read_SIM868();
           delay(1000);
 
           MySerial3.println("AT+CGATT?");
-
-          // Читаем ответ
-          while (MySerial3.available())
-          {
-            byte buff123 = MySerial3.read();
-            MySerial1.write(buff123);
-          }
+          read_SIM868();
           delay(1000);
 
           MySerial3.println("AT+CSTT=\"CMNET\"");
-
-          // Читаем ответ
-          while (MySerial3.available())
-          {
-            byte buff123 = MySerial3.read();
-            MySerial1.write(buff123);
-          }
+          read_SIM868();
           delay(1000);
 
           MySerial3.println("AT+CIICR");
-
-          // Читаем ответ
-          /* while (MySerial3.available())
-      {
-        byte buff123 = MySerial3.read();
-        MySerial1.write(buff123);
-        }*/
           delay(1000);
 
           MySerial3.println("AT+CIFSR");
-
-          // Читаем ответ
-          while (MySerial3.available())
-          {
-            byte buff123 = MySerial3.read();
-            MySerial1.write(buff123);
-          }
-          //delay(1000);
+          read_SIM868();
 
           MySerial3.println("AT+CIPSTART=\"TCP\",\"103.90.75.178\",5000");
-          CONNECT_buf_index = 0;
           delay(3000);
-          // Читаем ответ
-          /*while (!MySerial3.available())
-          {
-           MySerial1.print(".");
-          }*/
-          while (MySerial3.available())
-          {
-            byte buff123 = MySerial3.read();
-            MySerial1.write(buff123);
-            CONNECT_buf[CONNECT_buf_index] = buff123;
-            CONNECT_buf_index++;
-          }
-          connect = String(CONNECT_buf);
-          MySerial1.print("connect = ");
-          MySerial1.println(connect);
-
-          if (connect.lastIndexOf("FAIL")!=-1){
-            MySerial1.println("Not connect(((((((");
-            connect_flag = 0; 
-          }
-          else if (connect.lastIndexOf("CONNECT OK")!=-1){
-            MySerial1.println("CONNECT)))))))))");
-            connect_flag = 1;
-          }
+          //connect_flag = check_connect_to_server();
         }
 
-        if(connect_flag==1){
-          String dataTransmit = Module_ADDR +" "+ lattitude +" "+ lontitude +" "+ altitude +" "+ wrong_data +" "+ speed +" "+ status_count +" "+course;
-          MySerial1.println("Sending data to server ===>");
-          MySerial3.println("AT+CIPSEND="+String(dataTransmit.length()));
-          MySerial1.print("Sizeof= ");
-          MySerial1.println("AT+CIPSEND="+String(dataTransmit.length()));
-          delay(100);
-          
-          MySerial3.println(dataTransmit); // отправляем пакет // если нету модуля то заменить аргументы в скобках на строку: "56.45205 84.96131 450 1.5 50 2"
-          MySerial1.print("pack = ");
-          MySerial1.println(dataTransmit);
+        if (connect_flag == 1)
+        {
+          String dataTransmit = Module_ADDR + " " + lattitude + " " + lontitude + " " + altitude + " " + wrong_data + " " + speed + " " + status_count + " " + course;
+          send_to_server_SIM868(dataTransmit);
         }
       }
     }
@@ -528,22 +532,14 @@ void loop()
         // setup_delay = 1000;
         set_rs(0);
         MySerial1.println("S/R=0");
-
-        display.setCursor(SR_Xpos, SR_Ypos);
-        display.fillRect(SR_Xpos, SR_Ypos, 128, 8, SSD1306_BLACK);
-        display.print("0");
-        display.display();
+        draw_pos(SR_Xpos, SR_Ypos, "0");
       }
       if (butt_count == 2)
       {
         // setup_delay = 1000;
         set_rs(1);
         MySerial1.println("S/R=1");
-
-        display.setCursor(SR_Xpos, SR_Ypos);
-        display.fillRect(SR_Xpos, SR_Ypos, 128, 8, SSD1306_BLACK);
-        display.print("1");
-        display.display();
+        draw_pos(SR_Xpos, SR_Ypos, "1");
       }
       if (butt_count == 3)
       {
@@ -551,126 +547,20 @@ void loop()
         set_rs(2);
         butt_count = 0;
         MySerial1.println("S/R=2");
-
-        display.setCursor(SR_Xpos, SR_Ypos);
-        display.fillRect(SR_Xpos, SR_Ypos, 128, 8, SSD1306_BLACK);
-        display.print("2");
-        display.display();
+        draw_pos(SR_Xpos, SR_Ypos, "2");
       }
     }
 
     if (digitalRead(LORA_RST) == false)
     { // ========================== STATUS ========================== (не забыть добавить изменение статуса в пакет)
-      status_count++;
-      if (status_count == 1)
-      {
-        display.setCursor(Stat_Xpos, Stat_Ypos);
-        display.fillRect(Stat_Xpos, Stat_Ypos, 128, 8, SSD1306_BLACK);
-        display.print("Ground"); // на земле
-        display.display();
-      }
-      if (status_count == 2)
-      {
-        display.setCursor(Stat_Xpos, Stat_Ypos);
-        display.fillRect(Stat_Xpos, Stat_Ypos, 128, 8, SSD1306_BLACK);
-        display.print("Sky"); // в небе
-        display.display();
-      }
-      if (status_count == 3)
-      {
-        display.setCursor(Stat_Xpos, Stat_Ypos);
-        display.fillRect(Stat_Xpos, Stat_Ypos, 128, 8, SSD1306_BLACK);
-        display.print("Picked up"); // подбор
-        display.display();
-      }
-      if (status_count == 4)
-      {
-        display.setCursor(Stat_Xpos, Stat_Ypos);
-        display.fillRect(Stat_Xpos, Stat_Ypos, 128, 8, SSD1306_BLACK);
-        display.print("SOS"); // SOS соответствует 0 в status_counter
-        display.display();
-        status_count = 0;
-      }
-      delay(100);
+      status_count = Next_status(status_count, Stat_Xpos, Stat_Ypos);
     }
-
-    if (digitalRead(LORA_PA0) == false)
-    { // ========================= SRC_ADDR =================================
-      SRC_ADDR++;
-      set_SRC_ADDR(SRC_ADDR);
-
-      display.setCursor(SADDR_Xpos, SADDR_Ypos);
-      display.fillRect(SADDR_Xpos, SADDR_Ypos, 128, 8, SSD1306_BLACK);
-      display.print(SRC_ADDR);
-      display.display();
-
-      if (SRC_ADDR == 100)
-      {
-        SRC_ADDR = 0;
-      }
-    }
-    /*       устанавливаем паузы между передачами
-    if (digitalRead(STM_SW2) == true){ // устанавливаем паузы между передачами
-
-    switch_count++;
-    if (switch_count == 1)
-    {
-      test_delay = set_pause(600);
-
-      display.setCursor(Pause_Xpos, Pause_Ypos);
-      display.fillRect(Pause_Xpos, Pause_Ypos, 128, 8, SSD1306_BLACK);
-      display.print("600");
-      display.display();
-    }
-    if (switch_count == 2)
-    {
-      test_delay = set_pause(1200);
-
-      display.setCursor(Pause_Xpos, Pause_Ypos);
-      display.fillRect(Pause_Xpos, Pause_Ypos, 128, 8, SSD1306_BLACK);
-      display.print("1200");
-      display.display();
-    }
-    if (switch_count == 3)
-    {
-      test_delay = set_pause(2000);
-
-      display.setCursor(Pause_Xpos, Pause_Ypos);
-      display.fillRect(Pause_Xpos, Pause_Ypos, 128, 8, SSD1306_BLACK);
-      display.print("2000");
-      display.display();
-    }
-    if (switch_count == 4)
-    {
-      test_delay = set_pause(3000);
-
-      display.setCursor(Pause_Xpos, Pause_Ypos);
-      display.fillRect(Pause_Xpos, Pause_Ypos, 128, 8, SSD1306_BLACK);
-      display.print("3000");
-      display.display();
-    }
-    if (switch_count == 5)
-    {
-      test_delay = set_pause(5000);
-      switch_count = 0;
-
-      display.setCursor(Pause_Xpos, Pause_Ypos);
-      display.fillRect(Pause_Xpos, Pause_Ypos, 128, 8, SSD1306_BLACK);
-      display.print("5000");
-      display.display();
-    }
-    }
-    */
 
     if (digitalRead(STM_SW3) == true)
     { // переключаем мощность
       power_counter--;
       set_power(power_counter); // устанавливаем мощность
-
-      display.setCursor(Power_Xpos, Power_Ypos);
-      display.fillRect(Power_Xpos, Power_Ypos, 128, 8, SSD1306_BLACK);
-      display.print(power_counter);
-      display.display();
+      draw_pos(Power_Xpos, Power_Ypos, String(power_counter));
 
       if (power_counter == -9)
       {
