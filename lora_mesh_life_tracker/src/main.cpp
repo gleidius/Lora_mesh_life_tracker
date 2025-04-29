@@ -174,13 +174,15 @@ void send_to_server_SIM868(String dataTransmit)  // отправляем дан�
   MySerial1.print("Sizeof= ");
   MySerial1.println("AT+CIPSEND=" + String(dataTransmit.length()));
   delay(100);
-
+  read_SIM868();
   MySerial3.println(dataTransmit); // отправляем пакет // если нету модуля то заменить аргументы в скобках на строку: "56.45205 84.96131 450 1.5 50 2"
   MySerial1.print("pack = ");
   MySerial1.println(dataTransmit);
+  read_SIM868();
 }
 
 bool check_connect_to_server() // функция проверки соединения с сервером
+
 {
   bool connect_flag = 0;
   String connect ="connect";
@@ -212,7 +214,41 @@ bool check_connect_to_server() // функция проверки соедине
           return(connect_flag);
 }
 
-int Next_status(int status_count, int Stat_Xpos, int Stat_Ypos){
+void try_connect_to_server()  // выполняем попытку подключиться к серверу
+{
+  MySerial3.println("ATE0");
+          while (MySerial3.available())
+            read_SIM868();
+          delay(1000);
+
+          MySerial3.println("AT+CSQ");
+          read_SIM868();
+          delay(1000);
+
+          MySerial3.println("AT+CREG?");
+          read_SIM868();
+          delay(1000);
+
+          MySerial3.println("AT+CGATT?");
+          read_SIM868();
+          delay(1000);
+
+          MySerial3.println("AT+CSTT=\"CMNET\"");
+          read_SIM868();
+          delay(1000);
+
+          MySerial3.println("AT+CIICR");
+          delay(1000);
+
+          MySerial3.println("AT+CIFSR");
+          read_SIM868();
+
+          MySerial3.println("AT+CIPSTART=\"TCP\",\"103.90.75.178\",5000");
+          delay(3000);
+}
+
+int Next_status(int status_count, int Stat_Xpos, int Stat_Ypos) // выполняем смену статуса
+{
   status_count++;
       if (status_count == 1)
       {
@@ -234,6 +270,8 @@ int Next_status(int status_count, int Stat_Xpos, int Stat_Ypos){
       delay(100);
       return(status_count);
 }
+
+
 void setup()
 { //========================== SETUP ===========================
 
@@ -394,6 +432,7 @@ void loop()
 
       // =============================== ПОЛУЧЕНИЕ ТЕЛЕМЕТРИИ ==============================
       MySerial1.println("Get GPS");
+      read_SIM868();                              // на всякиий случай, перед получением корд читаем юарт, чтобы буфер был гарантированно пуст
       MySerial3.write("AT+CGNSINF\n");
       delay(10);
       while (MySerial3.available())
@@ -454,6 +493,9 @@ void loop()
       {
         lontitude = "-1";
       }
+      else if (lontitude.length() > 9){
+        lontitude = "-1";
+      }
       if (altitude.length() < 3)
       {
         altitude = "-1";
@@ -481,37 +523,9 @@ void loop()
         draw_pos(Mode_Xpos, Mode_Ypos, "Internet");
 
         if (connect_flag == 0)
-        {
-          MySerial3.println("ATE0");
-          while (MySerial3.available())
-            read_SIM868();
-          delay(1000);
-
-          MySerial3.println("AT+CSQ");
-          read_SIM868();
-          delay(1000);
-
-          MySerial3.println("AT+CREG?");
-          read_SIM868();
-          delay(1000);
-
-          MySerial3.println("AT+CGATT?");
-          read_SIM868();
-          delay(1000);
-
-          MySerial3.println("AT+CSTT=\"CMNET\"");
-          read_SIM868();
-          delay(1000);
-
-          MySerial3.println("AT+CIICR");
-          delay(1000);
-
-          MySerial3.println("AT+CIFSR");
-          read_SIM868();
-
-          MySerial3.println("AT+CIPSTART=\"TCP\",\"103.90.75.178\",5000");
-          delay(3000);
-          //connect_flag = check_connect_to_server();
+        { 
+          try_connect_to_server();
+          connect_flag = check_connect_to_server();
         }
 
         if (connect_flag == 1)
@@ -552,7 +566,7 @@ void loop()
     }
 
     if (digitalRead(LORA_RST) == false)
-    { // ========================== STATUS ========================== (не забыть добавить изменение статуса в пакет)
+    { // ========================== STATUS ========================== 
       status_count = Next_status(status_count, Stat_Xpos, Stat_Ypos);
     }
 
