@@ -271,6 +271,12 @@ int Next_status(int status_count, int Stat_Xpos, int Stat_Ypos) // выполн�
       return(status_count);
 }
 
+void send_to_mesh_E52(String data_transmitt)
+{
+  S_Serial.println(data_transmitt); 
+  MySerial1.print("pack = ");
+  MySerial1.println(data_transmitt);
+}
 
 void setup()
 { //========================== SETUP ===========================
@@ -315,6 +321,7 @@ void setup()
   send_command("AT+DST_ADDR=404,0"); // задаем целевой адрес
   send_command("AT+OPTION=1,0");     // задаем режим передачи (1 - unicast (одноадресная))
   send_command("AT+RATE=0");         // устанавливаем параметр скорость/дальность
+  //send_command("AT+HEAD=0");         // отключаем хедер
 
   // инициализируем SIM868
   // pressing SIM868 PWRK pin to boot it
@@ -391,7 +398,7 @@ void loop()
   int Power_Ypos = display.getCursorY(); // позиция Y курсора при написании мощности
   display.println("22");
 
-  display.print("!!!!Pause (2), ms: ");
+  display.print("!!Pause (2), ms: ");
   int Pause_Xpos = display.getCursorX(); // позиция Х курсора при написании мощности
   int Pause_Ypos = display.getCursorY(); // позиция Y курсора при написании мощности
   display.println("600");
@@ -513,10 +520,9 @@ void loop()
       { // ======================== MESH ============================
         draw_pos(Mode_Xpos, Mode_Ypos, "Mesh");
 
-        String data_transmitt = lattitude + " " + lontitude + " " + altitude + " " + wrong_data + " " + speed + " " + status_count + " " + course;
-        S_Serial.println(data_transmitt); // отправляем пакет // если нету модуля то заменить аргументы в data_transmitt на строку: "56.45205 84.96131 450 1.5 50 2"
-        MySerial1.print("pack = ");
-        MySerial1.println(data_transmitt);
+        String data_transmitt = "GL "+ Module_ADDR + " " + lattitude + " " + lontitude + " " + altitude + " " + wrong_data + " " + speed + " " + status_count + " " + course;
+        //String data_transmitt = "GL 6666 56.452051 84.962577 174.967 1.5 190.4 1 2";
+        send_to_mesh_E52(data_transmitt); // отправляем пакет
       }
       else if (digitalRead(STM_SW6) == true)
       { // ======================== INTERNET ===========================
@@ -530,7 +536,7 @@ void loop()
 
         if (connect_flag == 1)
         {
-          String dataTransmit = Module_ADDR + " " + lattitude + " " + lontitude + " " + altitude + " " + wrong_data + " " + speed + " " + status_count + " " + course;
+          String dataTransmit = "GL " + Module_ADDR + " " + lattitude + " " + lontitude + " " + altitude + " " + wrong_data + " " + speed + " " + status_count + " " + course;
           send_to_server_SIM868(dataTransmit);
         }
       }
