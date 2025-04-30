@@ -219,26 +219,26 @@ void try_connect_to_server()  // выполняем попытку подклю�
   MySerial3.println("ATE0");
           while (MySerial3.available())
             read_SIM868();
-          delay(1000);
+          delay(100);
 
           MySerial3.println("AT+CSQ");
           read_SIM868();
-          delay(1000);
+          delay(100);
 
           MySerial3.println("AT+CREG?");
           read_SIM868();
-          delay(1000);
+          delay(100);
 
           MySerial3.println("AT+CGATT?");
           read_SIM868();
-          delay(1000);
+          delay(100);
 
           MySerial3.println("AT+CSTT=\"CMNET\"");
           read_SIM868();
-          delay(1000);
+          delay(100);
 
           MySerial3.println("AT+CIICR");
-          delay(1000);
+          delay(100);
 
           MySerial3.println("AT+CIFSR");
           read_SIM868();
@@ -271,11 +271,105 @@ int Next_status(int status_count, int Stat_Xpos, int Stat_Ypos) // выполн�
       return(status_count);
 }
 
-void send_to_mesh_E52(String data_transmitt)
+int Next_SR(int butt_count, int SR_Xpos, int SR_Ypos) // меняем параметр скорость/дальность
+{
+  butt_count++;
+      MySerial1.print(butt_count);
+      if (butt_count == 1)
+      {
+        // setup_delay = 1000;
+        set_rs(0);
+        MySerial1.println("S/R=0");
+        draw_pos(SR_Xpos, SR_Ypos, "0");
+      }
+      if (butt_count == 2)
+      {
+        // setup_delay = 1000;
+        set_rs(1);
+        MySerial1.println("S/R=1");
+        draw_pos(SR_Xpos, SR_Ypos, "1");
+      }
+      if (butt_count == 3)
+      {
+        // setup_delay = 3000;
+        set_rs(2);
+        butt_count = 0;
+        MySerial1.println("S/R=2");
+        draw_pos(SR_Xpos, SR_Ypos, "2");
+      }
+      return(butt_count);
+}
+
+String Set_E52_ADDR() // устанавливаем адрес Е52 по последним 4-м ицфрам МАС адреса
+{
+  char MAC_buff[50] = "1010";
+  int MAC_buff_index = 0;
+
+  S_Serial.print("AT+MAC=?");
+  delay(100);
+
+  while (S_Serial.available())
+  {
+    byte buff123 = S_Serial.read();
+    MySerial1.write(buff123);
+    MAC_buff[MAC_buff_index] = buff123;
+    MAC_buff_index++;
+  }
+  String MAC_addr = String(MAC_buff);
+  String Module_ADDR = MAC_addr.substring(MAC_addr.indexOf(",") + 5, MAC_addr.indexOf(",") + 9);
+  MySerial1.println(Module_ADDR);
+  send_command("AT+SRC_ADDR=" + Module_ADDR + ",1");
+  
+  return(Module_ADDR);
+}
+
+void send_to_mesh_E52(String data_transmitt) // отправляем данные в меш при помщи Е52
 {
   S_Serial.println(data_transmitt); 
   MySerial1.print("pack = ");
   MySerial1.println(data_transmitt);
+}
+
+void E52_default_init()  // инициализируемся по дефолту
+{                       
+  send_command("AT+POWER=14,0");     // устанавливаем базовую мощность
+  send_command("AT+DST_ADDR=404,0"); // задаем целевой адрес
+  send_command("AT+OPTION=1,0");     // задаем режим передачи (1 - unicast (одноадресная))
+  send_command("AT+RATE=0");         // устанавливаем параметр скорость/дальность
+}
+
+void SIM868_GPS_Power_Up()    // включаем GPS
+{
+  MySerial3.write("AT+CGNSPWR=1\n"); // подаем питание на GPS
+  delay(100);
+  read_SIM868();
+}
+
+void SIM868_Power_SW(int SIM868_PWR_Pin) // включаем/выключаем Е52
+{
+  digitalWrite(SIM868_PWR_Pin, HIGH);
+  //digitalWrite(LED_PC13, LOW);
+  delay(100);
+  digitalWrite(SIM868_PWR_Pin, LOW);
+  //digitalWrite(LED_PC13, HIGH);
+  delay(1000);
+  digitalWrite(SIM868_PWR_Pin, HIGH);
+  //digitalWrite(LED_PC13, LOW);
+  delay(3000);
+}
+
+int Next_power(int power_counter, int Power_Xpos, int Power_Ypos) // переключаем мощность Е52
+{
+  power_counter--;
+  set_power(power_counter); // устанавливаем мощность
+  draw_pos(Power_Xpos, Power_Ypos, String(power_counter));
+
+  if (power_counter == -9)
+  {
+    power_counter = 23;
+  }
+  read_SSerial();
+  return(power_counter);
 }
 
 void setup()
@@ -315,57 +409,18 @@ void setup()
   int NUM_KEYS = 2;
   char buff;
   char buff2[NUM_KEYS];
+  
   delay(5000);                       ///////// нужен чтобы успеть открыть монитор порта потом удалить!!!!!!
-                                     // базовые настроечки
-  send_command("AT+POWER=14,0");     // устанавливаем базовую мощность
-  send_command("AT+DST_ADDR=404,0"); // задаем целевой адрес
-  send_command("AT+OPTION=1,0");     // задаем режим передачи (1 - unicast (одноадресная))
-  send_command("AT+RATE=0");         // устанавливаем параметр скорость/дальность
-  //send_command("AT+HEAD=0");         // отключаем хедер
 
-  // инициализируем SIM868
-  // pressing SIM868 PWRK pin to boot it
-  digitalWrite(SIM_PWRK, HIGH);
-  digitalWrite(LED_PC13, LOW);
-  delay(100);
-  digitalWrite(SIM_PWRK, LOW);
-  digitalWrite(LED_PC13, HIGH);
-  delay(1000);
-  digitalWrite(SIM_PWRK, HIGH);
-  digitalWrite(LED_PC13, LOW);
-  delay(3000);
+  E52_default_init(); // инициализируем Е52 по дефолту
 
-  MySerial1.println("===============================================================");
-  MySerial3.write("AT+CGNSPWR=1\n"); // подаем питание на GPS
-  delay(100);
-  while (MySerial3.available())
-  {
-    byte buff123 = MySerial3.read();
-    MySerial1.write(buff123);
-  }
+  SIM868_Power_SW(SIM_PWRK);      // включаем SIM868
+  
+  SIM868_GPS_Power_Up();          // включаем GPS
 }
 
 void loop()
 { // ======================== LOOP ===============================
-
-  // задаем адрес модуля е52 используя в качестве адреса последние 4 цифры МАС адреса
-  char MAC_buff[50] = "1010";
-  int MAC_buff_index = 0;
-
-  S_Serial.print("AT+MAC=?");
-  delay(100);
-
-  while (S_Serial.available())
-  {
-    byte buff123 = S_Serial.read();
-    MySerial1.write(buff123);
-    MAC_buff[MAC_buff_index] = buff123;
-    MAC_buff_index++;
-  }
-  String MAC_addr = String(MAC_buff);
-  String Module_ADDR = MAC_addr.substring(MAC_addr.indexOf(",") + 5, MAC_addr.indexOf(",") + 9);
-  MySerial1.println(Module_ADDR);
-  send_command("AT+SRC_ADDR=" + Module_ADDR + ",1");
 
   unsigned long start_time = millis(); // таймер
   int butt_count = 1;
@@ -373,13 +428,11 @@ void loop()
   int SRC_ADDR = 1;
   int power_counter = 22;
   char GPS_buff[150] = "Nothing";
-  //char CONNECT_buf[150] = "Nothing";
-  //int CONNECT_buf_index = 0;
   int GPS_buff_index = 0;
   bool connect_flag = 0;
 
   String GPS_str = "GPS";
-  //String connect = "connect";
+  String Module_ADDR = Set_E52_ADDR();  // устанавливаем и запоминаем адрес Е52
   String lattitude = "lattitude";
   String lontitude = "lontitude";
   String altitude = "altitude";
@@ -399,38 +452,33 @@ void loop()
   display.println("22");
 
   display.print("!!Pause (2), ms: ");
-  int Pause_Xpos = display.getCursorX(); // позиция Х курсора при написании мощности
-  int Pause_Ypos = display.getCursorY(); // позиция Y курсора при написании мощности
+  int Pause_Xpos = display.getCursorX(); // позиция Х курсора при написании паузы
+  int Pause_Ypos = display.getCursorY(); // позиция Y курсора при написании паузы
   display.println("600");
 
   display.print("S/R (4): ");
-  int SR_Xpos = display.getCursorX(); // позиция Х курсора при написании мощности
-  int SR_Ypos = display.getCursorY(); // позиция Y курсора при написании мощности
+  int SR_Xpos = display.getCursorX(); // позиция Х курсора при написании Speed/Rate
+  int SR_Ypos = display.getCursorY(); // позиция Y курсора при написании Speed/Rate
   display.println("0");
 
   display.print("Mode (6): ");
-  int Mode_Xpos = display.getCursorX(); // позиция Х курсора при написании мощности
-  int Mode_Ypos = display.getCursorY(); // позиция Y курсора при написании мощности
+  int Mode_Xpos = display.getCursorX(); // позиция Х курсора при написании режима
+  int Mode_Ypos = display.getCursorY(); // позиция Y курсора при написании режима
   display.println("Not");
 
   display.print("Status: ");
-  int Stat_Xpos = display.getCursorX(); // позиция Х курсора при написании мощности
-  int Stat_Ypos = display.getCursorY(); // позиция Y курсора при написании мощности
+  int Stat_Xpos = display.getCursorX(); // позиция Х курсора при написании статуса
+  int Stat_Ypos = display.getCursorY(); // позиция Y курсора при написании статуса
   display.println("Ground");
 
   display.display();
 
   MySerial3.println("AT+CIPCLOSE");
   delay(500);
-  while (MySerial3.available())
-  {
-    byte buff123 = MySerial3.read();
-    MySerial1.write(buff123);
-  }
+  read_SIM868();
 
   while (true)
   {
-    // MySerial1.println(millis());
     //  ========================= MODE AND SENDING ================================
     if ((millis() - start_time) >= 5000)
     {
@@ -544,31 +592,7 @@ void loop()
 
     if (digitalRead(STM_BTN1) == false)
     { // ========================== SPEED/RANGE ======================================
-      // LORA_RST, LORA_PA0, STM_BTN1
-      butt_count++;
-      MySerial1.print(butt_count);
-      if (butt_count == 1)
-      {
-        // setup_delay = 1000;
-        set_rs(0);
-        MySerial1.println("S/R=0");
-        draw_pos(SR_Xpos, SR_Ypos, "0");
-      }
-      if (butt_count == 2)
-      {
-        // setup_delay = 1000;
-        set_rs(1);
-        MySerial1.println("S/R=1");
-        draw_pos(SR_Xpos, SR_Ypos, "1");
-      }
-      if (butt_count == 3)
-      {
-        // setup_delay = 3000;
-        set_rs(2);
-        butt_count = 0;
-        MySerial1.println("S/R=2");
-        draw_pos(SR_Xpos, SR_Ypos, "2");
-      }
+      butt_count = Next_SR(butt_count, SR_Xpos, SR_Ypos);
     }
 
     if (digitalRead(LORA_RST) == false)
@@ -577,16 +601,8 @@ void loop()
     }
 
     if (digitalRead(STM_SW3) == true)
-    { // переключаем мощность
-      power_counter--;
-      set_power(power_counter); // устанавливаем мощность
-      draw_pos(Power_Xpos, Power_Ypos, String(power_counter));
-
-      if (power_counter == -9)
-      {
-        power_counter = 23;
-      }
-      read_SSerial();
+    { // ========================== POWER ========================== 
+      power_counter = Next_power(power_counter, Power_Xpos, Power_Ypos);
     }
 
     delay(500);
