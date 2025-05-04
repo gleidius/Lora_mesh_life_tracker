@@ -21,6 +21,7 @@ String SerialHandler::sendCommand(String command)
     delay(100);
     if (_serial.available())
         return _serial.readStringUntil('\n');
+    return String("No answer");
 }
 
 void SerialHandler::sendMessage(String message)

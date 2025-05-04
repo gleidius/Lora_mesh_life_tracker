@@ -1,7 +1,7 @@
 #include "functions.h"
 
 void setup()
-{ //========================== SETUP ===========================
+{                                                           //========================== SETUP ===========================
   if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) // инициализация дисплея    !!!!! спросить у Александра почему так !!!!!
   {
     MySerial1.println(F("SSD1306 allocation failed"));
@@ -51,8 +51,8 @@ void loop()
   int power_counter = 22;
 
   bool connect_flag = 0;
-  
-  String Module_ADDR = Set_E52_ADDR();  // устанавливаем и запоминаем адрес Е52
+
+  String Module_ADDR = Set_E52_ADDR(); // устанавливаем и запоминаем адрес Е52
 
   display.clearDisplay();
   display.setCursor(0, 0);
@@ -110,7 +110,7 @@ void loop()
         draw_pos(Mode_Xpos, Mode_Ypos, "Internet");
 
         if (connect_flag == 0)
-        { 
+        {
           try_connect_to_server();
           connect_flag = check_connect_to_server();
         }
@@ -128,12 +128,12 @@ void loop()
     }
 
     if (digitalRead(LORA_RST) == false)
-    { // ========================== STATUS ========================== 
+    { // ========================== STATUS ==========================
       status_count = Next_status(status_count, Stat_Xpos, Stat_Ypos);
     }
 
     if (digitalRead(STM_SW3) == true)
-    { // ========================== POWER ========================== 
+    { // ========================== POWER ==========================
       power_counter = Next_power(power_counter, Power_Xpos, Power_Ypos);
     }
 
