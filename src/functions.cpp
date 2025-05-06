@@ -1,7 +1,6 @@
 #include "functions.h"
 #include "configuration.h"
 
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 serialEEPROM myEEPROM(0x50, 32768, 64);
 
 uint8_t UART1_TX = PA9;
@@ -60,14 +59,6 @@ void read_SIM868() // функция чтения ответа от SIM868
     byte buff123 = MySerial3.read();
     MySerial1.write(buff123);
   }
-}
-
-void draw_pos(int x_pos, int y_pos, String text) // функция отрисовки по позиции, закрашивая строку
-{
-  display.setCursor(x_pos, y_pos);
-  display.fillRect(x_pos, y_pos, 128, 8, SSD1306_BLACK);
-  display.print(text);
-  display.display();
 }
 
 void send_to_server_SIM868(String dataTransmit) // отправляем данные на сервер используя SIM868
@@ -149,29 +140,29 @@ void try_connect_to_server() // выполняем попытку подключ
   delay(3000);
 }
 
-int Next_status(int status_count, int Stat_Xpos, int Stat_Ypos) // выполняем смену статуса
-{
-  status_count++;
-  if (status_count == 1)
-  {
-    draw_pos(Stat_Xpos, Stat_Ypos, "Ground");
-  }
-  if (status_count == 2)
-  {
-    draw_pos(Stat_Xpos, Stat_Ypos, "Sky");
-  }
-  if (status_count == 3)
-  {
-    draw_pos(Stat_Xpos, Stat_Ypos, "Picked up");
-  }
-  if (status_count == 4)
-  {
-    draw_pos(Stat_Xpos, Stat_Ypos, "SOS");
-    status_count = 0;
-  }
-  delay(100);
-  return (status_count);
-}
+// int Next_status(int status_count, int Stat_Xpos, int Stat_Ypos) // выполняем смену статуса
+// {
+//   status_count++;
+//   if (status_count == 1)
+//   {
+//     draw_pos(Stat_Xpos, Stat_Ypos, "Ground");
+//   }
+//   if (status_count == 2)
+//   {
+//     draw_pos(Stat_Xpos, Stat_Ypos, "Sky");
+//   }
+//   if (status_count == 3)
+//   {
+//     draw_pos(Stat_Xpos, Stat_Ypos, "Picked up");
+//   }
+//   if (status_count == 4)
+//   {
+//     draw_pos(Stat_Xpos, Stat_Ypos, "SOS");
+//     status_count = 0;
+//   }
+//   delay(100);
+//   return (status_count);
+// }
 
 void SIM868_GPS_Power_Up() // включаем GPS
 {

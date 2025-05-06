@@ -2,18 +2,9 @@
 #include <Arduino.h>
 #include <HardwareSerial.h>
 #include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
 #include <Adafruit_BMP280.h>
-#include <Adafruit_SSD1306.h>
 #include <serialEEPROM.h>
 
-#define SCREEN_WIDTH 128
-#define SCREEN_HEIGHT 64
-#define OLED_RESET -1
-#define SCREEN_ADDRESS 0x3C
-
-extern Adafruit_SSD1306 display; //(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 extern serialEEPROM myEEPROM;
 
 extern uint8_t UART1_TX;
@@ -55,8 +46,6 @@ extern uint8_t UART2_RX;
 extern HardwareSerial S_Serial;
 
 void read_SIM868(); // функция чтения ответа от SIM868
-
-void draw_pos(int x_pos, int y_pos, String text); // функция отрисовки по позиции, закрашивая строку
 
 void send_to_server_SIM868(String dataTransmit); // отправляем данные на сервер используя SIM868
 
