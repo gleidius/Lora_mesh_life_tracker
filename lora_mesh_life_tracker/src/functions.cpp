@@ -1,5 +1,9 @@
 #include "functions.h"
 
+//GyverBME280 bmp;
+Adafruit_BMP280 bmp;
+
+
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 serialEEPROM myEEPROM(0x50, 32768, 64);
 
@@ -348,14 +352,23 @@ int Next_power(int power_counter, int Power_Xpos, int Power_Ypos) // перек�
   return(power_counter);
 }
 
-String get_telemetry(String Module_ADDR, int status_count )    // получаем телеметрию
+String get_altitude_rate(float P, float P_pred, int t, int t_pred)      // получаем скороподъемность
+{
+  float R = 8.134;  // газовая постоянная 
+  float T = bmp.readTemperature() + 273.15;   // температура в кельвинах
+  float g = 9.81;     // ускорение свободного падения 
+  float M = 0.029;      // молярная масса воздуха
+
+  return(String(((R*T)/(g*M))*((P - P_pred)/(P*(t-t_pred)))));
+}
+
+String get_telemetry(String Module_ADDR, int status_count, String altitude_rate )    // получаем телеметрию
 {
   String lattitude = "lattitude";
   String lontitude = "lontitude";
   String altitude = "altitude";
   String speed = "speed";
   String course = "course";
-  String wrong_data = "1.5";
   char GPS_buff[150] = "Nothing";
   int GPS_buff_index = 0;
   int index1 = 0;
@@ -441,13 +454,18 @@ String get_telemetry(String Module_ADDR, int status_count )    // получае
         course = "-1";
       }
       String data_transmitt = "GL "+ Module_ADDR + " " + lattitude + " " 
-      + lontitude + " " + altitude + " " + wrong_data + " " + speed + " " 
+      + lontitude + " " + altitude + " " + altitude_rate + " " + speed + " " 
       + status_count + " " + course;
        
       return(data_transmitt);
 }
 
-String get_altitude_rate()      // получаем скороподъемность
-{
-  
+void setup_bmp(){
+  bmp.begin(0x76);
+  bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
+    Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
+    Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
+    Adafruit_BMP280::FILTER_X16,      /* Filtering. */
+    Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
 }
+

@@ -4,7 +4,7 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-//#include <Adafruit_BMP280.h>
+#include <Adafruit_BMP280.h>
 #include <Adafruit_SSD1306.h>
 #include <serialEEPROM.h>
 #include <GyverBME280.h>
@@ -94,4 +94,8 @@ void SIM868_Power_SW(int SIM868_PWR_Pin); // включаем/выключаем
 
 int Next_power(int power_counter, int Power_Xpos, int Power_Ypos); // переключаем мощность Е52
 
-String get_telemetry(String Module_ADDR, int status_count );    // получаем телеметрию
+String get_telemetry(String Module_ADDR, int status_count, String altitude_rate);    // получаем телеметрию
+
+String get_altitude_rate(float P, float P_pred, int t, int t_pred);
+
+void setup_bmp();

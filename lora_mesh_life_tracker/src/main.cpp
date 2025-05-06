@@ -1,7 +1,15 @@
 #include "functions.h"
-
+Adafruit_BMP280 bmp2;
 void setup()
-{ //========================== SETUP ===========================
+{ 
+  bmp2.begin(0x76);
+  bmp2.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
+    Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
+    Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
+    Adafruit_BMP280::FILTER_X16,      /* Filtering. */
+    Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
+  
+  //========================== SETUP ===========================
   if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) // инициализация дисплея    !!!!! спросить у Александра почему так !!!!!
   {
     MySerial1.println(F("SSD1306 allocation failed"));
@@ -27,6 +35,8 @@ void setup()
   pinMode(SIM_SLEEP, INPUT);
   pinMode(SIM_PWRK, OUTPUT);
 
+  
+
   int NUM_KEYS = 2;
   char buff;
   char buff2[NUM_KEYS];
@@ -34,6 +44,8 @@ void setup()
   delay(5000); ///////// нужен чтобы успеть открыть монитор порта потом удалить!!!!!!
 
   E52_default_init(); // инициализируем Е52 по дефолту
+
+  setup_bmp();
 
   SIM868_Power_SW(SIM_PWRK); // включаем SIM868
 
@@ -48,6 +60,8 @@ void loop()
   int status_count = 1;
   int SRC_ADDR = 1;
   int power_counter = 22;
+  float Preshure[2]{101325, 101325};
+  int time[2]{0, 0};
 
   bool connect_flag = 0;
   
@@ -82,6 +96,11 @@ void loop()
   int Stat_Ypos = display.getCursorY(); // позиция Y курсора при написании статуса
   display.println("Ground");
 
+  display.print("ALT_R: ");
+  int ALTR_Xpos = display.getCursorX(); // позиция Х курсора при написании статуса
+  int ALTR_Ypos = display.getCursorY(); // позиция Y курсора при написании статуса
+  display.println("N/A");
+
   display.display();
 
   MySerial3.println("AT+CIPCLOSE");
@@ -96,7 +115,23 @@ void loop()
       start_time = millis();
       MySerial1.println("==================================================================================");
 
-      String data_transmitt = get_telemetry(Module_ADDR, status_count);
+
+      time[0] = time[1];
+      time[1] = millis();
+      Preshure[0] = Preshure[1];
+      Preshure[1] = bmp2.readPressure();
+      MySerial1.print("Preshure[1] = ");
+      MySerial1.println(Preshure[1]);
+      MySerial1.print("time[1] = ");
+      MySerial1.println(time[1]);
+      
+
+      String altitude_rate = get_altitude_rate(Preshure[1], Preshure[0], time[1], time[0]);
+      MySerial1.print("Altitude_rate = ");
+      MySerial1.println(altitude_rate);
+      draw_pos(ALTR_Xpos, ALTR_Ypos, altitude_rate);
+
+      String data_transmitt = get_telemetry(Module_ADDR, status_count, altitude_rate);
 
       if (digitalRead(STM_SW6) == false)
       { // ======================== MESH ============================
