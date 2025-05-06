@@ -1,30 +1,31 @@
 #pragma once
-#include "configuration.h"
+#include <Arduino.h>
+#include "debug.h"
 
 class E52
 {
+private:
+    HardwareSerial *_streamRef;
+    uint16_t srcAddr = 0;
+
 public:
-    E52();
-
-    bool setup();
-    // функция изменения параметра скорость/дальность
-    bool setRs(int rs);
-    uint8_t getRs();
-
-    void setPower(int power);
-    int8_t getPower();
-
-    void setDstAddr();
-    uint32_t getSrcAddr();
+    bool setup(HardwareSerial *streamObject);
 
     bool sendCommand(String command);
+    void sendMessage(String data);
+    int available(void);
+    String recieveMessage(void);
 
-    void sendToMesh(String data);
+    bool setRs(uint8_t rs);
+    uint8_t getRs();
 
-    String receiveFromMesh();
+    void setPower(int8_t power);
+    int8_t getPower();
 
-private:
-    SerialHandler _serial;
+    void setSrcAddr(uint16_t srcAddr);
+    uint16_t getSrcAddr(void);
+
+    uint16_t getMacAddrLora();
 };
 
 extern E52 e52;

@@ -54,18 +54,6 @@ extern uint8_t UART2_TX;
 extern uint8_t UART2_RX;
 extern HardwareSerial S_Serial;
 
-void send_command(String command);
-
-void set_power(int power);
-
-void read_SSerial();
-
-int set_pause(int pause);
-
-void set_rs(int rs);
-
-void set_SRC_ADDR(int SRC);
-
 void read_SIM868(); // функция чтения ответа от SIM868
 
 void draw_pos(int x_pos, int y_pos, String text); // функция отрисовки по позиции, закрашивая строку
@@ -78,18 +66,8 @@ void try_connect_to_server(); // выполняем попытку подклю�
 
 int Next_status(int status_count, int Stat_Xpos, int Stat_Ypos); // выполняем смену статуса
 
-int Next_SR(int butt_count, int SR_Xpos, int SR_Ypos); // меняем параметр скорость/дальность
-
-String Set_E52_ADDR(); // устанавливаем адрес Е52 по последним 4-м ицфрам МАС адреса
-
-void send_to_mesh_E52(String data_transmitt); // отправляем данные в меш при помщи Е52
-
-void E52_default_init(); // инициализируемся по дефолту
-
 void SIM868_GPS_Power_Up(); // включаем GPS
 
 void SIM868_Power_SW(int SIM868_PWR_Pin); // включаем/выключаем Е52
-
-int Next_power(int power_counter, int Power_Xpos, int Power_Ypos); // переключаем мощность Е52
 
 String get_telemetry(String Module_ADDR, int status_count); // получаем телеметрию

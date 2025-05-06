@@ -6,7 +6,7 @@ serialEEPROM myEEPROM(0x50, 32768, 64);
 
 uint8_t UART1_TX = PA9;
 uint8_t UART1_RX = PA10;
-HardwareSerial MySerial1(UART1_RX, UART1_TX);
+// HardwareSerial MySerial1(UART1_RX, UART1_TX);
 
 // On-Board LEDs
 uint8_t LED_PC13 = PC13;
@@ -53,72 +53,6 @@ uint8_t UART2_RX = PA3;
 HardwareSerial S_Serial(UART2_RX, UART2_TX);
 
 //======================================================= ФУНКЦИИ ========================================================================
-void send_command(String command)
-{ // функиця отправки AT-команды в Е52
-  S_Serial.println(command);
-  delay(100);
-  while (S_Serial.available())
-  {
-    byte buff123 = S_Serial.read();
-    MySerial1.write(buff123);
-  }
-}
-
-void set_power(int power)
-{ // функция настройки мощности
-  String pw = String(power);
-  String at = "AT+POWER=";
-  String zero = ",0";
-  at.concat(pw);
-  at.concat(zero);
-  S_Serial.println(at);
-  MySerial1.print("Мощность: ");
-  String dbm = " дБм";
-  pw.concat(dbm);
-  MySerial1.println(pw);
-}
-
-void read_SSerial()
-{ // функция чтения Soft UART с задержкой
-  delay(100);
-  while (S_Serial.available())
-  {
-    byte buff123 = S_Serial.read();
-    MySerial1.write(buff123);
-  }
-}
-
-int set_pause(int pause)
-{ // функция установки паузы передачи
-  MySerial1.print("Пауза, мс: ");
-  MySerial1.println(pause);
-  int test_delay = pause - 300;
-  return (test_delay);
-}
-
-void set_rs(int rs)
-{ // функция изменения параметра скорость/дальность
-  e52.setRs(rs);
-}
-
-void set_SRC_ADDR(int SRC)
-{ // функция изменения собственного адреса
-  String range_speed = String(SRC);
-  String at = "AT+SRC_ADDR=";
-  String save = ",1";
-  at.concat(range_speed);
-  at.concat(save);
-  S_Serial.println(at);
-  MySerial1.print("Собственный адрес = ");
-  MySerial1.println(range_speed);
-
-  while (S_Serial.available())
-  {
-    byte buff123 = S_Serial.read();
-    MySerial1.write(buff123);
-  }
-}
-
 void read_SIM868() // функция чтения ответа от SIM868
 {
   while (MySerial3.available())
@@ -151,7 +85,6 @@ void send_to_server_SIM868(String dataTransmit) // отправляем данн
 }
 
 bool check_connect_to_server() // функция проверки соединения с сервером
-
 {
   bool connect_flag = 0;
   String connect = "connect";
@@ -240,73 +173,6 @@ int Next_status(int status_count, int Stat_Xpos, int Stat_Ypos) // выполн�
   return (status_count);
 }
 
-int Next_SR(int butt_count, int SR_Xpos, int SR_Ypos) // меняем параметр скорость/дальность
-{
-  butt_count++;
-  MySerial1.print(butt_count);
-  if (butt_count == 1)
-  {
-    // setup_delay = 1000;
-    set_rs(0);
-    MySerial1.println("S/R=0");
-    draw_pos(SR_Xpos, SR_Ypos, "0");
-  }
-  if (butt_count == 2)
-  {
-    // setup_delay = 1000;
-    set_rs(1);
-    MySerial1.println("S/R=1");
-    draw_pos(SR_Xpos, SR_Ypos, "1");
-  }
-  if (butt_count == 3)
-  {
-    // setup_delay = 3000;
-    set_rs(2);
-    butt_count = 0;
-    MySerial1.println("S/R=2");
-    draw_pos(SR_Xpos, SR_Ypos, "2");
-  }
-  return (butt_count);
-}
-
-String Set_E52_ADDR() // устанавливаем адрес Е52 по последним 4-м ицфрам МАС адреса
-{
-  char MAC_buff[50] = "1010";
-  int MAC_buff_index = 0;
-
-  S_Serial.print("AT+MAC=?");
-  delay(100);
-
-  while (S_Serial.available())
-  {
-    byte buff123 = S_Serial.read();
-    MySerial1.write(buff123);
-    MAC_buff[MAC_buff_index] = buff123;
-    MAC_buff_index++;
-  }
-  String MAC_addr = String(MAC_buff);
-  String Module_ADDR = MAC_addr.substring(MAC_addr.indexOf(",") + 5, MAC_addr.indexOf(",") + 9);
-  MySerial1.println(Module_ADDR);
-  send_command("AT+SRC_ADDR=" + Module_ADDR + ",1");
-
-  return (Module_ADDR);
-}
-
-void send_to_mesh_E52(String data_transmitt) // отправляем данные в меш при помщи Е52
-{
-  S_Serial.println(data_transmitt);
-  MySerial1.print("pack = ");
-  MySerial1.println(data_transmitt);
-}
-
-void E52_default_init() // инициализируемся по дефолту
-{
-  send_command("AT+POWER=14,0");     // устанавливаем базовую мощность
-  send_command("AT+DST_ADDR=404,0"); // задаем целевой адрес
-  send_command("AT+OPTION=1,0");     // задаем режим передачи (1 - unicast (одноадресная))
-  send_command("AT+RATE=0");         // устанавливаем параметр скорость/дальность
-}
-
 void SIM868_GPS_Power_Up() // включаем GPS
 {
   MySerial3.write("AT+CGNSPWR=1\n"); // подаем питание на GPS
@@ -325,20 +191,6 @@ void SIM868_Power_SW(int SIM868_PWR_Pin) // включаем/выключаем 
   digitalWrite(SIM868_PWR_Pin, HIGH);
   // digitalWrite(LED_PC13, LOW);
   delay(3000);
-}
-
-int Next_power(int power_counter, int Power_Xpos, int Power_Ypos) // переключаем мощность Е52
-{
-  power_counter--;
-  set_power(power_counter); // устанавливаем мощность
-  draw_pos(Power_Xpos, Power_Ypos, String(power_counter));
-
-  if (power_counter == -9)
-  {
-    power_counter = 23;
-  }
-  read_SSerial();
-  return (power_counter);
 }
 
 String get_telemetry(String Module_ADDR, int status_count) // получаем телеметрию
