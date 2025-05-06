@@ -240,8 +240,9 @@ int Next_status(int status_count, int Stat_Xpos, int Stat_Ypos) // выполн�
         draw_pos(Stat_Xpos, Stat_Ypos, "SOS");
         status_count = 0;
       }
-      delay(100);
+      delay(200);
       return(status_count);
+
 }
 
 int Next_SR(int butt_count, int SR_Xpos, int SR_Ypos) // меняем параметр скорость/дальность
@@ -270,6 +271,7 @@ int Next_SR(int butt_count, int SR_Xpos, int SR_Ypos) // меняем парам
         MySerial1.println("S/R=2");
         draw_pos(SR_Xpos, SR_Ypos, "2");
       }
+      delay(200);
       return(butt_count);
 }
 
@@ -342,6 +344,7 @@ int Next_power(int power_counter, int Power_Xpos, int Power_Ypos) // перек�
     power_counter = 23;
   }
   read_SSerial();
+  delay(200);
   return(power_counter);
 }
 
@@ -442,4 +445,9 @@ String get_telemetry(String Module_ADDR, int status_count )    // получае
       + status_count + " " + course;
        
       return(data_transmitt);
+}
+
+String get_altitude_rate()      // получаем скороподъемность
+{
+  
 }

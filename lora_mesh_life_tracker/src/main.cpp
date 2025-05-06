@@ -5,8 +5,7 @@ void setup()
   if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) // инициализация дисплея    !!!!! спросить у Александра почему так !!!!!
   {
     MySerial1.println(F("SSD1306 allocation failed"));
-    for (;;)
-      ;
+    for (;;);
   }
 
   display.setTextSize(1);
@@ -21,7 +20,7 @@ void setup()
 
   // инициализируем софтовые/хардовые serial-ы
   MySerial1.begin(115200); // обычный serial
-  S_Serial.begin(115200);
+  S_Serial.begin(115200);  //
   MySerial3.begin(115200); // serial SIM868
 
   // инициализируем  пины SIM868
@@ -136,7 +135,5 @@ void loop()
     { // ========================== POWER ========================== 
       power_counter = Next_power(power_counter, Power_Xpos, Power_Ypos);
     }
-
-    delay(500);
   }
 }

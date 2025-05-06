@@ -4,9 +4,10 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-#include <Adafruit_BMP280.h>
+//#include <Adafruit_BMP280.h>
 #include <Adafruit_SSD1306.h>
 #include <serialEEPROM.h>
+#include <GyverBME280.h>
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
