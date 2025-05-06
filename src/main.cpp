@@ -200,9 +200,9 @@ class Menu
 public:
 	Menu() : head(nullptr), currentMenu(nullptr) {}
 
-	void addMenuItem(const char *name)
+	MenuItem *addMenuItem(const char *name)
 	{
-		addItem(name, MENU_ITEM, nullptr);
+		return addItem(name, MENU_ITEM, nullptr);
 	}
 
 	void addParameterItem(const char *name, int *parameterValue)
@@ -210,9 +210,9 @@ public:
 		addItem(name, PARAMETER_ITEM, parameterValue);
 	}
 
-	void setSubmenu(MenuItem *item, Menu *submenu)
+	void setSubmenu(MenuItem *item)
 	{
-		item->submenu = submenu->head; // Привязываем подменю к элементу
+		item->submenu = head; // Привязываем подменю к элементу
 	}
 
 	void navigate()
@@ -226,17 +226,19 @@ public:
 
 			if (digitalRead(buttonUpPin) == LOW)
 			{
+				currentMenu = (currentMenu->prev != nullptr) ? currentMenu = currentMenu->prev : currentMenu = tail;
 				selected = (selected - 1 + countItems()) % countItems(); // Циклический выбор вверх
 				delay(200);												 // Антидребезг
 			}
 			if (digitalRead(buttonDownPin) == LOW)
 			{
+				currentMenu = (currentMenu->next != nullptr) ? currentMenu = currentMenu->next : currentMenu = head;
 				selected = (selected + 1) % countItems(); // Циклический выбор вниз
 				delay(200);								  // Антидребезг
 			}
 			if (digitalRead(buttonSelectPin) == LOW)
 			{
-				if (currentMenu != nullptr && currentMenu->submenu != nullptr && selected == 0)
+				if (currentMenu != nullptr && currentMenu->submenu != nullptr)
 				{
 					// Переход в подменю при выборе первого элемента
 					navigateSubmenu(currentMenu->submenu);
@@ -249,12 +251,13 @@ public:
 			}
 		}
 	}
-	MenuItem *head;
 
 private:
+	MenuItem *head;
+	MenuItem *tail;
 	MenuItem *currentMenu;
 
-	void addItem(const char *name, MenuItemType type, int *parameterValue)
+	MenuItem *addItem(const char *name, MenuItemType type, int *parameterValue)
 	{
 		MenuItem *newItem = new MenuItem;
 		newItem->name = name;
@@ -267,20 +270,18 @@ private:
 		{
 			newItem->prev = nullptr;
 			head = newItem; // Если это первый элемент
+			tail = newItem;
 		}
 		else
 		{
-			MenuItem *current = head;
-
-			// Находим последний элемент списка и добавляем новый элемент
-			while (current->next != nullptr)
-			{
-				current = current->next;
-			}
+			MenuItem *current = tail;
 
 			current->next = newItem; // Добавляем новый элемент в конец списка
 			newItem->prev = current; // Устанавливаем связь с предыдущим элементом
+
+			tail = newItem;
 		}
+		return newItem;
 	}
 
 	void displayMenu(int selected)
@@ -308,6 +309,7 @@ private:
 
 		display.display();
 	}
+
 	void navigateSubmenu(MenuItem *submenu)
 	{
 		Menu subMenu;
@@ -371,6 +373,7 @@ int parameterValue2 = 5; // Пример другого значения пар�
 
 void setup()
 {
+	Serial.begin(115200);
 	display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS);
 	display.clearDisplay();
 	display.setTextSize(1);
@@ -382,18 +385,28 @@ void setup()
 	pinMode(buttonSelectPin, INPUT_PULLUP);
 
 	// Пример добавления элементов в меню
-	mainMenu.addMenuItem("Option 1");
 
-	// Добавление параметров
 	mainMenu.addParameterItem("Parameter 1", &parameterValue1);
+	// Добавление параметров
+	MenuItem *submenu10 = mainMenu.addMenuItem("Option 1");
 	mainMenu.addParameterItem("Parameter 2", &parameterValue2);
 
 	// Создание подменю и добавление пунктов
 	Menu submenu;
-	submenu.addMenuItem("Submenu 1");
 	submenu.addMenuItem("Submenu 2");
+	MenuItem *submenu2 = submenu.addMenuItem("Submenu 1");
 
-	mainMenu.setSubmenu(mainMenu.head, &submenu); // Привязываем подменю к первому элементу
+	submenu.addParameterItem("Parameter 2", &parameterValue2);
+
+	submenu.setSubmenu(submenu10); // Привязываем подменю к элементу
+
+	Menu submenu1;
+	submenu1.addMenuItem("Submenu 3");
+	MenuItem *submenu3 = submenu1.addMenuItem("Submenu 4");
+
+	submenu1.setSubmenu(submenu2);
+
+	mainMenu.setSubmenu(submenu3); // Привязываем подменю к элементу
 
 	mainMenu.navigate();
 }
