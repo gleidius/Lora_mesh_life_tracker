@@ -170,233 +170,25 @@
 // 	// }
 // }
 
-#include "Arduino.h"
-
-// Определение пинов для кнопок
-const int buttonUpPin = PB0;
-const int buttonDownPin = PB1;
-const int buttonSelectPin = PA6;
-
-// Структура для узла меню
-enum MenuItemType
-{
-	MENU_ITEM,
-	PARAMETER_ITEM
-};
-
-struct MenuItem
-{
-	const char *name;
-	MenuItemType type;
-	MenuItem *next;
-	MenuItem *prev;
-	MenuItem *submenu;	 // Указатель на подменю
-	int *parameterValue; // Указатель на значение параметра (если это параметр)
-};
-
-// Класс для управления меню
-class Menu
-{
-public:
-	Menu() : head(nullptr), currentMenu(nullptr) {}
-
-	MenuItem *addMenuItem(const char *name)
-	{
-		return addItem(name, MENU_ITEM, nullptr);
-	}
-
-	void addParameterItem(const char *name, int *parameterValue)
-	{
-		addItem(name, PARAMETER_ITEM, parameterValue);
-	}
-
-	void setSubmenu(MenuItem *item)
-	{
-		item->submenu = head; // Привязываем подменю к элементу
-	}
-
-	void navigate()
-	{
-		currentMenu = head;
-		int selected = 0;
-
-		while (true)
-		{
-			displayMenu(selected);
-
-			if (digitalRead(buttonUpPin) == LOW)
-			{
-				currentMenu = (currentMenu->prev != nullptr) ? currentMenu = currentMenu->prev : currentMenu = tail;
-				selected = (selected - 1 + countItems()) % countItems(); // Циклический выбор вверх
-				delay(200);												 // Антидребезг
-			}
-			if (digitalRead(buttonDownPin) == LOW)
-			{
-				currentMenu = (currentMenu->next != nullptr) ? currentMenu = currentMenu->next : currentMenu = head;
-				selected = (selected + 1) % countItems(); // Циклический выбор вниз
-				delay(200);								  // Антидребезг
-			}
-			if (digitalRead(buttonSelectPin) == LOW)
-			{
-				if (currentMenu != nullptr && currentMenu->submenu != nullptr)
-				{
-					// Переход в подменю при выборе первого элемента
-					navigateSubmenu(currentMenu->submenu);
-				}
-				else
-				{
-					handleSelection(selected);
-				}
-				delay(200); // Антидребезг
-			}
-		}
-	}
-
-private:
-	MenuItem *head;
-	MenuItem *tail;
-	MenuItem *currentMenu;
-
-	MenuItem *addItem(const char *name, MenuItemType type, int *parameterValue)
-	{
-		MenuItem *newItem = new MenuItem;
-		newItem->name = name;
-		newItem->type = type;
-		newItem->next = nullptr;
-		newItem->submenu = nullptr;				  // Изначально подменю пустое
-		newItem->parameterValue = parameterValue; // Устанавливаем указатель на значение параметра
-
-		if (head == nullptr)
-		{
-			newItem->prev = nullptr;
-			head = newItem; // Если это первый элемент
-			tail = newItem;
-		}
-		else
-		{
-			MenuItem *current = tail;
-
-			current->next = newItem; // Добавляем новый элемент в конец списка
-			newItem->prev = current; // Устанавливаем связь с предыдущим элементом
-
-			tail = newItem;
-		}
-		return newItem;
-	}
-
-	void displayMenu(int selected)
-	{
-		display.clearDisplay();
-
-		MenuItem *currentItem = head;
-		int index = 0;
-
-		while (currentItem != nullptr && index < 3)
-		{ // Отображаем максимум 3 пункта меню
-			if (index == selected)
-			{
-				display.setTextColor(BLACK, WHITE); // Инверсия цвета для выделенного пункта
-			}
-			else
-			{
-				display.setTextColor(WHITE);
-			}
-			display.setCursor(0, index * 10);
-			display.println(currentItem->name);
-			currentItem = currentItem->next;
-			index++;
-		}
-
-		display.display();
-	}
-
-	void navigateSubmenu(MenuItem *submenu)
-	{
-		Menu subMenu;
-		subMenu.head = submenu; // Устанавливаем голову подменю
-		subMenu.navigate();		// Запускаем навигацию по подменю
-	}
-
-	void handleSelection(int selected)
-	{
-		MenuItem *currentItem = head;
-		int index = 0;
-
-		while (currentItem != nullptr && index < selected)
-		{
-			currentItem = currentItem->next;
-			index++;
-		}
-
-		if (currentItem != nullptr && currentItem->type == PARAMETER_ITEM)
-		{
-			// Изменение значения параметра
-			(*currentItem->parameterValue)++;
-			displayParameterValue(currentItem);
-		}
-		else
-		{
-			// Здесь можно добавить логику выбора пункта меню
-			// Например, выполнение действия для других пунктов меню
-		}
-	}
-
-	void displayParameterValue(MenuItem *item)
-	{
-		display.clearDisplay();
-		display.setCursor(0, 0);
-		display.print(item->name);
-		display.print(": ");
-		display.println(*item->parameterValue);
-		display.display();
-
-		delay(2000); // Показываем значение параметра в течение 2 секунд
-	}
-
-	int countItems()
-	{
-		int count = 0;
-		MenuItem *current = head;
-		while (current != nullptr)
-		{
-			count++;
-			current = current->next;
-		}
-		return count;
-	}
-};
-
 Menu mainMenu;
 
-int parameterValue1 = 0; // Пример значения параметра
-int parameterValue2 = 5; // Пример другого значения параметра
+uint16_t parameterValue1 = 2; // Пример значения параметра
+uint16_t parameterValue2 = 5; // Пример другого значения параметра
 
-void setup()
+void initMenu()
 {
-	Serial.begin(115200);
-	display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS);
-	display.clearDisplay();
-	display.setTextSize(1);
-	display.setTextColor(WHITE);
-	display.display();
-
-	pinMode(buttonUpPin, INPUT_PULLUP);
-	pinMode(buttonDownPin, INPUT_PULLUP);
-	pinMode(buttonSelectPin, INPUT_PULLUP);
-
 	// Пример добавления элементов в меню
-
-	mainMenu.addParameterItem("Parameter 1", &parameterValue1);
+	mainMenu.addParameterItem("Parameter 1", &parameterValue1, 2, 5);
 	// Добавление параметров
 	MenuItem *submenu10 = mainMenu.addMenuItem("Option 1");
-	mainMenu.addParameterItem("Parameter 2", &parameterValue2);
+	mainMenu.addParameterItem("Parameter 2", &parameterValue2, 1, 10);
 
 	// Создание подменю и добавление пунктов
 	Menu submenu;
 	submenu.addMenuItem("Submenu 2");
 	MenuItem *submenu2 = submenu.addMenuItem("Submenu 1");
 
-	submenu.addParameterItem("Parameter 2", &parameterValue2);
+	submenu.addParameterItem("Parameter 2", &parameterValue2, 1, 14);
 
 	submenu.setSubmenu(submenu10); // Привязываем подменю к элементу
 
@@ -407,7 +199,22 @@ void setup()
 	submenu1.setSubmenu(submenu2);
 
 	mainMenu.setSubmenu(submenu3); // Привязываем подменю к элементу
+}
 
+void setup()
+{
+	Serial.begin(115200);
+	delay(5000);
+	Serial.println("Start STM32");
+
+	mainMenu.setup();
+
+	pinMode(buttonUpPin, INPUT_PULLUP);
+	pinMode(buttonDownPin, INPUT_PULLUP);
+	pinMode(buttonSelectPin, INPUT_PULLUP);
+
+	initMenu();
+	Serial.println("end init");
 	mainMenu.navigate();
 }
 

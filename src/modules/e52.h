@@ -26,6 +26,8 @@ public:
     uint16_t getSrcAddr(void);
 
     uint16_t getMacAddrLora();
+
+private:
 };
 
 extern E52 e52;

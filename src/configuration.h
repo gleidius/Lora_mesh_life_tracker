@@ -8,9 +8,13 @@
 
 #include <Arduino.h>
 
+// Определение пинов для кнопок
+
 #include "debug.h"
 
-// #include "variant.h"
+#include "variant.h"
+
+#include "timerMillis.h"
 
 #include "modules/meshApp.h"
 #include "modules/e52.h"
