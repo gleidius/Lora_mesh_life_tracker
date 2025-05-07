@@ -96,6 +96,6 @@ int Next_power(int power_counter, int Power_Xpos, int Power_Ypos); // перек
 
 String get_telemetry(String Module_ADDR, int status_count, String altitude_rate);    // получаем телеметрию
 
-String get_altitude_rate(float P, float P_pred, int t, int t_pred);
+float get_altitude_rate(float P, float P_pred, int t, int t_pred);
 
 void setup_bmp();

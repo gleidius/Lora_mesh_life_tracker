@@ -26,6 +26,8 @@ void setup()
   pinMode(LORA_PA0, INPUT);
   pinMode(LORA_RST, INPUT);
 
+  pinMode(STM_SW2, INPUT);
+
   // инициализируем софтовые/хардовые serial-ы
   MySerial1.begin(115200); // обычный serial
   S_Serial.begin(115200);  //
@@ -41,7 +43,7 @@ void setup()
   char buff;
   char buff2[NUM_KEYS];
 
-  delay(5000); ///////// нужен чтобы успеть открыть монитор порта потом удалить!!!!!!
+  //delay(5000); ///////// нужен чтобы успеть открыть монитор порта потом удалить!!!!!!
 
   E52_default_init(); // инициализируем Е52 по дефолту
 
@@ -55,13 +57,16 @@ void setup()
 void loop()
 { // ======================== LOOP ===============================
 
-  unsigned long start_time = millis(); // таймер
+  unsigned long start_time, alt_rate_time = millis(); // таймер
   int butt_count = 1;
   int status_count = 1;
   int SRC_ADDR = 1;
   int power_counter = 22;
   float Preshure[2]{101325, 101325};
+  float alt_rate_massiv[5]{0,0,0,0,0};
   int time[2]{0, 0};
+  String altitude_rate = "-1";
+  int counter_OV = 0;               // счетчик для проверки областей видимости !!!удалить
 
   bool connect_flag = 0;
   
@@ -75,11 +80,11 @@ void loop()
   int Power_Xpos = display.getCursorX(); // позиция Х курсора при написании мощности
   int Power_Ypos = display.getCursorY(); // позиция Y курсора при написании мощности
   display.println("22");
-
+/*
   display.print("!!Pause (2), ms: ");
   int Pause_Xpos = display.getCursorX(); // позиция Х курсора при написании паузы
   int Pause_Ypos = display.getCursorY(); // позиция Y курсора при написании паузы
-  display.println("600");
+  display.println("600");*/
 
   display.print("S/R (4): ");
   int SR_Xpos = display.getCursorX(); // позиция Х курсора при написании Speed/Rate
@@ -108,28 +113,44 @@ void loop()
   read_SIM868();
 
   while (true)
-  {
-    //  ========================= MODE AND SENDING ================================
-    if ((millis() - start_time) >= 5000)
-    {
-      start_time = millis();
-      MySerial1.println("==================================================================================");
-
+  {    // ==================================== определение скороподъемности =================================
+    if (millis() - alt_rate_time >= 1000){     
+      alt_rate_time = millis();
+      //counter_OV++;
 
       time[0] = time[1];
       time[1] = millis();
       Preshure[0] = Preshure[1];
       Preshure[1] = bmp2.readPressure();
-      MySerial1.print("Preshure[1] = ");
-      MySerial1.println(Preshure[1]);
-      MySerial1.print("time[1] = ");
-      MySerial1.println(time[1]);
-      
 
-      String altitude_rate = get_altitude_rate(Preshure[1], Preshure[0], time[1], time[0]);
+      alt_rate_massiv[4]=alt_rate_massiv[3]; 
+      alt_rate_massiv[3]=alt_rate_massiv[2]; 
+      alt_rate_massiv[2]=alt_rate_massiv[1]; 
+      alt_rate_massiv[1]=alt_rate_massiv[0];        // криворукий циклический буффер !!! исправить
+      alt_rate_massiv[0] = get_altitude_rate(Preshure[1], Preshure[0], time[1], time[0]);
+
+      float alt_rate = ((alt_rate_massiv[0]+alt_rate_massiv[1]+alt_rate_massiv[2]+alt_rate_massiv[3]+alt_rate_massiv[4])/5);
+     
       MySerial1.print("Altitude_rate = ");
-      MySerial1.println(altitude_rate);
-      draw_pos(ALTR_Xpos, ALTR_Ypos, altitude_rate);
+      MySerial1.println(alt_rate);
+      draw_pos(ALTR_Xpos, ALTR_Ypos, String(alt_rate));
+      altitude_rate = String(alt_rate);
+    }
+
+
+    if(digitalRead(STM_SW2) == true){
+      MySerial1.println("MODE SETTINGS");
+      if(S_Serial.available()){
+        MySerial1.println(S_Serial.readString());
+      }
+      delay(1000);
+    }
+
+      //  ========================= MODE AND SENDING ================================
+      if ((millis() - start_time) >= 5000)
+    {
+      start_time = millis();
+      MySerial1.println("==================================================================================");
 
       String data_transmitt = get_telemetry(Module_ADDR, status_count, altitude_rate);
 

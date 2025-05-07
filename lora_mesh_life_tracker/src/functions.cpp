@@ -352,14 +352,14 @@ int Next_power(int power_counter, int Power_Xpos, int Power_Ypos) // перек�
   return(power_counter);
 }
 
-String get_altitude_rate(float P, float P_pred, int t, int t_pred)      // получаем скороподъемность
+float get_altitude_rate(float P, float P_pred, int t, int t_pred)      // получаем скороподъемность
 {
   float R = 8.134;  // газовая постоянная 
   float T = bmp.readTemperature() + 273.15;   // температура в кельвинах
   float g = 9.81;     // ускорение свободного падения 
   float M = 0.029;      // молярная масса воздуха
 
-  return(String(((R*T)/(g*M))*((P - P_pred)/(P*(t-t_pred)))));
+  return((((R*T)/(g*M))*((P_pred-P)/(P*((t/1000)-(t_pred/1000))))));    // есть воросы по поводу коэффициентов у t, t_pred
 }
 
 String get_telemetry(String Module_ADDR, int status_count, String altitude_rate )    // получаем телеметрию
