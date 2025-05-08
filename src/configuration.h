@@ -20,6 +20,7 @@
 
 #include "variant.h"
 
+#include "button.h"
 #include "timerMillis.h"
 
 #include "modules/meshApp.h"

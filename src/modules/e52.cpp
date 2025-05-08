@@ -24,7 +24,7 @@ void E52::setOption(uint8_t option)
 }
 
 // Установка целевого адреса
-void E52::setDstAddr(uint8_t DstAddr)
+void E52::setDstAddr(uint16_t DstAddr)
 {
     String at = "DST_ADDR=" + String(DstAddr);
     sendCommand(at);

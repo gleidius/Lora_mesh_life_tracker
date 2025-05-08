@@ -29,7 +29,7 @@ public:
 
     void setOption(uint8_t option);
 
-    void setDstAddr(uint8_t DstAddr);
+    void setDstAddr(uint16_t DstAddr);
 
     void setSrcAddr(uint16_t srcAddr);
     uint16_t getSrcAddr(void);

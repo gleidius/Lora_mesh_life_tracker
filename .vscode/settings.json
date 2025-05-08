@@ -6,6 +6,10 @@
         "string": "cpp",
         "numeric": "cpp",
         "limits": "cpp",
-        "type_traits": "cpp"
+        "type_traits": "cpp",
+        "system_error": "cpp",
+        "functional": "cpp",
+        "tuple": "cpp",
+        "utility": "cpp"
     }
 }
