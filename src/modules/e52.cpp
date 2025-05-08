@@ -2,27 +2,36 @@
 
 E52 e52;
 
-bool E52::setup(HardwareSerial *streamObject)
+void E52::setup(HardwareSerial *streamObject)
 {
-    bool flag;
     _streamRef = streamObject;
-    setSrcAddr(getMacAddrLora());
-    flag += !sendCommand("AT+POWER=14,0");     // устанавливаем базовую мощность
-    flag += !sendCommand("AT+DST_ADDR=404,0"); // задаем целевой адрес
-    flag += !sendCommand("AT+OPTION=1,0");     // задаем режим передачи (1 - unicast (одноадресная))
-    flag += !setRs(0);
-    return !flag;
+    getParametersOfE52();
 }
 
 // Установка скорости/дальности
-bool E52::setRs(uint8_t rs)
+void E52::setRs(uint8_t rs)
 {
     String at = "AT+RATE=" + String(rs);
-    return sendCommand(at);
+    sendCommand(at);
+}
+
+// Установка режима передачи
+// 1 - unicast (одноадресная)
+void E52::setOption(uint8_t option)
+{
+    String at = "AT+OPTION=" + String(option);
+    sendCommand(at);
+}
+
+// Установка целевого адреса
+void E52::setDstAddr(uint8_t DstAddr)
+{
+    String at = "DST_ADDR=" + String(DstAddr);
+    sendCommand(at);
 }
 
 // Отправка AT-команд в E52
-bool E52::sendCommand(String command)
+String E52::sendCommand(String command, const char *separation)
 {
     String response;
     DEBUGLN(command);
@@ -34,8 +43,10 @@ bool E52::sendCommand(String command)
         DEBUGLN(response);
     }
     if (response.indexOf("CMD_ERR") != -1)
-        return false;
-    return true;
+        return "error";
+    if (separation != nullptr)
+        return response.substring(response.indexOf(separation) + 1);
+    return response;
 }
 
 // Отправка сообщений в mesh
@@ -55,17 +66,17 @@ void E52::setPower(int8_t power)
         power = -8;
     String command = "AT+POWER=";
     command += String(power);
-    command += ",0";
+    command += ",1";
     sendCommand(command);
 }
 
 // Установка собственного адреса
 void E52::setSrcAddr(uint16_t srcAddr)
 {
-    srcAddr = srcAddr;
+    this->srcAddr = srcAddr;
     String command = "AT+SRC_ADDR=";
     command += String(srcAddr);
-    command = ",1";
+    command += ",1";
     sendCommand(command);
 }
 
@@ -74,18 +85,10 @@ uint16_t E52::getSrcAddr(void)
     return srcAddr;
 }
 
-uint16_t E52::getMacAddrLora()
+uint16_t E52::getMacAddrLora(void)
 {
     String input;
-    _streamRef->print("AT+MAC=?");
-    DEBUGLN(5);
-    delay(100);
-    while (int i = _streamRef->available())
-    {
-        DEBUGLN(i);
-        input = _streamRef->readString();
-    }
-    DEBUGLN(input);
+    input = sendCommand("AT+MAC=?", "=");
     // Находим позицию начала шестнадцатеричного числа
     int pos = input.indexOf("0x");
     if (pos != -1)
@@ -98,6 +101,10 @@ uint16_t E52::getMacAddrLora()
 
         // Преобразуем шестнадцатеричное число в десятичное
         unsigned long decimalValue = strtoul(lastFourHex.c_str(), NULL, 16);
+
+        DEBUG("MAC addres Lora: ");
+        DEBUGLN(decimalValue);
+
         return decimalValue;
     }
     else
@@ -118,4 +125,23 @@ String E52::recieveMessage(void)
         DEBUGLN(response);
     }
     return response;
+}
+
+void E52::setDefaultParameters(void)
+{
+    setSrcAddr(getMacAddrLora());
+    setPower(E52_POWER);
+    setDstAddr(E52_DST_ADDRESS);
+    setOption(E52_OPTION);
+    setRs(E52_RATE);
+}
+
+void E52::getParametersOfE52(void)
+{
+    DEBUGLN("Parameters E52 from memory");
+    power = sendCommand("AT+POWER=?", ",").toInt();
+    option = sendCommand("AT+OPTION=?", ",").toInt();
+    dstAddr = sendCommand("AT+DST_ADDR=?", ",").toInt();
+    srcAddr = sendCommand("AT+SRC_ADDR=?", ",").toInt();
+    rate = sendCommand("AT+RATE=?", ",").toInt();
 }

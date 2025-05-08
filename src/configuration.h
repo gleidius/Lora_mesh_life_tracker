@@ -6,6 +6,12 @@
 #define OLED_RESET -1
 #define SCREEN_ADDRESS 0x3C
 
+// E52 default parameters
+#define E52_POWER 15
+#define E52_OPTION 1
+#define E52_DST_ADDRESS 404
+#define E52_RATE 0
+
 #include <Arduino.h>
 
 // Определение пинов для кнопок
