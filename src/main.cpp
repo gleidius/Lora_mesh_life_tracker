@@ -29,10 +29,6 @@
 // void setup()
 // {
 
-// 	// pinMode(STM_BTN1, INPUT_PULLUP); // инициализируем кнопочки
-// 	// pinMode(LORA_PA0, INPUT);
-// 	// pinMode(LORA_RST, INPUT);
-
 // 	// // инициализируем софтовые/хардовые serial-ы
 // 	// MySerial1.begin(115200); // обычный serial
 // 	S_Serial.begin(115200);
@@ -146,26 +142,9 @@
 // 	//     }
 // 	//   }
 
-// 	//   if (digitalRead(STM_BTN1) == false)
-// 	//   { // ========================== SPEED/RANGE ======================================
-// 	//     butt_count = Next_SR(butt_count, SR_Xpos, SR_Ypos);
-// 	//   }
-
-// 	//   if (digitalRead(LORA_RST) == false)
-// 	//   { // ========================== STATUS ==========================
-// 	//     status_count = Next_status(status_count, Stat_Xpos, Stat_Ypos);
-// 	//   }
-
-// 	//   if (digitalRead(STM_SW3) == true)
-// 	//   { // ========================== POWER ==========================
-// 	//     power_counter = Next_power(power_counter, Power_Xpos, Power_Ypos);
-// 	//   }
-
 // 	//   delay(500);
 // 	// }
 // }
-
-Menu mainMenu;
 
 uint16_t parameterValue1 = 2; // Пример значения параметра
 uint16_t parameterValue2 = 5; // Пример другого значения параметра
@@ -180,14 +159,14 @@ void setup()
 	delay(5000);
 	Serial.println("Start STM32");
 
-	mainMenu.setup(&buttonOk, &buttonUp, &buttonDown);
+	menu.setup(&buttonOk, &buttonUp, &buttonDown);
 
 	Serial.println("end init");
 }
 
 void loop()
 {
-	mainMenu.navigate();
+	menu.navigate();
 	delay(100);
 	Serial.println(buttonUpPin);
 }

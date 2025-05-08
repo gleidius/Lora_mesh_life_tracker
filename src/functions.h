@@ -23,11 +23,6 @@ extern uint8_t UART3_TX;
 extern uint8_t UART3_RX;
 extern HardwareSerial MySerial3;
 
-// On-Board buttons                                                               // КНОПОЧКИ
-extern uint8_t STM_BTN1;
-extern uint8_t LORA_PA0;
-extern uint8_t LORA_RST;
-
 // uint8_t STM_SW1 = PC13;                                                        // ПЕРЕКЛЮЧАТЕЛИ
 extern uint8_t STM_SW2;
 extern uint8_t STM_SW3;

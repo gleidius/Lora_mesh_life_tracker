@@ -19,11 +19,6 @@ uint8_t UART3_TX = PB10;
 uint8_t UART3_RX = PB11;
 HardwareSerial MySerial3(UART3_RX, UART3_TX);
 
-// On-Board buttons                                                               // КНОПОЧКИ
-uint8_t STM_BTN1 = PB0;
-uint8_t LORA_PA0 = PB1;
-uint8_t LORA_RST = PA6;
-
 // uint8_t STM_SW1 = PC13;                                                        // ПЕРЕКЛЮЧАТЕЛИ
 uint8_t STM_SW2 = PC14;
 uint8_t STM_SW3 = PC15;
