@@ -7,13 +7,13 @@ const MenuItem menuStruct[] = {
     /*    */ {"sound", MENU_PARAMETER, 1, 0},   // 3
     /**/ {"Exit", MENU_ITEM, 0, 0},             // 4
     /**/ {"Test", MENU_SUBMENU, 0, 0},          // 5
-    /**/ {"sound", MENU_PARAMETER, 0, 0},       // 6
+    /**/ {"bool", MENU_PARAMETER, 0, 0},        // 6
 };
 
 MenuItemParameter menuValueParameter[] = {
     {2, 4, 3, 9},  // bridges
     {3, 3, 2, 11}, // sound
-    {6, 7, -8, 22} // power
+    {6, 0, 0, 0}   // power
 };
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
@@ -58,7 +58,10 @@ void Menu::navigate(void)
 
         case MENU_PARAMETER:
             uint8_t index = getCurrentValueField();
-            if (menuValueParameter[index].value > menuValueParameter[index].minValue)
+            if (menuValueParameter[index].value > menuValueParameter[index].minValue || // Обычные параметры
+                (menuValueParameter[index].minValue == 0 &&                             // Булев параметр
+                 menuValueParameter[index].maxValue == 0 &&
+                 menuValueParameter[index].value != 0))
                 menuValueParameter[index].value--;
             break;
         }
@@ -75,8 +78,12 @@ void Menu::navigate(void)
 
         case MENU_PARAMETER:
             uint8_t index = getCurrentValueField();
-            if (menuValueParameter[index].value < menuValueParameter[index].maxValue)
+            if (menuValueParameter[index].value < menuValueParameter[index].maxValue || // Обычные параметры
+                (menuValueParameter[index].minValue == 0 &&                             // Булев параметр
+                 menuValueParameter[index].maxValue == 0 &&
+                 menuValueParameter[index].value != 1))
                 menuValueParameter[index].value++;
+
             break;
         }
         displayMenu();
@@ -174,5 +181,11 @@ void Menu::displayParameter(int8_t index)
     if (currentTypeField == MENU_PARAMETER && index == currentItem && tmrHighlightedCursor)
         display.setTextColor(BLACK, WHITE);
     display.setCursor((strlen(menuStruct[index].name) + 2) * 6, display.getCursorY());
-    display.println(menuValueParameter[getCurrentValueField(index)].value);
+    if (menuValueParameter[getCurrentValueField(index)].minValue == 0 && menuValueParameter[getCurrentValueField(index)].maxValue == 0)
+        if (menuValueParameter[getCurrentValueField(index)].value)
+            display.println("On");
+        else
+            display.println("Off");
+    else
+        display.println(menuValueParameter[getCurrentValueField(index)].value);
 }

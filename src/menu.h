@@ -48,6 +48,7 @@ private:
     bool tmrHighlightedCursor = false;
     bool flagValueChanged = false;
     int lastValue;
+    uint8_t currentValueField = 0;
 
 public:
     void setup(Button *buttonOK, Button *buttonUP, Button *buttonDown);
