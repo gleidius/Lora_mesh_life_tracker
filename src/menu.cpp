@@ -49,7 +49,6 @@ void Menu::navigate(void)
         displayMenu();
     if (buttonUP->click())
     {
-        Serial.println("UP");
         switch (currentTypeField)
         {
         case MENU_SUBMENU:

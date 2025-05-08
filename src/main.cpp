@@ -1,48 +1,33 @@
 #include "functions.h"
 #include "configuration.h"
 
-// void parser()
-// {
-// 	String message;
-// 	if (meshApp.available())
-// 		message = meshApp.recieveMessage();
+void parser()
+{
+	String message;
+	if (meshApp.available())
+		message = meshApp.recieveMessage();
 
-// 	if (message.indexOf("mesh") == 0)
-// 	{
-// 		DEBUG("Message from PC: ");
-// 		DEBUGLN(message);
-// 		if (message.indexOf("msg") == 5)
-// 		{
-// 			String newMessage = message.substring(9);
-// 			e52.sendMessage(newMessage);
-// 		}
+	if (message.indexOf("mesh") == 0)
+	{
+		DEBUG("Message from PC: ");
+		DEBUGLN(message);
+		if (message.indexOf("msg") == 5)
+		{
+			String newMessage = message.substring(9);
+			e52.sendMessage(newMessage);
+		}
 
-// 		if (message.indexOf("cmd") == 5)
-// 		{
-// 			String newMessage = message.substring(9);
-// 			e52.sendCommand(newMessage);
-// 		}
-// 	}
-// }
+		if (message.indexOf("cmd") == 5)
+		{
+			String newMessage = message.substring(9);
+			e52.sendCommand(newMessage);
+		}
+	}
+}
 
 // // ========================== SETUP ===========================
 // void setup()
 // {
-
-// 	// // инициализируем софтовые/хардовые serial-ы
-// 	// MySerial1.begin(115200); // обычный serial
-// 	S_Serial.begin(115200);
-// 	Serial.begin(115200);
-// 	// MySerial3.begin(115200); // serial SIM868
-
-// 	delay(5000); ///////// нужен чтобы успеть открыть монитор порта потом удалить!!!!!!
-
-// 	meshApp.setup(&Serial);
-// 	meshApp.sendMessage("Start STM32");
-
-// 	e52.setup(&S_Serial);
-// 	meshApp.sendMessage("Init E52");
-
 // 	// // инициализируем  пины SIM868
 // 	// pinMode(SIM_SLEEP, INPUT);
 // 	// pinMode(SIM_PWRK, OUTPUT);
@@ -157,10 +142,12 @@ void checkChangesValues(void)
 	case 0:
 		Serial.print("Changed Field 0: ");
 		Serial.println(menuValueParameter[0].value);
+		e52.sendMessage("Hello World!");
 		break;
 	case 1:
 		Serial.print("Changed Field 1: ");
 		Serial.println(menuValueParameter[1].value);
+		meshApp.sendMessage("Hello World!");
 		break;
 	case 2:
 		Serial.print("Changed Field 2: ");
@@ -175,6 +162,16 @@ void setup()
 	delay(5000);
 	Serial.println("Start STM32");
 
+	// MySerial1.begin(115200); // обычный serial
+	S_Serial.begin(115200);
+	// MySerial3.begin(115200); // serial SIM868
+
+	meshApp.setup(&Serial);
+	meshApp.sendMessage("Start STM32");
+
+	e52.setup(&S_Serial);
+	meshApp.sendMessage("Init E52");
+
 	menu.setup(&buttonOk, &buttonUp, &buttonDown);
 
 	Serial.println("end init");
@@ -184,5 +181,7 @@ void loop()
 {
 	menu.navigate();
 	checkChangesValues();
+
+	parser();
 	delay(100);
 }
