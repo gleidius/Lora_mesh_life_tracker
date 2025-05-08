@@ -1,7 +1,22 @@
 #include "menu.h"
 
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+const MenuItem menuStruct[] = {
+    {"root", MENU_SUBMENU, -1, 4},              // 0
+    /**/ {"Settings", MENU_SUBMENU, 0, 2},      // 1
+    /*    */ {"bridges", MENU_PARAMETER, 1, 0}, // 2
+    /*    */ {"sound", MENU_PARAMETER, 1, 0},   // 3
+    /**/ {"Exit", MENU_ITEM, 0, 0},             // 4
+    /**/ {"Test", MENU_SUBMENU, 0, 0},          // 5
+    /**/ {"sound", MENU_PARAMETER, 0, 0},       // 6
+};
 
+MenuItemParameter menuValueParameter[] = {
+    {2, 4, 3, 9},  // bridges
+    {3, 3, 2, 11}, // sound
+    {6, 7, -8, 22} // power
+};
+
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 Menu menu;
 
 // public method
@@ -77,11 +92,36 @@ void Menu::navigate(void)
             break;
 
         case MENU_PARAMETER:
-            currentTypeField = (currentTypeField == MENU_PARAMETER) ? MENU_SUBMENU : MENU_PARAMETER;
+            if (currentTypeField == MENU_PARAMETER)
+            {
+                currentTypeField = MENU_SUBMENU;
+                if (lastValue != menuValueParameter[getCurrentValueField()].value)
+                    flagValueChanged = true;
+            }
+            else
+            {
+                currentTypeField = MENU_PARAMETER;
+                lastValue = menuValueParameter[getCurrentValueField()].value;
+            }
+
             break;
         }
         displayMenu();
     }
+}
+
+// Возвращает индекс элемента массива menuValueParameter который был изменен
+// если не было изменений вернет 255
+uint8_t Menu::isValueChanged(void)
+{
+    bool changed = false;
+    if (flagValueChanged)
+        changed = true;
+    flagValueChanged = false;
+    if (changed)
+        return getCurrentValueField();
+    else
+        return 255;
 }
 
 // private method

@@ -146,12 +146,28 @@
 // 	// }
 // }
 
-uint16_t parameterValue1 = 2; // Пример значения параметра
-uint16_t parameterValue2 = 5; // Пример другого значения параметра
-
 Button buttonOk(buttonSelectPin);
 Button buttonDown(buttonDownPin);
 Button buttonUp(buttonUpPin);
+
+void checkChangesValues(void)
+{
+	switch (menu.isValueChanged())
+	{
+	case 0:
+		Serial.print("Changed Field 0: ");
+		Serial.println(menuValueParameter[0].value);
+		break;
+	case 1:
+		Serial.print("Changed Field 1: ");
+		Serial.println(menuValueParameter[1].value);
+		break;
+	case 2:
+		Serial.print("Changed Field 2: ");
+		Serial.println(menuValueParameter[2].value);
+		break;
+	}
+}
 
 void setup()
 {
@@ -167,6 +183,6 @@ void setup()
 void loop()
 {
 	menu.navigate();
+	checkChangesValues();
 	delay(100);
-	Serial.println(buttonUpPin);
 }

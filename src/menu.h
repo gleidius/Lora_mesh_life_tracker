@@ -5,9 +5,35 @@
 #include <Adafruit_SSD1306.h>
 #include "configuration.h"
 
-#include "menuStructure.h"
+#define COUNT_MENU_ELEMENTS 7
+#define COUNT_MENU_PARAMETERS 3
+
+enum MenuType
+{
+    MENU_ITEM,
+    MENU_SUBMENU,
+    MENU_PARAMETER
+};
+
+struct MenuItem
+{
+    const char *name; // Название пункта меню
+    MenuType type;    // Тип пункта меню
+    int parent;       // Индекс родительского пункта (-1, если корень)
+    int childCount;   // Количество дочерних элементов
+};
+
+struct MenuItemParameter
+{
+    const int index;         // Индекс пункта меню типа MENU_PARAMETER
+    int value;               // Значение
+    const int minValue = -1; // Минимальное значение
+    const int maxValue = -1; // Максимальное значение
+};
 
 extern Adafruit_SSD1306 display;
+extern const MenuItem menuStruct[];
+extern MenuItemParameter menuValueParameter[COUNT_MENU_PARAMETERS];
 
 // Класс для управления меню
 class Menu
@@ -20,6 +46,8 @@ private:
     MenuType currentTypeField = MENU_SUBMENU;
     TimerMillis tmrUpdate;
     bool tmrHighlightedCursor = false;
+    bool flagValueChanged = false;
+    int lastValue;
 
 public:
     void setup(Button *buttonOK, Button *buttonUP, Button *buttonDown);
