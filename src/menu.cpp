@@ -1,7 +1,7 @@
 #include "menu.h"
 
 const MenuItem menuStruct[] = {
-    {"root", MENU_SUBMENU, -1, 4},              // 0
+    {"Mouse Board", MENU_SUBMENU, -1, 4},       // 0
     /**/ {"Settings", MENU_SUBMENU, 0, 2},      // 1
     /*    */ {"bridges", MENU_PARAMETER, 1, 0}, // 2
     /*    */ {"sound", MENU_PARAMETER, 1, 0},   // 3
@@ -56,7 +56,7 @@ void Menu::navigate(void)
         switch (currentTypeField)
         {
         case MENU_SUBMENU:
-            if (currendDisplayItem < menuStruct[currentSubmenu].childCount - 1)
+            if (currendDisplayItem < menuStruct[currentSubmenu].childCount)
                 currendDisplayItem++;
             break;
 
@@ -98,7 +98,10 @@ void Menu::navigate(void)
         switch (menuStruct[currentItem].type)
         {
         case MENU_SUBMENU:
-            currentSubmenu = currentItem;
+            if (currentSubmenu == currentItem && menuStruct[currentItem].parent != -1)
+                currentSubmenu = menuStruct[currentItem].parent;
+            else
+                currentSubmenu = currentItem;
             break;
 
         case MENU_PARAMETER:
@@ -141,9 +144,9 @@ void Menu::displayMenu(void)
     display.clearDisplay();
     display.setCursor(0, 0);
 
-    for (uint8_t index = currentSubmenu, j = 0; (index < COUNT_MENU_ELEMENTS) && (j < menuStruct[currentSubmenu].childCount); index++)
+    for (uint8_t index = currentSubmenu, j = 0; (index < COUNT_MENU_ELEMENTS) && (j < menuStruct[currentSubmenu].childCount + 1); index++)
     {
-        if (menuStruct[index].parent == currentSubmenu)
+        if (menuStruct[index].parent == currentSubmenu || index == currentSubmenu)
         {
             if (currendDisplayItem == j)
             {
@@ -155,6 +158,17 @@ void Menu::displayMenu(void)
 
             switch (menuStruct[index].type)
             {
+
+            case MENU_SUBMENU:
+                if (index == currentSubmenu)
+                {
+                    display.println(menuStruct[currentSubmenu].name);
+                    display.drawFastHLine(0, display.getCursorY() + 2, SCREEN_WIDTH, WHITE);
+                    display.setCursor(0, display.getCursorY() + 5);
+                }
+                else
+                    display.println(menuStruct[index].name); // Отображаем имя параметра
+                break;
             case MENU_PARAMETER:
                 displayParameter(index);
                 break;
@@ -163,10 +177,6 @@ void Menu::displayMenu(void)
                 for (uint8_t i = 0; (i < COUNT_MENU_INFO); i++)
                     if (menuItemInfo[i].index == index)
                         display.println(menuItemInfo[i].info);
-                break;
-
-            default:
-                display.println(menuStruct[index].name); // Отображаем имя параметра
                 break;
             }
             j++;
