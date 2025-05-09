@@ -15,7 +15,9 @@ const MenuItem menuStruct[] = {
     /*        */ {"test 1", MENU_PARAMETER, 8, 0},      // 11
     /*        */ {"test 2", MENU_PARAMETER, 8, 0},      // 12
     /*    */ {"WiFi", MENU_SUBMENU, 1, 2},              // 13
-    /**/ {"bool", MENU_PARAMETER, 0, 0},                // 14
+    /**/ {"Altitude: ", MENU_INFO, 0, 0},               // 14
+    /**/ {"bool", MENU_PARAMETER, 0, 0}                 // 15
+
 };
 
 uint16_t srcAddr;
@@ -28,12 +30,13 @@ MenuItemParameter menuValueParameter[] = {
     {10, 4, 3, 9},   // sound
     {11, 4, 3, 9},   // test 1
     {12, 3, 2, 11},  // test 2
-    {14, 0, 0, 0}    // bool
+    {15, 0, 0, 0}    // bool
 };
 
 MenuItemInfo menuItemInfo[] = {
     {6, nullptr}, // Dest address LoRa
-    {7, nullptr}  // Source address LoRa
+    {7, nullptr}, // Source address LoRa
+    {14, nullptr} // test altitude
 };
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);

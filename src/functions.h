@@ -2,10 +2,12 @@
 #include <Arduino.h>
 #include <HardwareSerial.h>
 #include <Wire.h>
-#include <Adafruit_BMP280.h>
-#include <serialEEPROM.h>
 
-extern serialEEPROM myEEPROM;
+#include <Adafruit_BMP280.h>
+
+// #include <serialEEPROM.h>
+
+// extern serialEEPROM myEEPROM;
 
 extern uint8_t UART1_TX;
 extern uint8_t UART1_RX;
@@ -52,4 +54,4 @@ void SIM868_GPS_Power_Up(); // включаем GPS
 
 void SIM868_Power_SW(int SIM868_PWR_Pin); // включаем/выключаем Е52
 
-String get_telemetry(String Module_ADDR, int status_count); // получаем телеметрию
+String get_telemetry(String Module_ADDR, int status_count, String altitude_rate); // получаем телеметрию

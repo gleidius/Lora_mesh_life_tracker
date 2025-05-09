@@ -5,9 +5,9 @@
 #include <Adafruit_SSD1306.h>
 #include "configuration.h"
 
-#define COUNT_MENU_ELEMENTS 15
+#define COUNT_MENU_ELEMENTS 16
 #define COUNT_MENU_PARAMETERS 8
-#define COUNT_MENU_INFO 2
+#define COUNT_MENU_INFO 3
 
 enum MenuType
 {

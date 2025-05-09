@@ -100,7 +100,7 @@ void parser()
 // 	//   if ((millis() - start_time) >= 5000)
 // 	//   {
 // 	//     start_time = millis();
-// 	//     MySerial1.println("==================================================================================");
+// 	//     Serial.println("==================================================================================");
 
 // 	//     String data_transmitt = get_telemetry(Module_ADDR, status_count);
 
@@ -130,6 +130,79 @@ void parser()
 // 	//   delay(500);
 // 	// }
 // }
+
+class AltitudeMonitor
+{
+public:
+	AltitudeMonitor() : bmp(), lastPressure(0), lastTime(0), ascentRate(0), pressureSum(0), count(0) {}
+
+	bool begin()
+	{
+		return bmp.begin(0x76); // Инициализация BMP280
+	}
+
+	void update()
+	{
+		unsigned long currentTime = millis();
+		if (currentTime - lastTime >= 1000)
+		{ // обновление каждую секунду
+			float currentPressure = bmp.readPressure();
+			float altitude = bmp.readAltitude(1013.25); // Стандартное давление на уровне моря
+
+			// Фильтрация данных
+			pressureSum += currentPressure;
+			count++;
+			float averagePressure = pressureSum / count;
+
+			if (lastPressure != 0)
+			{
+				float pressureChange = averagePressure - lastPressure;
+				// Переводим изменение давления в метры
+				float heightChange = (pressureChange / 100.0) * 8.43; // 1 гПа ~ 8.43 м
+
+				// Учитываем погрешность (например, 10%)
+				float errorMargin = 0.1;		   // 10%
+				heightChange *= (1 - errorMargin); // Уменьшаем на погрешность
+
+				// Устанавливаем порог для значимого изменения высоты
+				if (abs(heightChange) > 0.1)
+				{ // Порог в 0.1 метра
+					// Рассчитываем скорость подъема в метрах в секунду
+					ascentRate = heightChange / ((currentTime - lastTime) / 1000.0); // м/с
+				}
+				else
+				{
+					ascentRate = 0; // Если изменение незначительное, скорость подъема равна 0
+				}
+			}
+			lastPressure = averagePressure;
+			lastTime = currentTime;
+
+			// Отображение информации
+			Serial.print("Current Altitude: ");
+			Serial.print(altitude);
+			Serial.print(" m, Ascent Rate: ");
+			Serial.print(ascentRate);
+			Serial.println(" m/s");
+
+			dtostrf(altitude, 6, 2, result);
+			menuItemInfo[2].info = result;
+		}
+	}
+
+private:
+	char result[8]; // Buffer big enough for 7-character float
+
+	Adafruit_BMP280 bmp;
+	float lastPressure;
+	unsigned long lastTime;
+	float ascentRate;
+
+	float pressureSum; // Сумма давлений для фильтрации
+	int count;		   // Количество измерений
+};
+
+AltitudeMonitor altimeter;
 
 Button buttonOk(buttonSelectPin);
 Button buttonDown(buttonDownPin);
@@ -162,7 +235,6 @@ void setup()
 	delay(5000);
 	Serial.println("Start STM32");
 
-	// MySerial1.begin(115200); // обычный serial
 	S_Serial.begin(115200);
 	// MySerial3.begin(115200); // serial SIM868
 
@@ -174,11 +246,22 @@ void setup()
 
 	menu.setup(&buttonOk, &buttonUp, &buttonDown);
 
+	if (!altimeter.begin())
+	{
+		Serial.println("Could not find a valid BMP280 sensor, check wiring!");
+		while (1)
+			;
+	}
+
 	Serial.println("end init");
 }
+unsigned long alt_rate_time = millis(); // таймер
 
 void loop()
 {
+
+	altimeter.update();
+
 	menu.navigate();
 	checkChangesValues();
 

@@ -1,7 +1,7 @@
 #include "functions.h"
 #include "configuration.h"
 
-serialEEPROM myEEPROM(0x50, 32768, 64);
+// serialEEPROM myEEPROM(0x50, 32768, 64);
 
 uint8_t UART1_TX = PA9;
 uint8_t UART1_RX = PA10;
@@ -179,7 +179,7 @@ void SIM868_Power_SW(int SIM868_PWR_Pin) // включаем/выключаем 
   delay(3000);
 }
 
-String get_telemetry(String Module_ADDR, int status_count) // получаем телеметрию
+String get_telemetry(String Module_ADDR, int status_count, String altitude_rate) // получаем телеметрию
 {
   String lattitude = "lattitude";
   String lontitude = "lontitude";
@@ -272,7 +272,7 @@ String get_telemetry(String Module_ADDR, int status_count) // получаем �
   {
     course = "-1";
   }
-  String data_transmitt = "GL " + Module_ADDR + " " + lattitude + " " + lontitude + " " + altitude + " " + wrong_data + " " + speed + " " + status_count + " " + course;
+  String data_transmitt = "GL " + Module_ADDR + " " + lattitude + " " + lontitude + " " + altitude + " " + altitude_rate + " " + speed + " " + status_count + " " + course;
 
   return (data_transmitt);
 }
