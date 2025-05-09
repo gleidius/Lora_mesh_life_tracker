@@ -5,7 +5,7 @@ const MenuItem menuStruct[] = {
     /**/ {"Settings", MENU_SUBMENU, 0, 2},      // 1
     /*    */ {"bridges", MENU_PARAMETER, 1, 0}, // 2
     /*    */ {"sound", MENU_PARAMETER, 1, 0},   // 3
-    /**/ {"Exit", MENU_ITEM, 0, 0},             // 4
+    /**/ {"Source addres: ", MENU_INFO, 0, 0},  // 4
     /**/ {"Test", MENU_SUBMENU, 0, 0},          // 5
     /**/ {"bool", MENU_PARAMETER, 0, 0},        // 6
 };
@@ -14,6 +14,10 @@ MenuItemParameter menuValueParameter[] = {
     {2, 4, 3, 9},  // bridges
     {3, 3, 2, 11}, // sound
     {6, 0, 0, 0}   // power
+};
+
+MenuItemInfo menuItemInfo[] = {
+    {4, nullptr} // MAC addres LoRa
 };
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
@@ -137,22 +141,34 @@ void Menu::displayMenu(void)
     display.clearDisplay();
     display.setCursor(0, 0);
 
-    for (uint8_t i = currentSubmenu, j = 0; (i < COUNT_MENU_ELEMENTS) && (j < menuStruct[currentSubmenu].childCount); i++)
+    for (uint8_t index = currentSubmenu, j = 0; (index < COUNT_MENU_ELEMENTS) && (j < menuStruct[currentSubmenu].childCount); index++)
     {
-        if (menuStruct[i].parent == currentSubmenu)
+        if (menuStruct[index].parent == currentSubmenu)
         {
             if (currendDisplayItem == j)
             {
-                currentItem = i;
+                currentItem = index;
                 display.setTextColor(BLACK, WHITE); // Инверсия цвета для выделенного пункта
             }
             else
                 display.setTextColor(WHITE);
 
-            if (menuStruct[i].type == MENU_PARAMETER)
-                displayParameter(i);
-            else
-                display.println(menuStruct[i].name); // Отображаем имя параметра
+            switch (menuStruct[index].type)
+            {
+            case MENU_PARAMETER:
+                displayParameter(index);
+                break;
+            case MENU_INFO:
+                display.print(menuStruct[index].name);
+                for (uint8_t i = 0; (i < COUNT_MENU_INFO); i++)
+                    if (menuItemInfo[i].index == index)
+                        display.println(menuItemInfo[i].info);
+                break;
+
+            default:
+                display.println(menuStruct[index].name); // Отображаем имя параметра
+                break;
+            }
             j++;
         }
     }

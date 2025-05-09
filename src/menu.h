@@ -7,12 +7,14 @@
 
 #define COUNT_MENU_ELEMENTS 7
 #define COUNT_MENU_PARAMETERS 3
+#define COUNT_MENU_INFO 1
 
 enum MenuType
 {
     MENU_ITEM,
     MENU_SUBMENU,
-    MENU_PARAMETER
+    MENU_PARAMETER,
+    MENU_INFO
 };
 
 struct MenuItem
@@ -31,9 +33,16 @@ struct MenuItemParameter
     const int maxValue = -1; // Максимальное значение
 };
 
+struct MenuItemInfo
+{
+    const int index; // Индекс пункта меню типа MENU_PARAMETER
+    char *info;      // Поле информации
+};
+
 extern Adafruit_SSD1306 display;
 extern const MenuItem menuStruct[];
 extern MenuItemParameter menuValueParameter[COUNT_MENU_PARAMETERS];
+extern MenuItemInfo menuItemInfo[];
 
 // Класс для управления меню
 class Menu
