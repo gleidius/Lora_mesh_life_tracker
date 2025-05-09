@@ -48,8 +48,6 @@ bool check_connect_to_server(); // функция проверки соедин�
 
 void try_connect_to_server(); // выполняем попытку подключиться к серверу
 
-int Next_status(int status_count, int Stat_Xpos, int Stat_Ypos); // выполняем смену статуса
-
 void SIM868_GPS_Power_Up(); // включаем GPS
 
 void SIM868_Power_SW(int SIM868_PWR_Pin); // включаем/выключаем Е52

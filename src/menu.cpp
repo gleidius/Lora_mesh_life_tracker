@@ -1,23 +1,39 @@
 #include "menu.h"
 
 const MenuItem menuStruct[] = {
-    {"Mouse Board", MENU_SUBMENU, -1, 4},       // 0
-    /**/ {"Settings", MENU_SUBMENU, 0, 2},      // 1
-    /*    */ {"bridges", MENU_PARAMETER, 1, 0}, // 2
-    /*    */ {"sound", MENU_PARAMETER, 1, 0},   // 3
-    /**/ {"Source addres: ", MENU_INFO, 0, 0},  // 4
-    /**/ {"Test", MENU_SUBMENU, 0, 0},          // 5
-    /**/ {"bool", MENU_PARAMETER, 0, 0},        // 6
+    {"Mouse Board", MENU_SUBMENU, -1, 2},               // 0
+    /**/ {"Settings", MENU_SUBMENU, 0, 3},              // 1
+    /*    */ {"Mesh", MENU_SUBMENU, 1, 5},              // 2
+    /*        */ {"Power: ", MENU_PARAMETER, 2, 0},     // 3
+    /*        */ {"Rate: ", MENU_PARAMETER, 2, 0},      // 4
+    /*        */ {"Option: ", MENU_PARAMETER, 2, 0},    // 5
+    /*        */ {"Dest address: ", MENU_INFO, 2, 0},   // 6
+    /*        */ {"Source address: ", MENU_INFO, 2, 0}, // 7
+    /*    */ {"Network", MENU_SUBMENU, 1, 4},           // 8
+    /*        */ {"bridges", MENU_PARAMETER, 8, 0},     // 9
+    /*        */ {"sound", MENU_PARAMETER, 8, 0},       // 10
+    /*        */ {"test 1", MENU_PARAMETER, 8, 0},      // 11
+    /*        */ {"test 2", MENU_PARAMETER, 8, 0},      // 12
+    /*    */ {"WiFi", MENU_SUBMENU, 1, 2},              // 13
+    /**/ {"bool", MENU_PARAMETER, 0, 0},                // 14
 };
 
+uint16_t srcAddr;
+uint16_t dstAddr;
 MenuItemParameter menuValueParameter[] = {
-    {2, 4, 3, 9},  // bridges
-    {3, 3, 2, 11}, // sound
-    {6, 0, 0, 0}   // power
+    {3, 16, -8, 22}, // Power
+    {4, 0, 0, 2},    // Rate
+    {5, 1, 1, 4},    // Option
+    {9, 4, 3, 9},    // bridges
+    {10, 4, 3, 9},   // sound
+    {11, 4, 3, 9},   // test 1
+    {12, 3, 2, 11},  // test 2
+    {14, 0, 0, 0}    // bool
 };
 
 MenuItemInfo menuItemInfo[] = {
-    {4, nullptr} // MAC addres LoRa
+    {6, nullptr}, // Dest address LoRa
+    {7, nullptr}  // Source address LoRa
 };
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
@@ -99,9 +115,26 @@ void Menu::navigate(void)
         {
         case MENU_SUBMENU:
             if (currentSubmenu == currentItem && menuStruct[currentItem].parent != -1)
+            {
+                currentItem = currentSubmenu;
+                currendDisplayItem = 0;
+                for (uint8_t index = menuStruct[currentItem].parent; index < COUNT_MENU_ELEMENTS; index++)
+                {
+                    if (menuStruct[index].parent == menuStruct[currentItem].parent)
+                    {
+                        currendDisplayItem++;
+                        if (menuStruct[index].name == menuStruct[currentItem].name)
+                            break;
+                    }
+                }
                 currentSubmenu = menuStruct[currentItem].parent;
+            }
             else
+            {
+                currendDisplayItem = 0;
                 currentSubmenu = currentItem;
+            }
+
             break;
 
         case MENU_PARAMETER:

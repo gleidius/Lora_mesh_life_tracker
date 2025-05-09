@@ -5,9 +5,9 @@
 #include <Adafruit_SSD1306.h>
 #include "configuration.h"
 
-#define COUNT_MENU_ELEMENTS 7
-#define COUNT_MENU_PARAMETERS 3
-#define COUNT_MENU_INFO 1
+#define COUNT_MENU_ELEMENTS 15
+#define COUNT_MENU_PARAMETERS 8
+#define COUNT_MENU_INFO 2
 
 enum MenuType
 {
@@ -49,7 +49,7 @@ class Menu
 {
 private:
     Button *buttonOK, *buttonUP, *buttonDown;
-    int currentItem = 0;
+    int currentItem = 0; // Индекс выбранного элемента из menuStruct
     int currendDisplayItem = 0;
     int currentSubmenu = 0;
     MenuType currentTypeField = MENU_SUBMENU;
