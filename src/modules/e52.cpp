@@ -6,6 +6,7 @@ void E52::setup(HardwareSerial *streamObject)
 {
     _streamRef = streamObject;
     getParametersOfE52();
+    setSrcAddr(804);
 }
 
 // Установка скорости/дальности

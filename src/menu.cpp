@@ -1,7 +1,7 @@
 #include "menu.h"
 
 const MenuItem menuStruct[] = {
-    {"Mouse Board", MENU_SUBMENU, -1, 2},               // 0
+    {"Mouse Board", MENU_SUBMENU, -1, 3},               // 0
     /**/ {"Settings", MENU_SUBMENU, 0, 3},              // 1
     /*    */ {"Mesh", MENU_SUBMENU, 1, 5},              // 2
     /*        */ {"Power: ", MENU_PARAMETER, 2, 0},     // 3

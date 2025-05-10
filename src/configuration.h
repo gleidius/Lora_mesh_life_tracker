@@ -28,6 +28,6 @@
 
 #include "modules/meshApp.h"
 #include "modules/e52.h"
-#include "modules/BMP280.h"
+#include "modules/bmp280.h"
 
 #include "menu.h"

@@ -6,6 +6,7 @@ void parser()
 	String message;
 	if (meshApp.available())
 		message = meshApp.recieveMessage();
+	
 
 	if (message.indexOf("mesh") == 0)
 	{
@@ -23,6 +24,12 @@ void parser()
 			e52.sendCommand(newMessage);
 		}
 	}
+
+    if (e52.available())
+    {		
+        message = e52.recieveMessage();
+        meshApp.sendMessage(message);
+    }
 }
 
 // // ========================== SETUP ===========================
