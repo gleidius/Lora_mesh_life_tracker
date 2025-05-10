@@ -52,6 +52,8 @@ void setup()
   SIM868_Power_SW(SIM_PWRK); // включаем SIM868
 
   SIM868_GPS_Power_Up(); // включаем GPS
+
+  setup_gprs_parameter();  // настраиваем APN пока что здесь, потом надо чтобы менялся с базы
 }
 
 void loop()
@@ -67,6 +69,7 @@ void loop()
   int time[2]{0, 0};
   String altitude_rate = "-1";
   int counter_OV = 0;               // счетчик для проверки областей видимости !!!удалить
+ 
 
   bool connect_flag = 0;
   
@@ -137,13 +140,9 @@ void loop()
       altitude_rate = String(alt_rate);
     }
 
-
+    // ========================================= режим настроек =========================================
     if(digitalRead(STM_SW2) == true){
-      MySerial1.println("MODE SETTINGS");
-      if(S_Serial.available()){
-        MySerial1.println(S_Serial.readString());
-      }
-      delay(1000);
+      get_setup_from_ESP();
     }
 
       //  ========================= MODE AND SENDING ================================

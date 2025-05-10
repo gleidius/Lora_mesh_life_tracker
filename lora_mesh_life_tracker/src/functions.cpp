@@ -48,6 +48,8 @@ uint8_t switches[] = {
     STM_SW6,
 };
 
+String APN, power, rate, dst_addr, param5;
+
 const int switchesSize = sizeof(switches) / sizeof(uint8_t);
  uint8_t switchesState[switchesSize] = {0};
 
@@ -136,6 +138,13 @@ void read_SIM868() // функция чтения ответа от SIM868
   }
 }
 
+void send_SIM868(String command)      // отправка АТ команды в sim
+{
+  MySerial3.println(command);
+  read_SIM868();
+  delay(100);
+}
+
 void draw_pos(int x_pos, int y_pos, String text)// функция отрисовки по позиции, закрашивая строку
 {
   display.setCursor(x_pos, y_pos);
@@ -222,6 +231,19 @@ void try_connect_to_server()  // выполняем попытку подклю�
 
           MySerial3.println("AT+CIPSTART=\"TCP\",\"103.90.75.178\",5000");
           delay(3000);
+}
+
+void setup_gprs_parameter()     // настраиваем ппараметры GPRS (APN)
+{
+  MySerial3.println("AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\"");
+  read_SIM868();
+  delay(100);
+  MySerial3.println("AT+SAPBR=3,1,\"APN\",\"internet.tele2.ru\"");
+  read_SIM868();
+  delay(100);
+  MySerial3.println("AT+SAPBR=1,1");
+  read_SIM868();
+  delay(100);
 }
 
 int Next_status(int status_count, int Stat_Xpos, int Stat_Ypos) // выполняем смену статуса
@@ -469,3 +491,39 @@ void setup_bmp(){
     Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
 }
 
+void get_setup_from_ESP()     // получение настроек по меш от ESP
+{
+  MySerial1.println("MODE SETTINGS");
+  if(S_Serial.available()){
+    String settings_message = S_Serial.readString();
+
+    if(settings_message.indexOf("ST") != -1){
+      MySerial1.println(settings_message);
+      settings_message = settings_message.substring(settings_message.indexOf(" ")+1);
+      APN = "\"" + settings_message.substring(0, settings_message.indexOf(" "))+"\"";
+      MySerial1.println(APN);
+      settings_message = settings_message.substring(settings_message.indexOf(" ")+1);
+      power = settings_message.substring(0, settings_message.indexOf(" "));
+      MySerial1.println(power);
+      settings_message = settings_message.substring(settings_message.indexOf(" ")+1);
+      rate = settings_message.substring(0, settings_message.indexOf(" "));
+      MySerial1.println(rate);
+      settings_message = settings_message.substring(settings_message.indexOf(" ")+1);
+      dst_addr = settings_message.substring(0, settings_message.indexOf(" "));
+      MySerial1.println(dst_addr);
+      settings_message = settings_message.substring(settings_message.indexOf(" ")+1);
+      param5 = settings_message.substring(0, settings_message.indexOf(";"));
+      MySerial1.println(param5);
+      
+      send_SIM868("AT+SAPBR=3,1,\"APN\"," + APN);
+      send_command("AT+POWER="+ power +",1");
+      send_command("AT+RATE="+rate); 
+      send_command("AT+DST_ADDR="+dst_addr+",1");
+      read_SIM868();
+      
+
+    }
+            
+  }
+  delay(1000);
+}

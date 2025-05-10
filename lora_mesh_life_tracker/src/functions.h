@@ -70,6 +70,8 @@ void set_SRC_ADDR(int SRC);
 
 void read_SIM868(); // функция чтения ответа от SIM868
 
+void send_SIM868(String command);        // отправка АТ команды в sim
+
 void draw_pos(int x_pos, int y_pos, String text);// функция отрисовки по позиции, закрашивая строку
 
 void send_to_server_SIM868(String dataTransmit);  // отправляем данные на сервер используя SIM868
@@ -77,6 +79,8 @@ void send_to_server_SIM868(String dataTransmit);  // отправляем дан
 bool check_connect_to_server(); // функция проверки соединения с сервером
 
 void try_connect_to_server();  // выполняем попытку подключиться к серверу
+
+void setup_gprs_parameter(); // настраиваем ппараметры GPRS (APN)
 
 int Next_status(int status_count, int Stat_Xpos, int Stat_Ypos); // выполняем смену статуса
 
@@ -99,3 +103,5 @@ String get_telemetry(String Module_ADDR, int status_count, String altitude_rate)
 float get_altitude_rate(float P, float P_pred, int t, int t_pred);
 
 void setup_bmp();
+
+void get_setup_from_ESP();     // получение настроек по меш от ESP
