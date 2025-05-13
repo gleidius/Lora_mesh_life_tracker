@@ -59,17 +59,11 @@ void setup()
 void loop()
 { // ======================== LOOP ===============================
 
-  unsigned long start_time, alt_rate_time = millis(); // таймер
+  unsigned long start_time, timeout_altrate  = millis(); // таймер
   int butt_count = 1;
   int status_count = 1;
   int SRC_ADDR = 1;
   int power_counter = 22;
-  float Preshure[2]{101325, 101325};
-  float alt_rate_massiv[5]{0,0,0,0,0};
-  int time[2]{0, 0};
-  String altitude_rate = "-1";
-  int counter_OV = 0;               // счетчик для проверки областей видимости !!!удалить
- 
 
   bool connect_flag = 0;
   
@@ -117,28 +111,11 @@ void loop()
 
   while (true)
   {    // ==================================== определение скороподъемности =================================
-    if (millis() - alt_rate_time >= 1000){     
-      alt_rate_time = millis();
-      //counter_OV++;
-
-      time[0] = time[1];
-      time[1] = millis();
-      Preshure[0] = Preshure[1];
-      Preshure[1] = bmp2.readPressure();
-
-      alt_rate_massiv[4]=alt_rate_massiv[3]; 
-      alt_rate_massiv[3]=alt_rate_massiv[2]; 
-      alt_rate_massiv[2]=alt_rate_massiv[1]; 
-      alt_rate_massiv[1]=alt_rate_massiv[0];        // криворукий циклический буффер !!! исправить
-      alt_rate_massiv[0] = get_altitude_rate(Preshure[1], Preshure[0], time[1], time[0]);
-
-      float alt_rate = ((alt_rate_massiv[0]+alt_rate_massiv[1]+alt_rate_massiv[2]+alt_rate_massiv[3]+alt_rate_massiv[4])/5);
-     
-      MySerial1.print("Altitude_rate = ");
-      MySerial1.println(alt_rate);
-      draw_pos(ALTR_Xpos, ALTR_Ypos, String(alt_rate));
-      altitude_rate = String(alt_rate);
+    if (millis() - timeout_altrate >= 1000){     
+      timeout_altrate = millis();
+      altitude_rate = get_ar_with_filter(ALTR_Xpos, ALTR_Ypos);
     }
+
 
     // ========================================= режим настроек =========================================
     if(digitalRead(STM_SW2) == true){

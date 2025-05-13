@@ -57,6 +57,12 @@ const int switchesSize = sizeof(switches) / sizeof(uint8_t);
  uint8_t UART2_RX = PA3;
  HardwareSerial S_Serial(UART2_RX, UART2_TX);
 
+ float Preshure[2]{101325, 101325};
+ float alt_rate_massiv[5]{0,0,0,0,0};
+ int time[2]{0, 0};
+ String altitude_rate = "-1";
+ unsigned long alt_rate_time = millis();
+
 //======================================================= ФУНКЦИИ ========================================================================
 void send_command(String command)
 { // функиця отправки AT-команды в Е52
@@ -428,7 +434,7 @@ String get_telemetry(String Module_ADDR, int status_count, String altitude_rate 
       altitude = altitude.substring(0, altitude.indexOf(","));
       speed = speed.substring(0, speed.indexOf(","));
       course = course.substring(0, course.indexOf(","));
-
+/*
       MySerial1.print("\n");
       MySerial1.print("Lat= ");
       MySerial1.println(lattitude);
@@ -450,7 +456,7 @@ String get_telemetry(String Module_ADDR, int status_count, String altitude_rate 
       MySerial1.print("len_spd= ");
       MySerial1.println(speed.length());
       MySerial1.print("len_crs= ");
-      MySerial1.println(course.length());
+      MySerial1.println(course.length());*/
 
       if (lattitude.length() < 7)
       {
@@ -493,7 +499,7 @@ void setup_bmp(){
 
 void get_setup_from_ESP()     // получение настроек по меш от ESP
 {
-  MySerial1.println("MODE SETTINGS");
+ // MySerial1.println("MODE SETTINGS");
   if(S_Serial.available()){
     String settings_message = S_Serial.readString();
 
@@ -526,4 +532,30 @@ void get_setup_from_ESP()     // получение настроек по меш
             
   }
   delay(1000);
+}
+
+String get_ar_with_filter(int ALTR_Xpos, int ALTR_Ypos)       // получаем и фильтруем скороподъемность
+{
+  alt_rate_time = millis();
+      //counter_OV++;
+
+      time[0] = time[1];
+      time[1] = millis();
+      Preshure[0] = Preshure[1];
+      Preshure[1] = bmp.readPressure();
+
+      alt_rate_massiv[4]=alt_rate_massiv[3]; 
+      alt_rate_massiv[3]=alt_rate_massiv[2]; 
+      alt_rate_massiv[2]=alt_rate_massiv[1]; 
+      alt_rate_massiv[1]=alt_rate_massiv[0];        // криворукий циклический буффер !!! исправить
+      alt_rate_massiv[0] = get_altitude_rate(Preshure[1], Preshure[0], time[1], time[0]);
+
+      float alt_rate = ((alt_rate_massiv[0]+alt_rate_massiv[1]+alt_rate_massiv[2]+alt_rate_massiv[3]+alt_rate_massiv[4])/5);
+     
+      MySerial1.print("Altitude_rate = ");
+      MySerial1.println(alt_rate);
+      draw_pos(ALTR_Xpos, ALTR_Ypos, String(alt_rate));
+      altitude_rate = String(alt_rate);
+
+      return(altitude_rate);
 }
