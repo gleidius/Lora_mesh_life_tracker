@@ -59,7 +59,7 @@ const int switchesSize = sizeof(switches) / sizeof(uint8_t);
 
  float Preshure[2]{101325, 101325};
  float alt_rate_massiv[5]{0,0,0,0,0};
- int time[2]{0, 0};
+ int time_massiv[2]{0, 0};
  String altitude_rate = "-1";
  unsigned long alt_rate_time = millis();
 
@@ -460,26 +460,26 @@ String get_telemetry(String Module_ADDR, int status_count, String altitude_rate 
 
       if (lattitude.length() < 7)
       {
-        lattitude = "-1";
+        lattitude = "E";
       }
       if (lontitude.length() < 7)
       {
-        lontitude = "-1";
+        lontitude = "E";
       }
       else if (lontitude.length() > 9){
-        lontitude = "-1";
+        lontitude = "E";
       }
       if (altitude.length() < 3)
       {
-        altitude = "-1";
+        altitude = "E";
       }
       if (speed.length() < 3)
       {
-        speed = "-1";
+        speed = "E";
       }
       if (course.length() < 1)
       {
-        course = "-1";
+        course = "E";
       }
       String data_transmitt = "GL "+ Module_ADDR + " " + lattitude + " " 
       + lontitude + " " + altitude + " " + altitude_rate + " " + speed + " " 
@@ -539,8 +539,8 @@ String get_ar_with_filter(int ALTR_Xpos, int ALTR_Ypos)       // получае�
   alt_rate_time = millis();
       //counter_OV++;
 
-      time[0] = time[1];
-      time[1] = millis();
+      time_massiv[0] = time_massiv[1];
+      time_massiv[1] = millis();
       Preshure[0] = Preshure[1];
       Preshure[1] = bmp.readPressure();
 
@@ -548,7 +548,7 @@ String get_ar_with_filter(int ALTR_Xpos, int ALTR_Ypos)       // получае�
       alt_rate_massiv[3]=alt_rate_massiv[2]; 
       alt_rate_massiv[2]=alt_rate_massiv[1]; 
       alt_rate_massiv[1]=alt_rate_massiv[0];        // криворукий циклический буффер !!! исправить
-      alt_rate_massiv[0] = get_altitude_rate(Preshure[1], Preshure[0], time[1], time[0]);
+      alt_rate_massiv[0] = get_altitude_rate(Preshure[1], Preshure[0], time_massiv[1], time_massiv[0]);
 
       float alt_rate = ((alt_rate_massiv[0]+alt_rate_massiv[1]+alt_rate_massiv[2]+alt_rate_massiv[3]+alt_rate_massiv[4])/5);
      

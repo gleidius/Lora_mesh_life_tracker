@@ -55,9 +55,9 @@ extern uint8_t UART2_TX;
 extern uint8_t UART2_RX;
 extern HardwareSerial S_Serial;
 
-extern float Preshure;
-extern float alt_rate_massiv;
-extern int time;
+extern float Preshure[];
+extern float alt_rate_massiv[];
+extern int time_massiv[];
 extern String altitude_rate;
 extern unsigned long alt_rate_time;
 
@@ -111,4 +111,4 @@ void setup_bmp();
 
 void get_setup_from_ESP();     // получение настроек по меш от ESP
 
-String get_ar_with_filter(int ALTR_Xpos, int ALTR_Ypos)       // получаем и фильтруем скороподъемность
+String get_ar_with_filter(int ALTR_Xpos, int ALTR_Ypos);       // получаем и фильтруем скороподъемность
