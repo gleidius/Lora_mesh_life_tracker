@@ -30,8 +30,6 @@ void setup()
   pinMode(SIM_SLEEP, INPUT);
   pinMode(SIM_PWRK, OUTPUT);
 
-  
-
   int NUM_KEYS = 2;
   char buff;
   char buff2[NUM_KEYS];

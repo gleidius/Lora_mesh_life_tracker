@@ -3,7 +3,6 @@
 //GyverBME280 bmp;
 Adafruit_BMP280 bmp;
 
-
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 serialEEPROM myEEPROM(0x50, 32768, 64);
 
@@ -51,21 +50,21 @@ uint8_t switches[] = {
 String APN, power, rate, dst_addr, param5;
 
 const int switchesSize = sizeof(switches) / sizeof(uint8_t);
- uint8_t switchesState[switchesSize] = {0};
+uint8_t switchesState[switchesSize] = {0};
 
- uint8_t UART2_TX = PA2;
- uint8_t UART2_RX = PA3;
- HardwareSerial S_Serial(UART2_RX, UART2_TX);
+uint8_t UART2_TX = PA2;
+uint8_t UART2_RX = PA3;
+HardwareSerial S_Serial(UART2_RX, UART2_TX);
 
- float Preshure[2]{101325, 101325};
- float alt_rate_massiv[5]{0,0,0,0,0};
- int time_massiv[2]{0, 0};
- String altitude_rate = "-1";
- unsigned long alt_rate_time = millis();
+float Preshure[2]{101325, 101325};
+float alt_rate_massiv[5]{0,0,0,0,0};
+int time_massiv[2]{0, 0};
+String altitude_rate = "E";
+unsigned long alt_rate_time = millis();
 
 //======================================================= ФУНКЦИИ ========================================================================
-void send_command(String command)
-{ // функиця отправки AT-команды в Е52
+void send_command(String command)                                                    // функиця отправки AT-команды в Е52
+{ 
   S_Serial.println(command);
   delay(100);
   while (S_Serial.available())
@@ -75,8 +74,8 @@ void send_command(String command)
   }
 }
 
-void set_power(int power)
-{ // функция настройки мощности
+void set_power(int power)                                                            // функция настройки мощности
+{ 
   String pw = String(power);
   String at = "AT+POWER=";
   String zero = ",0";
@@ -89,8 +88,8 @@ void set_power(int power)
   MySerial1.println(pw);
 }
 
-void read_SSerial()
-{ // функция чтения Soft UART с задержкой
+void read_SSerial()                                                                  // функция чтения Soft UART с задержкой
+{ 
   delay(100);
   while (S_Serial.available())
   {
@@ -99,16 +98,16 @@ void read_SSerial()
   }
 }
 
-int set_pause(int pause)
-{ // функция установки паузы передачи
+int set_pause(int pause)                                                             // функция установки паузы передачи
+{ 
   MySerial1.print("Пауза, мс: ");
   MySerial1.println(pause);
   int test_delay = pause - 300;
   return (test_delay);
 }
 
-void set_rs(int rs)
-{ // функция изменения параметра скорость/дальность
+void set_rs(int rs)                                                                  // функция изменения параметра скорость/дальность
+{ 
   String range_speed = String(rs);
   String at = "AT+RATE=";
   at.concat(range_speed);
@@ -117,8 +116,8 @@ void set_rs(int rs)
   MySerial1.println(range_speed);
 }
 
-void set_SRC_ADDR(int SRC)
-{ // функция изменения собственного адреса
+void set_SRC_ADDR(int SRC)                                                           // функция изменения собственного адреса
+{ 
   String range_speed = String(SRC);
   String at = "AT+SRC_ADDR=";
   String save = ",1";
@@ -135,7 +134,7 @@ void set_SRC_ADDR(int SRC)
   }
 }
 
-void read_SIM868() // функция чтения ответа от SIM868
+void read_SIM868()                                                                   // функция чтения ответа от SIM868
 {
   while (MySerial3.available())
   {
@@ -144,14 +143,14 @@ void read_SIM868() // функция чтения ответа от SIM868
   }
 }
 
-void send_SIM868(String command)      // отправка АТ команды в sim
+void send_SIM868(String command)                                                     // отправка АТ команды в sim
 {
   MySerial3.println(command);
   read_SIM868();
   delay(100);
 }
 
-void draw_pos(int x_pos, int y_pos, String text)// функция отрисовки по позиции, закрашивая строку
+void draw_pos(int x_pos, int y_pos, String text)                                     // функция отрисовки по позиции, закрашивая строку
 {
   display.setCursor(x_pos, y_pos);
   display.fillRect(x_pos, y_pos, 128, 8, SSD1306_BLACK);
@@ -159,7 +158,7 @@ void draw_pos(int x_pos, int y_pos, String text)// функция отрисов
   display.display();
 }
 
-void send_to_server_SIM868(String dataTransmit)  // отправляем данные на сервер используя SIM868
+void send_to_server_SIM868(String dataTransmit)                                      // отправляем данные на сервер используя SIM868
 {
   MySerial1.println("Sending data to server ===>");
   MySerial3.println("AT+CIPSEND=" + String(dataTransmit.length()));
@@ -173,7 +172,7 @@ void send_to_server_SIM868(String dataTransmit)  // отправляем дан�
   read_SIM868();
 }
 
-bool check_connect_to_server() // функция проверки соединения с сервером
+bool check_connect_to_server()                                                       // функция проверки соединения с сервером
 
 {
   bool connect_flag = 0;
@@ -194,19 +193,19 @@ bool check_connect_to_server() // функция проверки соедине
 
           if (connect.lastIndexOf("FAIL") != -1)
           {
-            MySerial1.println("Not connect(((((((");
+            MySerial1.println("CONNECT TO SERVER FAIL");
             connect_flag = 0;
           }
           else if (connect.lastIndexOf("CONNECT OK") != -1)
           {
-            MySerial1.println("CONNECT)))))))))");
+            MySerial1.println("CONNECT TO SERVER OK");
             connect_flag = 1;
           }
 
           return(connect_flag);
 }
 
-void try_connect_to_server()  // выполняем попытку подключиться к серверу
+void try_connect_to_server()                                                         // выполняем попытку подключиться к серверу
 {
   MySerial3.println("ATE0");
           while (MySerial3.available())
@@ -239,7 +238,7 @@ void try_connect_to_server()  // выполняем попытку подклю�
           delay(3000);
 }
 
-void setup_gprs_parameter()     // настраиваем ппараметры GPRS (APN)
+void setup_gprs_parameter()                                                          // настраиваем ппараметры GPRS (APN)
 {
   MySerial3.println("AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\"");
   read_SIM868();
@@ -252,7 +251,7 @@ void setup_gprs_parameter()     // настраиваем ппараметры G
   delay(100);
 }
 
-int Next_status(int status_count, int Stat_Xpos, int Stat_Ypos) // выполняем смену статуса
+int Next_status(int status_count, int Stat_Xpos, int Stat_Ypos)                      // выполняем смену статуса
 {
   status_count++;
       if (status_count == 1)
@@ -277,27 +276,24 @@ int Next_status(int status_count, int Stat_Xpos, int Stat_Ypos) // выполн�
 
 }
 
-int Next_SR(int butt_count, int SR_Xpos, int SR_Ypos) // меняем параметр скорость/дальность
+int Next_SR(int butt_count, int SR_Xpos, int SR_Ypos)                                // меняем параметр скорость/дальность
 {
   butt_count++;
       MySerial1.print(butt_count);
       if (butt_count == 1)
       {
-        // setup_delay = 1000;
         set_rs(0);
         MySerial1.println("S/R=0");
         draw_pos(SR_Xpos, SR_Ypos, "0");
       }
       if (butt_count == 2)
       {
-        // setup_delay = 1000;
         set_rs(1);
         MySerial1.println("S/R=1");
         draw_pos(SR_Xpos, SR_Ypos, "1");
       }
       if (butt_count == 3)
       {
-        // setup_delay = 3000;
         set_rs(2);
         butt_count = 0;
         MySerial1.println("S/R=2");
@@ -307,7 +303,7 @@ int Next_SR(int butt_count, int SR_Xpos, int SR_Ypos) // меняем парам
       return(butt_count);
 }
 
-String Set_E52_ADDR() // устанавливаем адрес Е52 по последним 4-м ицфрам МАС адреса
+String Set_E52_ADDR()                                                                // устанавливаем адрес Е52 по последним 4-м ицфрам МАС адреса
 {
   char MAC_buff[50] = "1010";
   int MAC_buff_index = 0;
@@ -330,14 +326,14 @@ String Set_E52_ADDR() // устанавливаем адрес Е52 по пос�
   return(Module_ADDR);
 }
 
-void send_to_mesh_E52(String data_transmitt) // отправляем данные в меш при помщи Е52
+void send_to_mesh_E52(String data_transmitt)                                         // отправляем данные в меш при помщи Е52
 {
   S_Serial.println(data_transmitt); 
   MySerial1.print("pack = ");
   MySerial1.println(data_transmitt);
 }
 
-void E52_default_init()  // инициализируемся по дефолту
+void E52_default_init()                                                              // инициализируемся по дефолту
 {                       
   send_command("AT+POWER=14,0");     // устанавливаем базовую мощность
   send_command("AT+DST_ADDR=404,0"); // задаем целевой адрес
@@ -345,27 +341,24 @@ void E52_default_init()  // инициализируемся по дефолту
   send_command("AT+RATE=0");         // устанавливаем параметр скорость/дальность
 }
 
-void SIM868_GPS_Power_Up()    // включаем GPS
+void SIM868_GPS_Power_Up()                                                           // включаем GPS
 {
   MySerial3.write("AT+CGNSPWR=1\n"); // подаем питание на GPS
   delay(100);
   read_SIM868();
 }
 
-void SIM868_Power_SW(int SIM868_PWR_Pin) // включаем/выключаем Е52
+void SIM868_Power_SW(int SIM868_PWR_Pin)                                             // включаем/выключаем Е52
 {
   digitalWrite(SIM868_PWR_Pin, HIGH);
-  //digitalWrite(LED_PC13, LOW);
   delay(100);
   digitalWrite(SIM868_PWR_Pin, LOW);
-  //digitalWrite(LED_PC13, HIGH);
   delay(1000);
   digitalWrite(SIM868_PWR_Pin, HIGH);
-  //digitalWrite(LED_PC13, LOW);
   delay(3000);
 }
 
-int Next_power(int power_counter, int Power_Xpos, int Power_Ypos) // переключаем мощность Е52
+int Next_power(int power_counter, int Power_Xpos, int Power_Ypos)                    // переключаем мощность Е52
 {
   power_counter--;
   set_power(power_counter); // устанавливаем мощность
@@ -380,14 +373,14 @@ int Next_power(int power_counter, int Power_Xpos, int Power_Ypos) // перек�
   return(power_counter);
 }
 
-float get_altitude_rate(float P, float P_pred, int t, int t_pred)      // получаем скороподъемность
+float get_altitude_rate(float P, float P_pred, int t, int t_pred)                    // получаем скороподъемность
 {
-  float R = 8.134;  // газовая постоянная 
-  float T = bmp.readTemperature() + 273.15;   // температура в кельвинах
-  float g = 9.81;     // ускорение свободного падения 
-  float M = 0.029;      // молярная масса воздуха
+  float R = 8.134;                              // газовая постоянная 
+  float T = bmp.readTemperature() + 273.15;     // температура в кельвинах
+  float g = 9.81;                               // ускорение свободного падения 
+  float M = 0.029;                              // молярная масса воздуха
 
-  return((((R*T)/(g*M))*((P_pred-P)/(P*((t/1000)-(t_pred/1000))))));    // есть воросы по поводу коэффициентов у t, t_pred
+  return((((R*T)/(g*M))*((P_pred-P)/(P*((t/1000)-(t_pred/1000))))));  
 }
 
 String get_telemetry(String Module_ADDR, int status_count, String altitude_rate )    // получаем телеметрию
@@ -421,8 +414,6 @@ String get_telemetry(String Module_ADDR, int status_count, String altitude_rate 
 
       index1 = (GPS_str.indexOf(".") + 5);
       GPS_str = GPS_str.substring(index1);
-      /*MySerial1.print("GPS =");
-      MySerial1.println(GPS_str);*/
 
       lattitude = GPS_str.substring(0, GPS_str.indexOf(","));
       lontitude = GPS_str.substring(GPS_str.indexOf(",") + 1);
@@ -434,29 +425,6 @@ String get_telemetry(String Module_ADDR, int status_count, String altitude_rate 
       altitude = altitude.substring(0, altitude.indexOf(","));
       speed = speed.substring(0, speed.indexOf(","));
       course = course.substring(0, course.indexOf(","));
-/*
-      MySerial1.print("\n");
-      MySerial1.print("Lat= ");
-      MySerial1.println(lattitude);
-      MySerial1.print("Lon= ");
-      MySerial1.println(lontitude);
-      MySerial1.print("Alt= ");
-      MySerial1.println(altitude);
-      MySerial1.print("Spd= ");
-      MySerial1.println(speed);
-      MySerial1.print("Crs= ");
-      MySerial1.println(course);
-
-      MySerial1.print("len_lat= ");
-      MySerial1.println(lattitude.length());
-      MySerial1.print("len_lon= ");
-      MySerial1.println(lontitude.length());
-      MySerial1.print("len_alt= ");
-      MySerial1.println(altitude.length());
-      MySerial1.print("len_spd= ");
-      MySerial1.println(speed.length());
-      MySerial1.print("len_crs= ");
-      MySerial1.println(course.length());*/
 
       if (lattitude.length() < 7)
       {
@@ -473,7 +441,7 @@ String get_telemetry(String Module_ADDR, int status_count, String altitude_rate 
       {
         altitude = "E";
       }
-      if (speed.length() < 3)
+      if ((speed.length() < 3) or (speed.startsWith(".") == true))
       {
         speed = "E";
       }
@@ -488,7 +456,8 @@ String get_telemetry(String Module_ADDR, int status_count, String altitude_rate 
       return(data_transmitt);
 }
 
-void setup_bmp(){
+void setup_bmp()                                                                     // установка параметров BMP
+{
   bmp.begin(0x76);
   bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
     Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
@@ -497,7 +466,7 @@ void setup_bmp(){
     Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
 }
 
-void get_setup_from_ESP()     // получение настроек по меш от ESP
+void get_setup_from_ESP()                                                            // получение настроек по меш от ESP
 {
  // MySerial1.println("MODE SETTINGS");
   if(S_Serial.available()){
@@ -534,10 +503,9 @@ void get_setup_from_ESP()     // получение настроек по меш
   delay(1000);
 }
 
-String get_ar_with_filter(int ALTR_Xpos, int ALTR_Ypos)       // получаем и фильтруем скороподъемность
+String get_ar_with_filter(int ALTR_Xpos, int ALTR_Ypos)                              // получаем и фильтруем скороподъемность
 {
   alt_rate_time = millis();
-      //counter_OV++;
 
       time_massiv[0] = time_massiv[1];
       time_massiv[1] = millis();
@@ -552,8 +520,6 @@ String get_ar_with_filter(int ALTR_Xpos, int ALTR_Ypos)       // получае�
 
       float alt_rate = ((alt_rate_massiv[0]+alt_rate_massiv[1]+alt_rate_massiv[2]+alt_rate_massiv[3]+alt_rate_massiv[4])/5);
      
-      MySerial1.print("Altitude_rate = ");
-      MySerial1.println(alt_rate);
       draw_pos(ALTR_Xpos, ALTR_Ypos, String(alt_rate));
       altitude_rate = String(alt_rate);
 
