@@ -112,3 +112,7 @@ void setup_bmp();
 void get_setup_from_ESP();     // получение настроек по меш от ESP
 
 String get_ar_with_filter(int ALTR_Xpos, int ALTR_Ypos);       // получаем и фильтруем скороподъемность
+
+void init_pinout_and_display();
+
+void init_board();                                            // инициализируем плату

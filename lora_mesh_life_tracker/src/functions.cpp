@@ -525,3 +525,45 @@ String get_ar_with_filter(int ALTR_Xpos, int ALTR_Ypos)                         
 
       return(altitude_rate);
 }
+
+void init_pinout_and_display()                                                       // инициализируем пины и настройки экранчика
+{
+  if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) // инициализация дисплея    !!!!! спросить у Александра почему так !!!!!
+  {
+    MySerial1.println(F("SSD1306 allocation failed"));
+    for (;;);
+  }
+
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(0, 0);
+  display.cp437(true);
+  display.clearDisplay();
+
+  pinMode(STM_BTN1, INPUT_PULLUP); // инициализируем кнопочки
+  pinMode(LORA_PA0, INPUT);
+  pinMode(LORA_RST, INPUT);
+
+  pinMode(STM_SW2, INPUT);
+
+  // инициализируем софтовые/хардовые serial-ы
+  MySerial1.begin(115200); // обычный serial
+  S_Serial.begin(115200);  //
+  MySerial3.begin(115200); // serial SIM868
+
+  // инициализируем  пины SIM868
+  pinMode(SIM_SLEEP, INPUT);
+  pinMode(SIM_PWRK, OUTPUT);
+}
+
+void init_board(){                                                                   // инициализируем плату
+  init_pinout_and_display();
+  E52_default_init(); // инициализируем Е52 по дефолту
+  setup_bmp();
+  SIM868_Power_SW(SIM_PWRK); // включаем SIM868
+  SIM868_GPS_Power_Up(); // включаем GPS
+  setup_gprs_parameter();  // настраиваем APN пока что здесь, потом надо чтобы менялся с базы
+}
+
+
+
