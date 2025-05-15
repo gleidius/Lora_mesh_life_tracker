@@ -61,6 +61,7 @@ extern int time_massiv[];
 extern String altitude_rate;
 extern unsigned long alt_rate_time;
 
+//======================================================= ФУНКЦИИ ========================================================================
 void send_command(String command);
 
 void set_power(int power);
@@ -73,46 +74,46 @@ void set_rs(int rs);
 
 void set_SRC_ADDR(int SRC);
 
-void read_SIM868(); // функция чтения ответа от SIM868
+void read_SIM868();                                                                     // функция чтения ответа от SIM868
 
-void send_SIM868(String command);        // отправка АТ команды в sim
+void send_SIM868(String command);                                                       // отправка АТ команды в sim
 
-void draw_pos(int x_pos, int y_pos, String text);// функция отрисовки по позиции, закрашивая строку
+void draw_pos(int x_pos, int y_pos, String text);                                       // функция отрисовки по позиции, закрашивая строку
 
-void send_to_server_SIM868(String dataTransmit);  // отправляем данные на сервер используя SIM868
+void send_to_server_SIM868(String dataTransmit);                                        // отправляем данные на сервер используя SIM868
 
-bool check_connect_to_server(); // функция проверки соединения с сервером
+bool check_connect_to_server();                                                         // функция проверки соединения с сервером
 
-void try_connect_to_server();  // выполняем попытку подключиться к серверу
+void try_connect_to_server();                                                           // выполняем попытку подключиться к серверу
 
-void setup_gprs_parameter(); // настраиваем ппараметры GPRS (APN)
+void setup_gprs_parameter();                                                            // настраиваем ппараметры GPRS (APN)
 
-int Next_status(int status_count, int Stat_Xpos, int Stat_Ypos); // выполняем смену статуса
+int Next_status(int status_count, int Stat_Xpos, int Stat_Ypos);                        // выполняем смену статуса
 
-int Next_SR(int butt_count, int SR_Xpos, int SR_Ypos); // меняем параметр скорость/дальность
+int Next_SR(int butt_count, int SR_Xpos, int SR_Ypos);                                  // меняем параметр скорость/дальность
 
-String Set_E52_ADDR(); // устанавливаем адрес Е52 по последним 4-м ицфрам МАС адреса
+String Set_E52_ADDR();                                                                  // устанавливаем адрес Е52 по последним 4-м ицфрам МАС адреса
 
-void send_to_mesh_E52(String data_transmitt); // отправляем данные в меш при помщи Е52
+void send_to_mesh_E52(String data_transmitt);                                           // отправляем данные в меш при помщи Е52
 
-void E52_default_init();  // инициализируемся по дефолту
+void E52_default_init();                                                                // инициализируемся по дефолту
 
-void SIM868_GPS_Power_Up();    // включаем GPS
+void SIM868_GPS_Power_Up();                                                             // включаем GPS
 
-void SIM868_Power_SW(int SIM868_PWR_Pin); // включаем/выключаем Е52
+void SIM868_Power_SW(int SIM868_PWR_Pin);                                               // включаем/выключаем Е52
 
-int Next_power(int power_counter, int Power_Xpos, int Power_Ypos); // переключаем мощность Е52
+int Next_power(int power_counter, int Power_Xpos, int Power_Ypos);                      // переключаем мощность Е52
 
-String get_telemetry(String Module_ADDR, int status_count, String altitude_rate);    // получаем телеметрию
+String get_telemetry(String Module_ADDR, int status_count, String altitude_rate);       // получаем телеметрию
 
 float get_altitude_rate(float P, float P_pred, int t, int t_pred);
 
 void setup_bmp();
 
-void get_setup_from_ESP();     // получение настроек по меш от ESP
+void get_setup_from_ESP();                                                              // получение настроек по меш от ESP
 
-String get_ar_with_filter(int ALTR_Xpos, int ALTR_Ypos);       // получаем и фильтруем скороподъемность
+String get_ar_with_filter(int ALTR_Xpos, int ALTR_Ypos);                                // получаем и фильтруем скороподъемность
 
 void init_pinout_and_display();
 
-void init_board();                                            // инициализируем плату
+void init_board();                                                                      // инициализируем плату

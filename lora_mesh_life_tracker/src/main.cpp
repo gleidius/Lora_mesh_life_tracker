@@ -14,12 +14,18 @@ void loop()
   int power_counter = 22;
 
   bool connect_flag = 0;
+/*
+  struct Display_coordinates 
+  {
+    int Power_Xpos, Power_
+  };
+  */
   
   String Module_ADDR = Set_E52_ADDR();  // устанавливаем и запоминаем адрес Е52
 
   display.clearDisplay();
   display.setCursor(0, 0);
-  display.println("    === " + Module_ADDR + " ===");
+  display.println("    === " + Module_ADDR + " ===");  // !!!!!!!!!!!!! можно попробовать заменить все инты на структуру и потом её return();
 
   display.print("Power (3), dBm: ");
   int Power_Xpos = display.getCursorX(); // позиция Х курсора при написании мощности
@@ -67,7 +73,7 @@ void loop()
       if ((millis() - start_time) >= 5000)                  // режим отправки и отправка
     {
       start_time = millis();
-      MySerial1.println("==================================================================================");
+      MySerial1.println("===========================================================================================");
 
       String data_transmitt = get_telemetry(Module_ADDR, status_count, altitude_rate);
 

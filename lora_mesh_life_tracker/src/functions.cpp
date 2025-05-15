@@ -396,7 +396,7 @@ String get_telemetry(String Module_ADDR, int status_count, String altitude_rate 
   String GPS_str = "GPS";
 
       // =============================== ПОЛУЧЕНИЕ ТЕЛЕМЕТРИИ ==============================
-      MySerial1.println("Get GPS");
+      MySerial1.print("Get GPS:");
       read_SIM868();                              // на всякиий случай, перед получением корд читаем юарт, чтобы буфер был гарантированно пуст
       MySerial3.write("AT+CGNSINF\n");
       delay(10);
