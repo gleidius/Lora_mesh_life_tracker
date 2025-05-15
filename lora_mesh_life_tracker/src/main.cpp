@@ -1,8 +1,9 @@
 #include "functions.h"
 
 void setup() //========================== SETUP ===========================
-{ 
+{ MySerial1.println("========= START =========");
   init_board();
+  MySerial1.println("========= STOP SETUP =========");
 }
 
 void loop()
@@ -14,10 +15,13 @@ void loop()
   int power_counter = 22;
 
   bool connect_flag = 0;
-/*
+
+  /*
   struct Display_coordinates 
   {
-    int Power_Xpos, Power_
+    int Power_Xpos, Power_Ypos;
+    int SR_Xpos, SR_Ypos;
+    int Mode_Xpos, Mode_Ypos;
   };
   */
   

@@ -240,7 +240,7 @@ void try_connect_to_server()                                                    
 
 void setup_gprs_parameter()                                                          // настраиваем ппараметры GPRS (APN)
 {
-  MySerial3.println("AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\"");
+  MySerial3.print("AT+SAPBR=3,1,\"Contype\",\"GPRS\"\r\n");
   read_SIM868();
   delay(100);
   MySerial3.println("AT+SAPBR=3,1,\"APN\",\"internet.tele2.ru\"");
@@ -333,9 +333,9 @@ void send_to_mesh_E52(String data_transmitt)                                    
   MySerial1.println(data_transmitt);
 }
 
-void E52_default_init()                                                              // инициализируемся по дефолту
+void  E52_default_init()                                                              // инициализируемся по дефолту
 {                       
-  send_command("AT+POWER=14,0");     // устанавливаем базовую мощность
+  send_command("AT+POWER=22,0");     // устанавливаем базовую мощность
   send_command("AT+DST_ADDR=404,0"); // задаем целевой адрес
   send_command("AT+OPTION=1,0");     // задаем режим передачи (1 - unicast (одноадресная))
   send_command("AT+RATE=0");         // устанавливаем параметр скорость/дальность
@@ -399,15 +399,12 @@ String get_telemetry(String Module_ADDR, int status_count, String altitude_rate 
       MySerial1.print("Get GPS:");
       read_SIM868();                              // на всякиий случай, перед получением корд читаем юарт, чтобы буфер был гарантированно пуст
       MySerial3.write("AT+CGNSINF\n");
-      delay(10);
+      delay(5);
       while (MySerial3.available())
       {
-        byte buff123 = MySerial3.read();
-        MySerial1.write(buff123);
-        GPS_buff[GPS_buff_index] = buff123;
-        GPS_buff_index++;
+        GPS_str = MySerial3.readString();
+        MySerial1.println(GPS_str);
       }
-      GPS_str = String(GPS_buff);
       // GPS_str = "1,1,20240208183233.000,55.643222,37.336658,336.55,0.00,323.0,1,,0.9,1.2,0.8,,12,10,9,,33,,";//подмена для отладки
 
       GPS_buff_index = 0;
@@ -425,6 +422,11 @@ String get_telemetry(String Module_ADDR, int status_count, String altitude_rate 
       altitude = altitude.substring(0, altitude.indexOf(","));
       speed = speed.substring(0, speed.indexOf(","));
       course = course.substring(0, course.indexOf(","));
+
+      MySerial1.println(lattitude);
+      MySerial1.println(lattitude.length());
+      MySerial1.println(lontitude);
+      MySerial1.println(lontitude.length());
 
       if (lattitude.length() < 7)
       {
@@ -560,6 +562,8 @@ void init_board(){                                                              
   init_pinout_and_display();
   E52_default_init(); // инициализируем Е52 по дефолту
   setup_bmp();
+  SIM868_Power_SW(SIM_PWRK); // включаем SIM868      несколько перезагрузок нужно для симки (без этого не устанавливается APN)
+  SIM868_Power_SW(SIM_PWRK); // вылючаем SIM868
   SIM868_Power_SW(SIM_PWRK); // включаем SIM868
   SIM868_GPS_Power_Up(); // включаем GPS
   setup_gprs_parameter();  // настраиваем APN пока что здесь, потом надо чтобы менялся с базы
