@@ -497,10 +497,7 @@ void get_setup_from_ESP()                                                       
       send_command("AT+RATE="+rate); 
       send_command("AT+DST_ADDR="+dst_addr+",1");
       read_SIM868();
-      
-
-    }
-            
+    }        
   }
   delay(1000);
 }
@@ -558,7 +555,8 @@ void init_pinout_and_display()                                                  
   pinMode(SIM_PWRK, OUTPUT);
 }
 
-void init_board(){                                                                   // инициализируем плату
+void init_board()                                                                    // инициализируем плату
+{                                                                  
   init_pinout_and_display();
   E52_default_init(); // инициализируем Е52 по дефолту
   setup_bmp();
@@ -569,5 +567,41 @@ void init_board(){                                                              
   setup_gprs_parameter();  // настраиваем APN пока что здесь, потом надо чтобы менялся с базы
 }
 
+Display_coordinates init_menu(String Module_ADDR)                                    // отрисовываем меню
+{
+  Display_coordinates coordinates = {};
+  
+  display.clearDisplay();
+  display.setCursor(0, 0);
+  display.println("    === " + Module_ADDR + " ===");  // !!!!!!!!!!!!! можно попробовать заменить все инты на структуру и потом её return();
 
+  display.print("Power (3), dBm: ");
+  coordinates.Power_Xpos = display.getCursorX(); // позиция Х курсора при написании мощности
+  coordinates.Power_Ypos = display.getCursorY(); // позиция Y курсора при написании мощности
+  display.println("22");
+
+  display.print("S/R (4): ");
+  coordinates.SR_Xpos = display.getCursorX(); // позиция Х курсора при написании Speed/Rate
+  coordinates.SR_Ypos = display.getCursorY(); // позиция Y курсора при написании Speed/Rate
+  display.println("0");
+
+  display.print("Mode (6): ");
+  coordinates.Mode_Xpos = display.getCursorX(); // позиция Х курсора при написании режима
+  coordinates.Mode_Ypos = display.getCursorY(); // позиция Y курсора при написании режима
+  display.println("Not");
+
+  display.print("Status: ");
+  coordinates.Stat_Xpos = display.getCursorX(); // позиция Х курсора при написании статуса
+  coordinates.Stat_Ypos = display.getCursorY(); // позиция Y курсора при написании статуса
+  display.println("Ground");
+
+  display.print("ALT_R: ");
+  coordinates.ALTR_Xpos = display.getCursorX(); // позиция Х курсора при написании статуса
+  coordinates.ALTR_Ypos = display.getCursorY(); // позиция Y курсора при написании статуса
+  display.println("N/A");
+
+  display.display();
+
+  return coordinates;
+}
 

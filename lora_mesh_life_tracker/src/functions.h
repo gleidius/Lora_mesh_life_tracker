@@ -61,6 +61,15 @@ extern int time_massiv[];
 extern String altitude_rate;
 extern unsigned long alt_rate_time;
 
+  struct Display_coordinates 
+  {
+    int Power_Xpos, Power_Ypos;
+    int SR_Xpos, SR_Ypos;
+    int Mode_Xpos, Mode_Ypos;
+    int Stat_Xpos, Stat_Ypos;
+    int ALTR_Xpos, ALTR_Ypos;
+  };
+
 //======================================================= ФУНКЦИИ ========================================================================
 void send_command(String command);
 
@@ -117,3 +126,5 @@ String get_ar_with_filter(int ALTR_Xpos, int ALTR_Ypos);                        
 void init_pinout_and_display();
 
 void init_board();                                                                      // инициализируем плату
+
+struct Display_coordinates init_menu(String Module_ADDR);                               // отрисовываем меню
