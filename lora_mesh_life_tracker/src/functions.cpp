@@ -242,8 +242,10 @@ void try_connect_to_server()                                                    
 }
 
 void setup_gprs_parameter()                                                          // настраиваем ппараметры GPRS (APN)
-{
-  MySerial3.print("AT+SAPBR=3,1,\"Contype\",\"GPRS\"\r\n");
+{  //MySerial1.println("AT+SAPBR=3,1,\"Contype\",\"GPRS\"");
+  delay(15000);
+  read_SIM868();
+  MySerial3.println("AT+SAPBR=3,1,\"Contype\",\"GPRS\"");
   read_SIM868();
   delay(100);
   MySerial3.println("AT+SAPBR=3,1,\"APN\",\"internet.tele2.ru\"");
@@ -567,8 +569,8 @@ void init_board()                                                               
   E52_default_init(); // инициализируем Е52 по дефолту
   setup_bmp();
   SIM868_Power_SW(SIM_PWRK); // включаем SIM868      несколько перезагрузок нужно для симки (без этого не устанавливается APN)
-  SIM868_Power_SW(SIM_PWRK); // вылючаем SIM868
-  SIM868_Power_SW(SIM_PWRK); // включаем SIM868
+  //SIM868_Power_SW(SIM_PWRK); // вылючаем SIM868
+  //SIM868_Power_SW(SIM_PWRK); // включаем SIM868
   SIM868_GPS_Power_Up(); // включаем GPS
   setup_gprs_parameter();  // настраиваем APN пока что здесь, потом надо чтобы менялся с базы
 }
