@@ -30,7 +30,7 @@ void loop()
       altitude_rate = get_ar_with_filter(cord.ALTR_Xpos, cord.ALTR_Ypos);
     }
     
-    if(digitalRead(STM_SW2) == true)                        // режим настроек 
+    if(digitalRead(STM_SW2) == false)                        // режим настроек 
     {
       get_setup_from_ESP();                                 // получаем строку с настройками инастраиваемся
     }
@@ -64,20 +64,21 @@ void loop()
         }
       }
     }
-
-    if (digitalRead(STM_BTN1) == false)                                                 //  SPEED/RANGE 
-    { 
+     
+     if (digitalRead(STM_LT) == false)                                                 //  SPEED/RANGE 
+     { 
       butt_count = Next_SR(butt_count, cord.SR_Xpos, cord.SR_Ypos);
     }
-
-    if (digitalRead(LORA_RST) == false)                                                 //  STATUS  
+    
+    if (digitalRead(STM_RT) == false)                                                 //  STATUS  
     { 
       status_count = Next_status(status_count, cord.Stat_Xpos, cord.Stat_Ypos);
     }
-
-    if (digitalRead(STM_SW3) == true)                                                   //  POWER 
+    
+    if (digitalRead(STM_OK) == false)                                                   //  POWER 
     {  
       power_counter = Next_power(power_counter, cord.Power_Xpos, cord.Power_Ypos);
     }
+     
   }
 }

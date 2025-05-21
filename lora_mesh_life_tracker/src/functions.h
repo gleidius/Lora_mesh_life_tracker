@@ -34,11 +34,15 @@ extern uint8_t UART3_RX;
 extern HardwareSerial MySerial3;
  
 // On-Board buttons                                                               // КНОПОЧКИ
-extern uint8_t STM_BTN1;
-extern uint8_t LORA_PA0;
-extern uint8_t LORA_RST;
+extern uint8_t STM_LT;
+extern uint8_t STM_DN;
+extern uint8_t STM_OK;
+extern uint8_t STM_RT;
+extern uint8_t STM_UP;
+
 
 // uint8_t STM_SW1 = PC13;                                                        // ПЕРЕКЛЮЧАТЕЛИ
+extern uint8_t STM_SW1;
 extern uint8_t STM_SW2;
 extern uint8_t STM_SW3;
 extern uint8_t STM_SW4;
@@ -127,4 +131,4 @@ void init_pinout_and_display();
 
 void init_board();                                                                      // инициализируем плату
 
-struct Display_coordinates init_menu(String Module_ADDR);                               // отрисовываем меню
+Display_coordinates init_menu(String Module_ADDR);                                      // отрисовываем меню

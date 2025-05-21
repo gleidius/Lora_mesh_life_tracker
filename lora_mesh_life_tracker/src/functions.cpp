@@ -1,6 +1,5 @@
 #include "functions.h"
 
-//GyverBME280 bmp;
 Adafruit_BMP280 bmp;
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
@@ -23,23 +22,26 @@ uint8_t UART3_RX = PB11;
 HardwareSerial MySerial3(UART3_RX, UART3_TX);
 
 // On-Board buttons                                                               // КНОПОЧКИ
-uint8_t STM_BTN1 = PB0;
-uint8_t LORA_PA0 = PB1;
-uint8_t LORA_RST = PA6;
+uint8_t STM_LT = PB3;
+uint8_t STM_DN = PA15;
+uint8_t STM_OK = PA12;
+uint8_t STM_RT = PA11;
+uint8_t STM_UP = PA8;
 
-// uint8_t STM_SW1 = PC13;                                                        // ПЕРЕКЛЮЧАТЕЛИ
-uint8_t STM_SW2 = PC14;
-uint8_t STM_SW3 = PC15;
-uint8_t STM_SW4 = PA0;
-uint8_t STM_SW5 = PA1;
-uint8_t STM_SW6 = PA7;
+// On-Board switches
+uint8_t STM_SW1 = PC14;
+uint8_t STM_SW2 = PC15;
+uint8_t STM_SW3 = PA0;
+uint8_t STM_SW4 = PA1;
+uint8_t STM_SW5 = PB0;
+uint8_t STM_SW6 = PB1;
 
 // SIM868 GPIO
 uint8_t SIM_SLEEP = PA4;
-uint8_t SIM_PWRK = PA5;
+uint8_t SIM_PWRK = PB15;
 
 uint8_t switches[] = {
-    // STM_SW1,
+    STM_SW1,
     STM_SW2,
     STM_SW3,
     STM_SW4,
@@ -52,6 +54,7 @@ String APN, power, rate, dst_addr, param5;
 const int switchesSize = sizeof(switches) / sizeof(uint8_t);
 uint8_t switchesState[switchesSize] = {0};
 
+// LoRa URAT
 uint8_t UART2_TX = PA2;
 uint8_t UART2_RX = PA3;
 HardwareSerial S_Serial(UART2_RX, UART2_TX);
@@ -234,7 +237,7 @@ void try_connect_to_server()                                                    
           MySerial3.println("AT+CIFSR");
           read_SIM868();
 
-          MySerial3.println("AT+CIPSTART=\"TCP\",\"103.90.75.178\",5000");
+          MySerial3.println("AT+CIPSTART=\"TCP\",\"80.74.24.27\",5000");
           delay(3000);
 }
 
@@ -319,10 +322,11 @@ String Set_E52_ADDR()                                                           
     MAC_buff_index++;
   }
   String MAC_addr = String(MAC_buff);
-  String Module_ADDR = MAC_addr.substring(MAC_addr.indexOf(",") + 5, MAC_addr.indexOf(",") + 9);
-  MySerial1.println(Module_ADDR);
+  String Module_ADDR = MAC_addr.substring(MAC_addr.indexOf(",")+1);
+  Module_ADDR = Module_ADDR.substring(Module_ADDR.length()-6,Module_ADDR.length()-2);
   send_command("AT+SRC_ADDR=" + Module_ADDR + ",1");
   
+
   return(Module_ADDR);
 }
 
@@ -499,7 +503,7 @@ void get_setup_from_ESP()                                                       
       read_SIM868();
     }        
   }
-  delay(1000);
+  //delay(1000);
 }
 
 String get_ar_with_filter(int ALTR_Xpos, int ALTR_Ypos)                              // получаем и фильтруем скороподъемность
@@ -539,10 +543,12 @@ void init_pinout_and_display()                                                  
   display.cp437(true);
   display.clearDisplay();
 
-  pinMode(STM_BTN1, INPUT_PULLUP); // инициализируем кнопочки
-  pinMode(LORA_PA0, INPUT);
-  pinMode(LORA_RST, INPUT);
-
+  pinMode(STM_LT, INPUT); // инициализируем кнопочки
+  pinMode(STM_DN, INPUT);
+  pinMode(STM_OK, INPUT);
+  pinMode(STM_RT, INPUT);
+  pinMode(STM_UP, INPUT);
+  
   pinMode(STM_SW2, INPUT);
 
   // инициализируем софтовые/хардовые serial-ы
