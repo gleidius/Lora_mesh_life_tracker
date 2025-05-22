@@ -212,8 +212,12 @@ void try_connect_to_server()                                                    
 {
   MySerial3.println("ATE0");
           while (MySerial3.available())
-            read_SIM868();
+          read_SIM868();
           delay(100);
+
+          MySerial3.println("AT+CIPCLOSE");                          // закрываем старые TCP соединения 
+          delay(500);
+          read_SIM868();
 
           MySerial3.println("AT+CSQ");
           read_SIM868();
@@ -242,7 +246,7 @@ void try_connect_to_server()                                                    
 }
 
 void setup_gprs_parameter()                                                          // настраиваем ппараметры GPRS (APN)
-{  //MySerial1.println("AT+SAPBR=3,1,\"Contype\",\"GPRS\"");
+{  
   delay(15000);
   read_SIM868();
   MySerial3.println("AT+SAPBR=3,1,\"Contype\",\"GPRS\"");
@@ -565,6 +569,7 @@ void init_pinout_and_display()                                                  
 
 void init_board()                                                                    // инициализируем плату
 {                                                                  
+  delay(1000);                                                // нужно для включения экрана, без этого почему то не успевает
   init_pinout_and_display();
   E52_default_init(); // инициализируем Е52 по дефолту
   setup_bmp();

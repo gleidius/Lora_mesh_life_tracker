@@ -1,7 +1,9 @@
 #include "functions.h"
 
 void setup() //========================== SETUP ===========================
-{ MySerial1.println("========= START =========");
+
+{
+  MySerial1.println("========= START =========");
   init_board();
   MySerial1.println("========= STOP SETUP =========");
 }
@@ -13,15 +15,9 @@ void loop()
   int butt_count = 1;
   int status_count = 1;
   int power_counter = 22;
-
   bool connect_flag = 0;
-  
   String Module_ADDR = Set_E52_ADDR();                       // устанавливаем и запоминаем адрес Е52
   Display_coordinates cord = init_menu(Module_ADDR);
-
-  MySerial3.println("AT+CIPCLOSE");                          // закрываем старые TCP соединения 
-  delay(500);
-  read_SIM868();
 
   while (true)                                               
   {    
