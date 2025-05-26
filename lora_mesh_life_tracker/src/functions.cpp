@@ -168,10 +168,13 @@ bool send_to_server_SIM868(String dataTransmit)                                 
   MySerial1.print("Sizeof= ");
   MySerial1.println("AT+CIPSEND=" + String(dataTransmit.length()));
   delay(100);
-  
+
   String connection_status = MySerial3.readString();
+  
+  /*
   MySerial1.print("Connection Status =");
   MySerial1.println(connection_status);
+  */
 
 //read_SIM868();
   MySerial3.println(dataTransmit); // отправляем пакет // если нету модуля то заменить аргументы в скобках на строку: " 1111 56.45205 84.96131 450 1.5 50 2"
@@ -268,7 +271,7 @@ void setup_gprs_parameter()                                                     
   MySerial3.println("AT+SAPBR=3,1,\"Contype\",\"GPRS\"");
   read_SIM868();
   delay(100);
-  MySerial3.println("AT+SAPBR=3,1,\"APN\",\"internet.tele2.ru\"");
+  //MySerial3.println("AT+SAPBR=3,1,\"APN\",\"internet.tele2.ru\"");      !!!!!!!!!!!!!
   read_SIM868();
   delay(100);
   MySerial3.println("AT+SAPBR=1,1");
@@ -330,10 +333,12 @@ int Next_SR(int butt_count, int SR_Xpos, int SR_Ypos)                           
 
 String Set_E52_ADDR()                                                                // устанавливаем адрес Е52 по последним 4-м ицфрам МАС адреса
 {
+  send_command("AT+SRC_ADDR=1234,1");
   char MAC_buff[50] = "1010";
   int MAC_buff_index = 0;
 
   S_Serial.print("AT+MAC=?");
+  MySerial1.print("AT+MAC=?");
   delay(100);
 
   while (S_Serial.available())
@@ -346,6 +351,9 @@ String Set_E52_ADDR()                                                           
   String MAC_addr = String(MAC_buff);
   String Module_ADDR = MAC_addr.substring(MAC_addr.indexOf(",")+1);
   Module_ADDR = Module_ADDR.substring(Module_ADDR.length()-6,Module_ADDR.length()-2);
+
+  MySerial1.print("Module_addr=");
+  MySerial1.print(Module_ADDR);
   send_command("AT+SRC_ADDR=" + Module_ADDR + ",1");
   
 
@@ -501,7 +509,7 @@ void get_setup_from_ESP()                                                       
  // MySerial1.println("MODE SETTINGS");
   if(S_Serial.available()){
     String settings_message = S_Serial.readString();
-
+    MySerial1.println("======= SETTINGS FROM ESP =======");
     if(settings_message.indexOf("ST") != -1){
       MySerial1.println(settings_message);
       settings_message = settings_message.substring(settings_message.indexOf(" ")+1);
@@ -630,6 +638,11 @@ Display_coordinates init_menu(String Module_ADDR)                               
   coordinates.ALTR_Xpos = display.getCursorX(); // позиция Х курсора при написании статуса
   coordinates.ALTR_Ypos = display.getCursorY(); // позиция Y курсора при написании статуса
   display.println("N/A");
+
+  display.print("Pause: ");
+  coordinates.pause_Xpos = display.getCursorX(); // позиция Х курсора при написании статуса
+  coordinates.pause_Ypos = display.getCursorY(); // позиция Y курсора при написании статуса
+  display.println("600");
 
   display.display();
 

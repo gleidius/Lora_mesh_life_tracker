@@ -1,8 +1,8 @@
 #include "functions.h"
 
-void setup() //========================== SETUP ===========================
-
-{
+void setup() 
+{//========================== SETUP ===========================
+  
   MySerial1.println("========= START =========");
   init_board();
   MySerial1.println("========= STOP SETUP =========");
@@ -26,7 +26,7 @@ void loop()
       altitude_rate = get_ar_with_filter(cord.ALTR_Xpos, cord.ALTR_Ypos);
     }
     
-    if(digitalRead(STM_SW2) == false)                        // режим настроек 
+    if(digitalRead(STM_SW2) == false)                        // SETTINGS
     {
       get_setup_from_ESP();                                 // получаем строку с настройками инастраиваемся
     }
@@ -75,6 +75,5 @@ void loop()
     {  
       power_counter = Next_power(power_counter, cord.Power_Xpos, cord.Power_Ypos);
     }
-     
   }
 }

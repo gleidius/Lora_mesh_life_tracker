@@ -72,6 +72,7 @@ extern unsigned long alt_rate_time;
     int Mode_Xpos, Mode_Ypos;
     int Stat_Xpos, Stat_Ypos;
     int ALTR_Xpos, ALTR_Ypos;
+    int pause_Xpos, pause_Ypos;
   };
 
 //======================================================= ФУНКЦИИ ========================================================================
