@@ -54,9 +54,9 @@ void loop()
           connect_flag = check_connect_to_server();           // проверяем получилось ли подключиться 
         }
 
-        if (connect_flag == 1)
+        if (connect_flag == 1)            // !!!!!!!!!0 потому что хочу посмотреть что пишет в таком случае должен быть 1!!!!!!!!
         {
-          send_to_server_SIM868(data_transmitt);              // если получилось подключиться то отправляем данные
+          connect_flag = send_to_server_SIM868(data_transmitt);              // если получилось подключиться то отправляем данные
         }
       }
     }

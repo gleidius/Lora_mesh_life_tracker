@@ -161,18 +161,34 @@ void draw_pos(int x_pos, int y_pos, String text)                                
   display.display();
 }
 
-void send_to_server_SIM868(String dataTransmit)                                      // отправляем данные на сервер используя SIM868
+bool send_to_server_SIM868(String dataTransmit)                                      // отправляем данные на сервер используя SIM868
 {
   MySerial1.println("Sending data to server ===>");
   MySerial3.println("AT+CIPSEND=" + String(dataTransmit.length()));
   MySerial1.print("Sizeof= ");
   MySerial1.println("AT+CIPSEND=" + String(dataTransmit.length()));
   delay(100);
-  read_SIM868();
-  MySerial3.println(dataTransmit); // отправляем пакет // если нету модуля то заменить аргументы в скобках на строку: "56.45205 84.96131 450 1.5 50 2"
+  
+  String connection_status = MySerial3.readString();
+  MySerial1.print("Connection Status =");
+  MySerial1.println(connection_status);
+
+//read_SIM868();
+  MySerial3.println(dataTransmit); // отправляем пакет // если нету модуля то заменить аргументы в скобках на строку: " 1111 56.45205 84.96131 450 1.5 50 2"
   MySerial1.print("pack = ");
   MySerial1.println(dataTransmit);
-  read_SIM868();
+  
+  if(connection_status.indexOf("ERROR")!=-1)
+  {
+    return(0);
+  }
+  else
+  {
+    return(1);
+  }
+
+ //read_SIM868();
+  
 }
 
 bool check_connect_to_server()                                                       // функция проверки соединения с сервером
@@ -360,12 +376,14 @@ void SIM868_GPS_Power_Up()                                                      
 
 void SIM868_Power_SW(int SIM868_PWR_Pin)                                             // включаем/выключаем Е52
 {
+  pinMode(SIM868_PWR_Pin, OUTPUT);
   digitalWrite(SIM868_PWR_Pin, HIGH);
   delay(100);
   digitalWrite(SIM868_PWR_Pin, LOW);
   delay(1000);
   digitalWrite(SIM868_PWR_Pin, HIGH);
   delay(3000);
+  pinMode(SIM868_PWR_Pin, INPUT);
 }
 
 int Next_power(int power_counter, int Power_Xpos, int Power_Ypos)                    // переключаем мощность Е52

@@ -93,7 +93,7 @@ void send_SIM868(String command);                                               
 
 void draw_pos(int x_pos, int y_pos, String text);                                       // функция отрисовки по позиции, закрашивая строку
 
-void send_to_server_SIM868(String dataTransmit);                                        // отправляем данные на сервер используя SIM868
+bool send_to_server_SIM868(String dataTransmit);                                        // отправляем данные на сервер используя SIM868
 
 bool check_connect_to_server();                                                         // функция проверки соединения с сервером
 
