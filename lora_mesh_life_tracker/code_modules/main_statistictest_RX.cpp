@@ -14,6 +14,7 @@ void loop()
   String Module_ADDR = Set_E52_ADDR();                       // устанавливаем и запоминаем адрес Е52
   Display_coordinates cord = init_menu(Module_ADDR);
   int counter_RX = 0;
+  int power_counter = 22;
   int butt_count = 1;
   unsigned long timer = millis();
   send_command("AT+SRC_ADDR=404,1");
@@ -43,6 +44,10 @@ void loop()
     if (digitalRead(STM_LT) == false)                                                 //  SPEED/RANGE 
     { 
       butt_count = Next_SR(butt_count, cord.SR_Xpos, cord.SR_Ypos);
+    }
+        if (digitalRead(STM_DN) == false)                                                   //  POWER 
+    {  
+      power_counter = Next_power(power_counter, cord.Power_Xpos, cord.Power_Ypos);
     }
   }
 }

@@ -16,6 +16,7 @@ void loop()
   int counter_TX = 0;
   int pause_counter = 0;
   int butt_count = 1;
+  int power_counter = 22;
   int pause = 600;
   unsigned long timer = millis();
 
@@ -24,6 +25,10 @@ void loop()
     if (digitalRead(STM_LT) == false)                                                 //  SPEED/RANGE 
     { 
       butt_count = Next_SR(butt_count, cord.SR_Xpos, cord.SR_Ypos);
+    }
+        if (digitalRead(STM_DN) == false)                                                   //  POWER 
+    {  
+      power_counter = Next_power(power_counter, cord.Power_Xpos, cord.Power_Ypos);
     }
 
     if (digitalRead(STM_RT) == false)                                                 //  PAUSE
@@ -66,6 +71,17 @@ void loop()
           MySerial1.println(counter_TX);
           draw_pos(0,56,String(counter_TX));
         }
+
+        if(digitalRead(STM_RT) == false){
+      S_Serial.print("AT+ROUTER_READ=?");
+      delay(5);
+      while (S_Serial.available())
+      {
+        byte buff123 = S_Serial.read();
+        MySerial1.write(buff123);
+      }
+      //delay(200);
+    }
         
         if(millis() >= 1000*60*10){
           while(true){
