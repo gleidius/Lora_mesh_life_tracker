@@ -47,7 +47,7 @@ void loop()
       if (digitalRead(STM_SW6) == false)                         // MESH 
       { 
         draw_pos(cord.Mode_Xpos, cord.Mode_Ypos, "Mesh");
-        send_to_mesh_E52(data_transmitt); // отправляем пакет (Если что то с модулем: data_transmitt = "GL 6666 56.452051 84.962577 174.967 1.5 190.4 1 2";)
+        send_to_mesh_E52("GL" + data_transmitt); // отправляем пакет (Если что то с модулем: data_transmitt = "GL 6666 56.452051 84.962577 174.967 1.5 190.4 1 2";)
       
         if (connect_flag == 0)                  // добавил дублирование отправкой на сервер, по просьбе организатора
         { 
@@ -57,7 +57,7 @@ void loop()
 
         if (connect_flag == 1)            // !!!!!!!!!0 потому что хочу посмотреть что пишет в таком случае должен быть 1!!!!!!!!
         {
-          connect_flag = send_to_server_SIM868(data_transmitt);              // если получилось подключиться то отправляем данные
+          connect_flag = send_to_server_SIM868("GV" + data_transmitt);              // в случае дублирования ключ другой
         }
       }
 
@@ -73,7 +73,7 @@ void loop()
 
         if (connect_flag == 1)            // !!!!!!!!!0 потому что хочу посмотреть что пишет в таком случае должен быть 1!!!!!!!!
         {
-          connect_flag = send_to_server_SIM868(data_transmitt);              // если получилось подключиться то отправляем данные
+          connect_flag = send_to_server_SIM868("GL" + data_transmitt);              // если получилось подключиться то отправляем данные
         }
       }
     }

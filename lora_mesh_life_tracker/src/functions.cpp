@@ -487,7 +487,7 @@ String get_telemetry(String Module_ADDR, int status_count, String altitude_rate 
       {
         course = "E";
       }
-      String data_transmitt = "GL "+ Module_ADDR + " " + lattitude + " " 
+      String data_transmitt = " "+ Module_ADDR + " " + lattitude + " " 
       + lontitude + " " + altitude + " " + altitude_rate + " " + speed + " " 
       + status_count + " " + course;
        
