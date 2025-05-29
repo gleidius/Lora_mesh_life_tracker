@@ -623,7 +623,7 @@ Display_coordinates init_menu(String Module_ADDR)                               
   display.setCursor(0, 0);
   display.println("    === " + Module_ADDR + " ===");  // !!!!!!!!!!!!! можно попробовать заменить все инты на структуру и потом её return();
 
-  display.print("Power (3), dBm: ");
+  display.print("Power, dBm: ");
   coordinates.Power_Xpos = display.getCursorX(); // позиция Х курсора при написании мощности
   coordinates.Power_Ypos = display.getCursorY(); // позиция Y курсора при написании мощности
   display.println("22");

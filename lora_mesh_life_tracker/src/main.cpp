@@ -29,11 +29,11 @@ void loop()
       timeout_altrate = millis();
       altitude_rate = get_ar_with_filter(cord.ALTR_Xpos, cord.ALTR_Ypos);
     }
-    
+    /*
     if(digitalRead(STM_SW2) == false)                        // SETTINGS
     {
       get_setup_from_ESP();                                 // получаем строку с настройками инастраиваемся
-    }
+    }*/
 
       if ((millis() - start_time) >= 3000+TX_timeout_random_piece)                  // режим отправки и отправка
     {
