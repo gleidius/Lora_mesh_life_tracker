@@ -117,6 +117,7 @@ void set_rs(int rs)                                                             
   S_Serial.println(at);
   MySerial1.print("Скорость/Дальность = ");
   MySerial1.println(range_speed);
+  read_SSerial();
 }
 
 void set_SRC_ADDR(int SRC)                                                           // функция изменения собственного адреса
@@ -333,6 +334,7 @@ int Next_SR(int butt_count, int SR_Xpos, int SR_Ypos)                           
 
 String Set_E52_ADDR()                                                                // устанавливаем адрес Е52 по последним 4-м ицфрам МАС адреса
 {
+  //read_SSerial();
   send_command("AT+SRC_ADDR=1234,1");
   char MAC_buff[50] = "1010";
   int MAC_buff_index = 0;
@@ -568,12 +570,14 @@ void init_pinout_and_display()                                                  
     MySerial1.println(F("SSD1306 allocation failed"));
     for (;;);
   }
-
+  display.display();
+  
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(0, 0);
   display.cp437(true);
   display.clearDisplay();
+  
 
   pinMode(STM_LT, INPUT); // инициализируем кнопочки
   pinMode(STM_DN, INPUT);
@@ -581,7 +585,12 @@ void init_pinout_and_display()                                                  
   pinMode(STM_RT, INPUT);
   pinMode(STM_UP, INPUT);
   
-  pinMode(STM_SW2, INPUT);
+  pinMode(STM_SW1, INPUT_PULLUP);
+  pinMode(STM_SW2, INPUT_PULLUP);
+  pinMode(STM_SW3, INPUT_PULLUP);
+  pinMode(STM_SW4, INPUT_PULLUP);
+  pinMode(STM_SW5, INPUT_PULLUP);
+  pinMode(STM_SW6, INPUT_PULLUP);
 
   // инициализируем софтовые/хардовые serial-ы
   MySerial1.begin(115200); // обычный serial
@@ -619,7 +628,7 @@ Display_coordinates init_menu(String Module_ADDR)                               
   coordinates.Power_Ypos = display.getCursorY(); // позиция Y курсора при написании мощности
   display.println("22");
 
-  display.print("S/R (4): ");
+  display.print("S/R (1-2): ");
   coordinates.SR_Xpos = display.getCursorX(); // позиция Х курсора при написании Speed/Rate
   coordinates.SR_Ypos = display.getCursorY(); // позиция Y курсора при написании Speed/Rate
   display.println("0");
@@ -639,10 +648,10 @@ Display_coordinates init_menu(String Module_ADDR)                               
   coordinates.ALTR_Ypos = display.getCursorY(); // позиция Y курсора при написании статуса
   display.println("N/A");
 
-  display.print("Pause: ");
+  display.print("Pause(3-4): ");
   coordinates.pause_Xpos = display.getCursorX(); // позиция Х курсора при написании статуса
   coordinates.pause_Ypos = display.getCursorY(); // позиция Y курсора при написании статуса
-  display.println("600");
+  display.println("3-5");
 
   display.display();
 
