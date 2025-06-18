@@ -272,7 +272,7 @@ void setup_gprs_parameter()                                                     
   MySerial3.println("AT+SAPBR=3,1,\"Contype\",\"GPRS\"");
   read_SIM868();
   delay(100);
-  //MySerial3.println("AT+SAPBR=3,1,\"APN\",\"internet.tele2.ru\"");      !!!!!!!!!!!!!
+  MySerial3.println("AT+SAPBR=3,1,\"APN\",\"internet.mts.ru\"");      
   read_SIM868();
   delay(100);
   MySerial3.println("AT+SAPBR=1,1");
@@ -456,7 +456,7 @@ String get_telemetry(String Module_ADDR, int status_count, String altitude_rate 
       speed = altitude.substring(altitude.indexOf(",") + 1);
       course = speed.substring(speed.indexOf(",") + 1);
 
-      lontitude = lontitude.substring(0, lontitude.indexOf(","));
+      lontitude = lontitude.substring(0, 7);
       altitude = altitude.substring(0, altitude.indexOf(","));
       speed = speed.substring(0, speed.indexOf(","));
       course = course.substring(0, course.indexOf(","));
@@ -472,9 +472,6 @@ String get_telemetry(String Module_ADDR, int status_count, String altitude_rate 
       }
       if (lontitude.length() < 7)
       {
-        lontitude = "E";
-      }
-      else if (lontitude.length() > 9){
         lontitude = "E";
       }
       if (altitude.length() < 3)
