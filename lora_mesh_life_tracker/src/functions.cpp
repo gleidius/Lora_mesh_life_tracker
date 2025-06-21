@@ -85,10 +85,10 @@ void set_power(int power)                                                       
   at.concat(pw);
   at.concat(zero);
   S_Serial.println(at);
-  MySerial1.print("Мощность: ");
+  //MySerial1.print("Мощность: ");
   String dbm = " дБм";
   pw.concat(dbm);
-  MySerial1.println(pw);
+  //MySerial1.println(pw);
 }
 
 void read_SSerial()                                                                  // функция чтения Soft UART с задержкой
@@ -421,7 +421,7 @@ float get_altitude_rate(float P, float P_pred, int t, int t_pred)               
   return((((R*T)/(g*M))*((P_pred-P)/(P*((t/1000)-(t_pred/1000))))));  
 }
 
-String get_telemetry(String Module_ADDR, int status_count, String altitude_rate )    // получаем телеметрию
+String get_telemetry(String Module_ADDR, int status_count, String altitude_rate, String router_hop)    // получаем телеметрию
 {
   String lattitude = "lattitude";
   String lontitude = "lontitude";
@@ -434,14 +434,14 @@ String get_telemetry(String Module_ADDR, int status_count, String altitude_rate 
   String GPS_str = "GPS";
 
       // =============================== ПОЛУЧЕНИЕ ТЕЛЕМЕТРИИ ==============================
-      MySerial1.print("Get GPS:");
+      //MySerial1.print("Get GPS:");
       read_SIM868();                              // на всякиий случай, перед получением корд читаем юарт, чтобы буфер был гарантированно пуст
       MySerial3.write("AT+CGNSINF\n");
       delay(5);
       while (MySerial3.available())
       {
         GPS_str = MySerial3.readString();
-        MySerial1.println(GPS_str);
+        //MySerial1.println(GPS_str);
       }
       // GPS_str = "1,1,20240208183233.000,55.643222,37.336658,336.55,0.00,323.0,1,,0.9,1.2,0.8,,12,10,9,,33,,";//подмена для отладки
 
@@ -460,12 +460,12 @@ String get_telemetry(String Module_ADDR, int status_count, String altitude_rate 
       altitude = altitude.substring(0, altitude.indexOf(","));
       speed = speed.substring(0, speed.indexOf(","));
       course = course.substring(0, course.indexOf(","));
-
+      /*
       MySerial1.println(lattitude);
       MySerial1.println(lattitude.length());
       MySerial1.println(lontitude);
       MySerial1.println(lontitude.length());
-
+      */
       if (lattitude.length() < 7)
       {
         lattitude = "E";
@@ -488,7 +488,7 @@ String get_telemetry(String Module_ADDR, int status_count, String altitude_rate 
       }
       String data_transmitt = " "+ Module_ADDR + " " + lattitude + " " 
       + lontitude + " " + altitude + " " + altitude_rate + " " + speed + " " 
-      + status_count + " " + course;
+      + status_count + " " + course + " " + router_hop;
        
       return(data_transmitt);
 }
@@ -620,7 +620,7 @@ Display_coordinates init_menu(String Module_ADDR)                               
   display.setCursor(0, 0);
   display.println("    === " + Module_ADDR + " ===");  // !!!!!!!!!!!!! можно попробовать заменить все инты на структуру и потом её return();
 
-  display.print("Power, dBm: ");
+  display.print("Power (5), dBm: ");
   coordinates.Power_Xpos = display.getCursorX(); // позиция Х курсора при написании мощности
   coordinates.Power_Ypos = display.getCursorY(); // позиция Y курсора при написании мощности
   display.println("22");
@@ -654,4 +654,38 @@ Display_coordinates init_menu(String Module_ADDR)                               
 
   return coordinates;
 }
+
+String read_router_hop()                                                             // считываем номер модуля через который произошел hop
+{
+   S_Serial.print("AT+ROUTER_READ=?");
+      delay(5);
+         while(S_Serial.available()){
+          String router_table = S_Serial.readString();
+          //MySerial1.println(router_table);
+          if(router_table.indexOf("404")!=-1){
+
+            router_table = router_table.substring(router_table.indexOf("404"));
+            //MySerial1.println(router_table);
+            //MySerial1.println("404 detected");
+
+            String router_hop = router_table.substring(3);
+            //MySerial1.print("hop =");
+            //MySerial1.println(router_hop);
+            while(router_hop.startsWith(" ") == true){
+              router_hop = router_hop.substring(1);
+              //MySerial1.println(router_hop);
+            }
+            router_hop = router_hop.substring(0,4);
+            //MySerial1.println(router_hop);
+            //MySerial1.println(router_hop.length());
+            
+            return(router_hop);
+        }
+        else{
+          return("E");
+        }
+        } 
+      
+    }
+      
 

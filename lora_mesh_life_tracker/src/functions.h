@@ -118,7 +118,7 @@ void SIM868_Power_SW(int SIM868_PWR_Pin);                                       
 
 int Next_power(int power_counter, int Power_Xpos, int Power_Ypos);                      // переключаем мощность Е52
 
-String get_telemetry(String Module_ADDR, int status_count, String altitude_rate);       // получаем телеметрию
+String get_telemetry(String Module_ADDR, int status_count, String altitude_rate, String router_hop);       // получаем телеметрию
 
 float get_altitude_rate(float P, float P_pred, int t, int t_pred);
 
@@ -133,3 +133,5 @@ void init_pinout_and_display();
 void init_board();                                                                      // инициализируем плату
 
 Display_coordinates init_menu(String Module_ADDR);                                      // отрисовываем меню
+
+String read_router_hop();                                                                // считываем номер модуля через который произошел hop
