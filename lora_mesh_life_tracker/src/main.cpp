@@ -20,7 +20,8 @@ void loop()
   bool connect_flag = 0;
   int random_piece_upper_limit = 0;
   String Module_ADDR = Set_E52_ADDR();                       // устанавливаем и запоминаем адрес Е52
-  String data_transmitt = "Nothing";
+  String data_transmitt = "";
+  String data_transmitt_old = "";
   String router_hop = "E";
   Display_coordinates cord = init_menu(Module_ADDR);
 
@@ -32,7 +33,22 @@ void loop()
       timeout_altrate = millis();
       altitude_rate = get_ar_with_filter(cord.ALTR_Xpos, cord.ALTR_Ypos);
       router_hop = read_router_hop();
-      data_transmitt = get_telemetry(Module_ADDR, status_count, altitude_rate, router_hop);
+      data_transmitt_old = get_telemetry(Module_ADDR, status_count, altitude_rate, router_hop);
+      
+      if(data_transmitt == "") {
+        data_transmitt = data_transmitt_old;
+      }
+      if (data_transmitt_old.indexOf("E") == -1){ // отбраковываем данные которые содержат ешки
+        data_transmitt = data_transmitt_old;
+      }
+    
+#define HELL
+
+#ifndef HELL
+Serial.println();
+#endif
+
+
     }
     /*
     if(digitalRead(STM_SW2) == false)                        // SETTINGS
@@ -56,25 +72,26 @@ void loop()
 
       //String data_transmitt = get_telemetry(Module_ADDR, status_count, altitude_rate);
 
-      if (digitalRead(STM_SW6) == false)                         // MESH 
-      { 
-        draw_pos(cord.Mode_Xpos, cord.Mode_Ypos, "Mesh");
-        counter_TX_pack++;
-        send_to_mesh_E52("GL" + data_transmitt + " " + counter_TX_pack); // отправляем пакет (Если что то с модулем: data_transmitt = "GL 6666 56.452051 84.962577 174.967 1.5 190.4 1 2";)
+      // if (digitalRead(STM_SW6) == false)                         // MESH 
+      // { 
+      //   draw_pos(cord.Mode_Xpos, cord.Mode_Ypos, "Mesh");
+      //   counter_TX_pack++;
+      //   send_to_mesh_E52("GL" + data_transmitt + " " + counter_TX_pack); // отправляем пакет (Если что то с модулем: data_transmitt = "GL 6666 56.452051 84.962577 174.967 1.5 190.4 1 2";)
       
-        /*if (connect_flag == 0)                  // добавил дублирование отправкой на сервер, по просьбе организатора
-        { 
-          try_connect_to_server();                            // пытаемя подключиьтся к серверу
-          connect_flag = check_connect_to_server();           // проверяем получилось ли подключиться 
-        }
+      //   if (connect_flag == 0)                  // добавил дублирование отправкой на сервер, по просьбе организатора
+      //   { 
+      //     try_connect_to_server();                            // пытаемя подключиьтся к серверу
+      //     connect_flag = check_connect_to_server();           // проверяем получилось ли подключиться 
+      //   }
 
-        if (connect_flag == 1)            // !!!!!!!!!0 потому что хочу посмотреть что пишет в таком случае должен быть 1!!!!!!!!
-        {
-          connect_flag = send_to_server_SIM868("GV" + data_transmitt);              // в случае дублирования ключ другой
-        }*/
-      }
+      //   if (connect_flag == 1)            // !!!!!!!!!0 потому что хочу посмотреть что пишет в таком случае должен быть 1!!!!!!!!
+      //   {
+      //     connect_flag = send_to_server_SIM868("GV" + data_transmitt + " " + counter_TX_pack);              // в случае дублирования ключ другой
+      //   }
+      // }
 
-      else if (digitalRead(STM_SW6) == true)                    // INTERNET 
+      // else 
+      if (digitalRead(STM_SW6) == true)                    // INTERNET 
       { 
         draw_pos(cord.Mode_Xpos, cord.Mode_Ypos, "Internet");
 
@@ -88,6 +105,7 @@ void loop()
         {
           counter_TX_pack++;
           connect_flag = send_to_server_SIM868("GL" + data_transmitt + " " + counter_TX_pack);              // если получилось подключиться то отправляем данные
+          data_transmitt = "";
         }
       }
     }

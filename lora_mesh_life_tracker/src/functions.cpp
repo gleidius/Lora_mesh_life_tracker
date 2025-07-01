@@ -435,13 +435,14 @@ String get_telemetry(String Module_ADDR, int status_count, String altitude_rate,
 
       // =============================== ПОЛУЧЕНИЕ ТЕЛЕМЕТРИИ ==============================
       //MySerial1.print("Get GPS:");
+
       read_SIM868();                              // на всякиий случай, перед получением корд читаем юарт, чтобы буфер был гарантированно пуст
       MySerial3.write("AT+CGNSINF\n");
       delay(5);
       while (MySerial3.available())
       {
         GPS_str = MySerial3.readString();
-        //MySerial1.println(GPS_str);
+        MySerial1.println(GPS_str);
       }
       // GPS_str = "1,1,20240208183233.000,55.643222,37.336658,336.55,0.00,323.0,1,,0.9,1.2,0.8,,12,10,9,,33,,";//подмена для отладки
 
@@ -451,26 +452,33 @@ String get_telemetry(String Module_ADDR, int status_count, String altitude_rate,
       GPS_str = GPS_str.substring(index1);
 
       lattitude = GPS_str.substring(0, GPS_str.indexOf(","));
+      
+
       lontitude = GPS_str.substring(GPS_str.indexOf(",") + 1);
+      
+
       altitude = lontitude.substring(lontitude.indexOf(",") + 1);
       speed = altitude.substring(altitude.indexOf(",") + 1);
       course = speed.substring(speed.indexOf(",") + 1);
 
-      lontitude = lontitude.substring(0, 7);
+      lontitude = lontitude.substring(0, lontitude.indexOf(","));
       altitude = altitude.substring(0, altitude.indexOf(","));
       speed = speed.substring(0, speed.indexOf(","));
       course = course.substring(0, course.indexOf(","));
+      
+      lontitude = lontitude.substring(0, lontitude.indexOf(".") + 5);
+      lattitude = lattitude.substring(0, lattitude.indexOf(".") + 5);
       /*
       MySerial1.println(lattitude);
       MySerial1.println(lattitude.length());
       MySerial1.println(lontitude);
       MySerial1.println(lontitude.length());
       */
-      if (lattitude.length() < 7)
+      if (lattitude.length() <= 6)
       {
         lattitude = "E";
       }
-      if (lontitude.length() < 7)
+      if (lontitude.length() <= 6)
       {
         lontitude = "E";
       }
@@ -488,7 +496,7 @@ String get_telemetry(String Module_ADDR, int status_count, String altitude_rate,
       }
       String data_transmitt = " "+ Module_ADDR + " " + lattitude + " " 
       + lontitude + " " + altitude + " " + altitude_rate + " " + speed + " " 
-      + status_count + " " + course + " " + router_hop;
+      + status_count + " " + course; //+ " " + router_hop;
        
       return(data_transmitt);
 }
@@ -678,6 +686,9 @@ String read_router_hop()                                                        
             router_hop = router_hop.substring(0,4);
             //MySerial1.println(router_hop);
             //MySerial1.println(router_hop.length());
+            if(router_hop.endsWith(" ")==1){
+              router_hop = router_hop.substring(0,3);
+            }
             
             return(router_hop);
         }
