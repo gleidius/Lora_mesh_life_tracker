@@ -6,8 +6,13 @@ class SIM868
 
 {
 private:
-    HardwareSerial &MySerial3;
-    HardwareSerial &MySerial1;
+    HardwareSerial &mSIM868_UART;
+    HardwareSerial &mTerminal_UART;
+
+    String mData_transmitt = "";
+    String mData_transmitt_old = "";
+    int mCounter_TX_pack = 0;
+    bool mConnect_flag = 0;
 
 public:
     int random_piece_upper_limit = 2000;
@@ -16,9 +21,11 @@ public:
 
     void read_SIM868(); // функция чтения ответа от SIM868
 
-    void send_SIM868(String command); // отправка АТ команды в sim
+    void send_AT_command(String command); // отправка АТ команды в sim
 
-    bool send_to_server_SIM868(String dataTransmit); // отправляем данные на сервер используя SIM868
+    void filter_incorrect_data(); // отфильтрвываем неправильные данные
+
+    bool send_to_server(String prefix, String end_of_message); // отправляем данные на сервер используя SIM868
 
     bool check_connect_to_server(); // функция проверки соединения с сервером
 
@@ -26,9 +33,11 @@ public:
 
     void setup_gprs_parameter(); // настраиваем ппараметры GPRS (APN)
 
-    void SIM868_GPS_Power_Up(); // включаем GPS
+    void PowerUp_gps(); // включаем GPS
 
-    void SIM868_Power_SW(int SIM868_PWR_Pin); // включаем/выключаем Е52
+    void Switch_Power(int SIM868_PWR_Pin); // включаем/выключаем Е52
 
     String get_telemetry(String Module_ADDR, int status_count, String altitude_rate); // получаем телеметрию
+
+    void try_send_to_server(); // пытаемся отправить данные на сервер
 };

@@ -1,11 +1,7 @@
 #pragma once
 #include <Arduino.h>
 
-// extern float Preshure[];
-// extern float alt_rate_massiv[];
-// extern int time_massiv[];
 extern String altitude_rate;
-// extern unsigned long alt_rate_time;
 
 struct Display_coordinates
 {
@@ -22,12 +18,11 @@ extern int butt_count;
 extern int status_count;
 extern int power_counter;
 extern int TX_timeout_random_piece;
-extern int counter_TX_pack;
-extern bool connect_flag;
-// extern int random_piece_upper_limit;
-extern String Module_ADDR; // устанавливаем и запоминаем адрес Е52
-extern String data_transmitt;
-extern String data_transmitt_old;
+// extern int counter_TX_pack;
+// extern bool connect_flag;
+extern String module_ADDR; // устанавливаем и запоминаем адрес Е52
+// extern String data_transmitt;
+// extern String data_transmitt_old;
 extern String router_hop;
 extern Display_coordinates cord;
 extern int state_SW1, state_SW2, state_SW3, state_SW4, state_SW5, state_SW6;

@@ -5,12 +5,12 @@
 // Serial UART
 extern uint8_t UART1_TX;
 extern uint8_t UART1_RX;
-extern HardwareSerial MySerial1;
+extern HardwareSerial Terminal_UART;
 
 // Sim UART
 extern uint8_t UART3_TX;
 extern uint8_t UART3_RX;
-extern HardwareSerial MySerial3;
+extern HardwareSerial SIM868_UART;
 
 // LoRa URAT
 extern uint8_t UART2_TX;

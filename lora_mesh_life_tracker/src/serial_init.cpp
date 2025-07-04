@@ -3,12 +3,12 @@
 // Serial UART
 uint8_t UART1_TX = PA9;
 uint8_t UART1_RX = PA10;
-HardwareSerial MySerial1(UART1_RX, UART1_TX);
+HardwareSerial Terminal_UART(UART1_RX, UART1_TX);
 
 // Sim UART
 uint8_t UART3_TX = PB10;
 uint8_t UART3_RX = PB11;
-HardwareSerial MySerial3(UART3_RX, UART3_TX);
+HardwareSerial SIM868_UART(UART3_RX, UART3_TX);
 
 // LoRa URAT
 uint8_t UART2_TX = PA2;

@@ -1,43 +1,38 @@
 #include "SIM868.h"
 
 SIM868::SIM868(HardwareSerial &Serial1, HardwareSerial &Serial3)
-    : MySerial3(Serial3), MySerial1(Serial1) {}
+    : mSIM868_UART(Serial3), mTerminal_UART(Serial1) {}
 
 void SIM868::read_SIM868() // функция чтения ответа от SIM868
 {
-    while (MySerial3.available())
+    while (mSIM868_UART.available())
     {
-        byte buff123 = MySerial3.read();
-        MySerial1.write(buff123);
+        byte buff123 = mSIM868_UART.read();
+        mTerminal_UART.write(buff123);
     }
 }
 
-void SIM868::send_SIM868(String command) // отправка АТ команды в sim
+void SIM868::send_AT_command(String command) // отправка АТ команды в sim
 {
-    MySerial3.println(command);
+    mSIM868_UART.println(command);
     read_SIM868();
     delay(100);
 }
 
-bool SIM868::send_to_server_SIM868(String dataTransmit) // отправляем данные на сервер используя SIM868
+bool SIM868::send_to_server(String prefix, String end_of_message) // отправляем данные на сервер используя SIM868
 {
-    MySerial1.println("Sending data to server ===>");
-    MySerial3.println("AT+CIPSEND=" + String(dataTransmit.length()));
-    MySerial1.print("Sizeof= ");
-    MySerial1.println("AT+CIPSEND=" + String(dataTransmit.length()));
+    mData_transmitt = prefix + " " + mData_transmitt + " " + end_of_message;
+    mTerminal_UART.println("Sending data to server ===>");
+    mSIM868_UART.println("AT+CIPSEND=" + String(mData_transmitt.length()));
+    mTerminal_UART.print("Sizeof= ");
+    mTerminal_UART.println("AT+CIPSEND=" + String(mData_transmitt.length()));
     delay(100);
 
-    String connection_status = MySerial3.readString();
+    String connection_status = mSIM868_UART.readString();
 
-    /*
-    MySerial1.print("Connection Status =");
-    MySerial1.println(connection_status);
-    */
-
-    // read_SIM868();
-    MySerial3.println(dataTransmit); // отправляем пакет // если нету модуля то заменить аргументы в скобках на строку: " 1111 56.45205 84.96131 450 1.5 50 2"
-    MySerial1.print("pack = ");
-    MySerial1.println(dataTransmit);
+    mSIM868_UART.println(mData_transmitt); // отправляем пакет // если нету модуля то заменить аргументы в скобках на строку: " 1111 56.45205 84.96131 450 1.5 50 2"
+    mTerminal_UART.print("pack = ");
+    mTerminal_UART.println(mData_transmitt);
 
     if (connection_status.indexOf("ERROR") != -1)
     {
@@ -47,8 +42,6 @@ bool SIM868::send_to_server_SIM868(String dataTransmit) // отправляем 
     {
         return (1);
     }
-
-    // read_SIM868();
 }
 
 bool SIM868::check_connect_to_server() // функция проверки соединения с сервером
@@ -59,25 +52,25 @@ bool SIM868::check_connect_to_server() // функция проверки сое
     char CONNECT_buf[150] = "Nothing";
     int CONNECT_buf_index = 0;
 
-    while (MySerial3.available())
+    while (mSIM868_UART.available())
     {
-        byte buff123 = MySerial3.read();
-        MySerial1.write(buff123);
+        byte buff123 = mSIM868_UART.read();
+        mTerminal_UART.write(buff123);
         CONNECT_buf[CONNECT_buf_index] = buff123;
         CONNECT_buf_index++;
     }
     connect = String(CONNECT_buf);
-    MySerial1.print("connect = ");
-    MySerial1.println(connect);
+    mTerminal_UART.print("connect = ");
+    mTerminal_UART.println(connect);
 
     if (connect.lastIndexOf("FAIL") != -1)
     {
-        MySerial1.println("CONNECT TO SERVER FAIL");
+        mTerminal_UART.println("CONNECT TO SERVER FAIL");
         connect_flag = 0;
     }
     else if (connect.lastIndexOf("CONNECT OK") != -1)
     {
-        MySerial1.println("CONNECT TO SERVER OK");
+        mTerminal_UART.println("CONNECT TO SERVER OK");
         connect_flag = 1;
     }
 
@@ -86,38 +79,38 @@ bool SIM868::check_connect_to_server() // функция проверки сое
 
 void SIM868::try_connect_to_server() // выполняем попытку подключиться к серверу
 {
-    MySerial3.println("ATE0");
-    while (MySerial3.available())
+    mSIM868_UART.println("ATE0");
+    while (mSIM868_UART.available())
         read_SIM868();
     delay(100);
 
-    MySerial3.println("AT+CIPCLOSE"); // закрываем старые TCP соединения
+    mSIM868_UART.println("AT+CIPCLOSE"); // закрываем старые TCP соединения
     delay(500);
     read_SIM868();
 
-    MySerial3.println("AT+CSQ");
+    mSIM868_UART.println("AT+CSQ");
     read_SIM868();
     delay(100);
 
-    MySerial3.println("AT+CREG?");
+    mSIM868_UART.println("AT+CREG?");
     read_SIM868();
     delay(100);
 
-    MySerial3.println("AT+CGATT?");
+    mSIM868_UART.println("AT+CGATT?");
     read_SIM868();
     delay(100);
 
-    MySerial3.println("AT+CSTT=\"CMNET\"");
+    mSIM868_UART.println("AT+CSTT=\"CMNET\"");
     read_SIM868();
     delay(100);
 
-    MySerial3.println("AT+CIICR");
+    mSIM868_UART.println("AT+CIICR");
     delay(100);
 
-    MySerial3.println("AT+CIFSR");
+    mSIM868_UART.println("AT+CIFSR");
     read_SIM868();
 
-    MySerial3.println("AT+CIPSTART=\"TCP\",\"80.74.24.27\",5000");
+    mSIM868_UART.println("AT+CIPSTART=\"TCP\",\"80.74.24.27\",5000");
     delay(3000);
 }
 
@@ -125,25 +118,25 @@ void SIM868::setup_gprs_parameter() // настраиваем ппараметр
 {
     delay(15000);
     read_SIM868();
-    MySerial3.println("AT+SAPBR=3,1,\"Contype\",\"GPRS\"");
+    mSIM868_UART.println("AT+SAPBR=3,1,\"Contype\",\"GPRS\"");
     read_SIM868();
     delay(100);
-    MySerial3.println("AT+SAPBR=3,1,\"APN\",\"internet.mts.ru\"");
+    mSIM868_UART.println("AT+SAPBR=3,1,\"APN\",\"internet.mts.ru\"");
     read_SIM868();
     delay(100);
-    MySerial3.println("AT+SAPBR=1,1");
+    mSIM868_UART.println("AT+SAPBR=1,1");
     read_SIM868();
     delay(100);
 }
 
-void SIM868::SIM868_GPS_Power_Up() // включаем GPS
+void SIM868::PowerUp_gps() // включаем GPS
 {
-    MySerial3.write("AT+CGNSPWR=1\n"); // подаем питание на GPS
+    mSIM868_UART.write("AT+CGNSPWR=1\n"); // подаем питание на GPS
     delay(100);
     read_SIM868();
 }
 
-void SIM868::SIM868_Power_SW(int SIM868_PWR_Pin) // включаем/выключаем Е52
+void SIM868::Switch_Power(int SIM868_PWR_Pin) // включаем/выключаем Е52
 {
     pinMode(SIM868_PWR_Pin, OUTPUT);
     digitalWrite(SIM868_PWR_Pin, HIGH);
@@ -153,6 +146,19 @@ void SIM868::SIM868_Power_SW(int SIM868_PWR_Pin) // включаем/выклю�
     digitalWrite(SIM868_PWR_Pin, HIGH);
     delay(3000);
     pinMode(SIM868_PWR_Pin, INPUT);
+}
+
+void SIM868::filter_incorrect_data()
+{
+    if (mData_transmitt == "")
+    {
+        mData_transmitt = mData_transmitt_old;
+    }
+    if (mData_transmitt_old.indexOf("E") == -1)
+    { // отбраковываем данные которые содержат ешки
+        mData_transmitt = mData_transmitt_old;
+    }
+    mTerminal_UART.println(mData_transmitt);
 }
 
 String SIM868::get_telemetry(String Module_ADDR, int status_count, String altitude_rate) // получаем телеметрию
@@ -168,18 +174,16 @@ String SIM868::get_telemetry(String Module_ADDR, int status_count, String altitu
     String GPS_str = "GPS";
 
     // =============================== ПОЛУЧЕНИЕ ТЕЛЕМЕТРИИ ==============================
-    // MySerial1.print("Get GPS:");
-    MySerial1.println("clear_telemetry =");
-    
+    mTerminal_UART.print("Get GPS:");
+
     read_SIM868(); // на всякиий случай, перед получением корд читаем юарт, чтобы буфер был гарантированно пуст
-    MySerial3.write("AT+CGNSINF\n");
-    
-    MySerial1.println("get telemetry =");
+    mSIM868_UART.write("AT+CGNSINF\n");
+
     delay(5);
-    while (MySerial3.available())
+    while (mSIM868_UART.available())
     {
-        GPS_str = MySerial3.readString();
-        MySerial1.println(GPS_str);
+        GPS_str = mSIM868_UART.readString();
+        mTerminal_UART.println(GPS_str);
     }
     // GPS_str = "1,1,20240208183233.000,55.643222,37.336658,336.55,0.00,323.0,1,,0.9,1.2,0.8,,12,10,9,,33,,";//подмена для отладки
 
@@ -201,12 +205,7 @@ String SIM868::get_telemetry(String Module_ADDR, int status_count, String altitu
 
     lontitude = lontitude.substring(0, lontitude.indexOf(".") + 5);
     lattitude = lattitude.substring(0, lattitude.indexOf(".") + 5);
-    /*
-    MySerial1.println(lattitude);
-    MySerial1.println(lattitude.length());
-    MySerial1.println(lontitude);
-    MySerial1.println(lontitude.length());
-    */
+
     if (lattitude.length() <= 6)
     {
         lattitude = "E";
@@ -227,7 +226,33 @@ String SIM868::get_telemetry(String Module_ADDR, int status_count, String altitu
     {
         course = "E";
     }
-    String data_transmitt = " " + Module_ADDR + " " + lattitude + " " + lontitude + " " + altitude + " " + altitude_rate + " " + speed + " " + status_count + " " + course; //+ " " + router_hop;
+    String mData_transmitt =  //
+        Module_ADDR + " "     //
+        + lattitude + " "     //
+        + lontitude + " "     //
+        + altitude + " "      //
+        + altitude_rate + " " //
+        + speed + " "         //
+        + status_count + " "  //
+        + course;             //+ " " + router_hop;
 
-    return (data_transmitt);
+    mData_transmitt_old = mData_transmitt;
+    return (mData_transmitt);
+}
+
+void SIM868::try_send_to_server() // отправляем данные на сервер и проверяем статус подключения
+{
+    if (mConnect_flag == 0)
+    {
+        try_connect_to_server();                   // пытаемя подключиьтся к серверу
+        mConnect_flag = check_connect_to_server(); // проверяем получилось ли подключиться
+    }
+
+    if (mConnect_flag == 1)
+    {
+        mCounter_TX_pack++;
+        mConnect_flag = send_to_server("GL", String(mCounter_TX_pack)); // если получилось подключиться то отправляем данные
+
+        mData_transmitt = "";
+    }
 }
