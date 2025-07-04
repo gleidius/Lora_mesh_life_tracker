@@ -116,7 +116,7 @@ void SIM868::try_connect_to_server() // выполняем попытку под
 
 void SIM868::setup_gprs_parameter() // настраиваем ппараметры GPRS (APN)
 {
-    delay(15000);
+    //delay(15000);
     read_SIM868();
     mSIM868_UART.println("AT+SAPBR=3,1,\"Contype\",\"GPRS\"");
     read_SIM868();

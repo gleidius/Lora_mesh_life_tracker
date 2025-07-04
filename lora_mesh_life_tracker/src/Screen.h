@@ -22,7 +22,7 @@ public:
 
     void display();
 
-    void fillRect(int x_pos, int y_pos); // закрашиваем прямоугольник
+    void fillRect(int x_pos, int y_pos, int w, int h, uint16_t color); // закрашиваем прямоугольник
 
     void drawBitmap(int x, int y, const uint8_t bitmap[], int w, int h, uint16_t color); // отображаем рисунок по битмапу
 

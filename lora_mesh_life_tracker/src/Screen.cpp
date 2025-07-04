@@ -40,9 +40,9 @@ void Screen::display()
   my_display.display();
 }
 
-void Screen::fillRect(int x_pos, int y_pos)
+void Screen::fillRect(int x_pos, int y_pos, int w, int h, uint16_t color)
 {
-  my_display.fillRect(x_pos, y_pos, 128, 8, SSD1306_WHITE);
+  my_display.fillRect(x_pos, y_pos, w, h, color);
 }
 
 Display_coordinates Screen::draw_menu(String module_address) // отрисовываем меню

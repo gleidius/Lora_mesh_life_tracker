@@ -1,6 +1,7 @@
 #include "serial_init.h"
 #include "variables.h"
 #include "pinout.h"
+#include "bitmaps.h"
 
 #include "Screen.h"
 #include "BMP280.h"
@@ -19,12 +20,29 @@ void setup()
 	my_screen.begin();
 	bmp.begin();
 
-	// my_screen.fillRect(0, 50);
-	// my_screen.display(); //!!!!!!!!!!!!11
+	my_screen.drawBitmap(0, 0, PODNEBESE_LOGO, 128, 64, SSD1306_WHITE);
+
+	my_screen.fillRect(0, 50, 128, 16, SSD1306_BLACK);
+	my_screen.display(); //!!!!!!!!!!!!11
 
 	sim868.Switch_Power(SIM_PWRK);
 	sim868.PowerUp_gps();
 	sim868.setup_gprs_parameter();
+
+	my_screen.fillRect(0, 50, 28, 8, SSD1306_WHITE);
+	my_screen.display(); //!!!!!!!!!!!!11
+
+	float logoTimer = millis();
+	while (millis() - logoTimer < 15000)
+	{
+
+		float width = (((millis() - logoTimer) / 15000) * 100) + 28;
+
+		my_screen.fillRect(0, 50, width, 8, SSD1306_WHITE);
+		my_screen.display(); //!!!!!!!!!!!!11
+
+		Terminal_UART.println(width);
+	}
 
 	init_pinout();
 	my_screen.cord = my_screen.draw_menu(module_ADDR);
