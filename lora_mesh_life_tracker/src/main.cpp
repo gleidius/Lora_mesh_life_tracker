@@ -12,10 +12,13 @@ BMP280 bmp;
 Screen my_screen(Terminal_UART);
 
 void setup()
-{								 //========================== SETUP ===========================
+{
+	delay(5000);				 //========================== SETUP ===========================
 	Terminal_UART.begin(115200); // обычный serial
 	// S_Serial.begin(115200);	 //
 	SIM868_UART.begin(115200); // serial SIM868
+
+	init_pinout();
 
 	my_screen.begin();
 	bmp.begin();
@@ -25,7 +28,7 @@ void setup()
 	my_screen.fillRect(0, 50, 128, 16, SSD1306_BLACK);
 	my_screen.display(); //!!!!!!!!!!!!11
 
-	sim868.Switch_Power(SIM_PWRK);
+	sim868.power_ON(SIM_PWRK);
 	sim868.PowerUp_gps();
 	sim868.setup_gprs_parameter();
 
@@ -41,10 +44,9 @@ void setup()
 		my_screen.fillRect(0, 50, width, 8, SSD1306_WHITE);
 		my_screen.display(); //!!!!!!!!!!!!11
 
-		Terminal_UART.println(width);
+		// Terminal_UART.println(width);
 	}
 
-	init_pinout();
 	my_screen.cord = my_screen.draw_menu(module_ADDR);
 }
 

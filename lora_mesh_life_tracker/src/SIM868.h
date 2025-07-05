@@ -35,7 +35,8 @@ public:
 
     void PowerUp_gps(); // включаем GPS
 
-    void Switch_Power(int SIM868_PWR_Pin); // включаем/выключаем Е52
+    void power_ON(int SIM868_PWR_Pin);  // включаем SIM
+    void power_OFF(int SIM868_PWR_Pin); // выключаем SIM
 
     String get_telemetry(String Module_ADDR, int status_count, String altitude_rate); // получаем телеметрию
 

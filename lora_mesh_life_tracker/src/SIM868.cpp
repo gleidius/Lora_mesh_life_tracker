@@ -116,7 +116,7 @@ void SIM868::try_connect_to_server() // выполняем попытку под
 
 void SIM868::setup_gprs_parameter() // настраиваем ппараметры GPRS (APN)
 {
-    //delay(15000);
+    // delay(15000);
     read_SIM868();
     mSIM868_UART.println("AT+SAPBR=3,1,\"Contype\",\"GPRS\"");
     read_SIM868();
@@ -136,16 +136,48 @@ void SIM868::PowerUp_gps() // включаем GPS
     read_SIM868();
 }
 
-void SIM868::Switch_Power(int SIM868_PWR_Pin) // включаем/выключаем Е52
+void SIM868::power_ON(int SIM868_PWR_Pin) // включаем/выключаем SIM
 {
-    pinMode(SIM868_PWR_Pin, OUTPUT);
-    digitalWrite(SIM868_PWR_Pin, HIGH);
-    delay(100);
-    digitalWrite(SIM868_PWR_Pin, LOW);
-    delay(1000);
-    digitalWrite(SIM868_PWR_Pin, HIGH);
-    delay(3000);
-    pinMode(SIM868_PWR_Pin, INPUT);
+    read_SIM868();
+    mSIM868_UART.write("AT\n");
+    delay(5);
+    String response = mSIM868_UART.readString();
+
+    if (response.indexOf("OK") == -1)
+    {
+        pinMode(SIM868_PWR_Pin, OUTPUT);
+        digitalWrite(SIM868_PWR_Pin, HIGH);
+        delay(100);
+        digitalWrite(SIM868_PWR_Pin, LOW);
+        delay(1000);
+        digitalWrite(SIM868_PWR_Pin, HIGH);
+        delay(3000);
+        pinMode(SIM868_PWR_Pin, INPUT);
+
+        mTerminal_UART.println("Power ON");
+    }
+}
+
+void SIM868::power_OFF(int SIM868_PWR_Pin) // включаем/выключаем SIM
+{
+    read_SIM868();
+    mSIM868_UART.write("AT\n");
+    delay(5);
+    String response = mSIM868_UART.readString();
+
+    if (response.indexOf("OK") != -1)
+    {
+        pinMode(SIM868_PWR_Pin, OUTPUT);
+        digitalWrite(SIM868_PWR_Pin, HIGH);
+        delay(100);
+        digitalWrite(SIM868_PWR_Pin, LOW);
+        delay(1000);
+        digitalWrite(SIM868_PWR_Pin, HIGH);
+        delay(3000);
+        pinMode(SIM868_PWR_Pin, INPUT);
+
+        mTerminal_UART.println("Power OFF");
+    }
 }
 
 void SIM868::filter_incorrect_data()

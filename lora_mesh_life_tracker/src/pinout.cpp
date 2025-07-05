@@ -42,7 +42,7 @@ void init_pinout() // инициализируем пины и настройк�
     pinMode(STM_DN, INPUT);
     pinMode(STM_OK, INPUT);
     pinMode(STM_RT, INPUT);
-    pinMode(STM_UP, INPUT);  
+    pinMode(STM_UP, INPUT);
 
     pinMode(STM_SW1, INPUT_PULLUP);
     pinMode(STM_SW2, INPUT_PULLUP);
@@ -53,5 +53,5 @@ void init_pinout() // инициализируем пины и настройк�
 
     // инициализируем  пины SIM868
     pinMode(SIM_SLEEP, INPUT);
-    pinMode(SIM_PWRK, OUTPUT);
+    pinMode(SIM_PWRK, INPUT);
 }
