@@ -110,7 +110,7 @@ void SIM868::try_connect_to_server() // выполняем попытку под
     mSIM868_UART.println("AT+CIFSR");
     read_SIM868();
 
-    mSIM868_UART.println("AT+CIPSTART=\"TCP\",\"80.74.24.27\",5000");
+    mSIM868_UART.println(CipStartAddr); // Example: CipStartAddr = "AT+CIPSTART=\"TCP\",\"<ip addres>\",<port>"
     delay(3000);
 }
 
@@ -288,3 +288,55 @@ void SIM868::try_send_to_server() // отправляем данные на се
         mData_transmitt = "";
     }
 }
+
+int SIM868::readBaseStationPowerImage()
+{
+    read_SIM868();
+    mSIM868_UART.write("AT+CSQ\n");
+    while (!mSIM868_UART.available())
+    {
+    };
+    String response = mSIM868_UART.readString();
+
+    response = response.substring(response.indexOf(":") + 2);
+    response = response.substring(0, response.indexOf(","));
+
+    int response_int = response.toInt();
+    mTerminal_UART.print("base_signal_PWR =");
+    mTerminal_UART.println(response);
+    mTerminal_UART.print("response_int =");
+    mTerminal_UART.println(response_int);
+
+    if ((response_int == 1) or (response_int == 0))
+    {
+        return (1); // нет связи
+    }
+    else if (response_int == 1)
+    {
+        return (2); // очень слабый сигнал
+    }
+    else if ((2 <= response_int) and (response_int < 5))
+    {
+        return (3); // слабый сигнал
+    }
+    else if ((5 <= response_int) and (response_int < 12))
+    {
+        return (4); // средний сигнал
+    }
+    else if ((12 <= response_int) and (response_int < 20))
+    {
+        return (5); // хороший сигнал
+    }
+    else if ((20 <= response_int) and (response_int <= 31))
+    {
+        return (6); // очень хороший сигнал
+    }
+    else if (response_int == 99)
+    {
+        return (1); // неизвестно
+    }
+    else
+    {
+        return (0);
+    }
+};

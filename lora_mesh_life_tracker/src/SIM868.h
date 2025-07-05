@@ -1,6 +1,7 @@
 #pragma once
 #include <Arduino.h>
 #include <HardwareSerial.h>
+#include "secret_data.h"
 
 class SIM868
 
@@ -41,4 +42,6 @@ public:
     String get_telemetry(String Module_ADDR, int status_count, String altitude_rate); // получаем телеметрию
 
     void try_send_to_server(); // пытаемся отправить данные на сервер
+
+    int readBaseStationPowerImage(); // получаем мощность сигнала от базовой станциии определяем что рисовать на экране
 };

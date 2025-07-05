@@ -87,3 +87,38 @@ Display_coordinates Screen::draw_menu(String module_address) // отрисовы
 
   return coordinates;
 }
+
+void Screen::drawSignalIcon(int icon_number)
+{
+  int x_cord = 112;
+  int y_cord = 0;
+  int height = 8; // высота
+  int width = 16; // ширина
+
+  fillRect(x_cord, y_cord, width, height, SSD1306_BLACK);
+  if (icon_number == 1)
+  {
+    drawBitmap(x_cord, y_cord, no_connection_icon, width, height, SSD1306_WHITE);
+  }
+  if (icon_number == 2)
+  {
+    drawBitmap(x_cord, y_cord, very_low_signal, width, height, SSD1306_WHITE);
+  }
+  if (icon_number == 3)
+  {
+    drawBitmap(x_cord, y_cord, low_signal, width, height, SSD1306_WHITE);
+  }
+  if (icon_number == 4)
+  {
+    drawBitmap(x_cord, y_cord, medium_signal, width, height, SSD1306_WHITE);
+  }
+  if (icon_number == 5)
+  {
+    drawBitmap(x_cord, y_cord, good_signal, width, height, SSD1306_WHITE);
+  }
+  if (icon_number == 6)
+  {
+    drawBitmap(x_cord, y_cord, very_good_signal, width, height, SSD1306_WHITE);
+  }
+ 
+}

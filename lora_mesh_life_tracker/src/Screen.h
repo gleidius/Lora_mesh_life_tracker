@@ -3,6 +3,7 @@
 #include <HardwareSerial.h>
 #include "variables.h"
 #include <Adafruit_SSD1306.h>
+#include <signal_icon.h>
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
@@ -33,4 +34,6 @@ public:
     void draw_in_coordinates(int x_pos, int y_pos, String text); // функция отрисовки по позиции, закрашивая строку
 
     Display_coordinates draw_menu(String module_address); // отрисовываем меню
+
+    void drawSignalIcon(int icon_number);
 };

@@ -1,7 +1,7 @@
 #include "serial_init.h"
 #include "variables.h"
 #include "pinout.h"
-#include "bitmaps.h"
+#include "logo.h"
 
 #include "Screen.h"
 #include "BMP280.h"
@@ -59,6 +59,8 @@ void loop()
 		altitude_rate = bmp.get_ar_with_filter();
 		sim868.get_telemetry(module_ADDR, status_count, altitude_rate);
 		sim868.filter_incorrect_data();
+
+		my_screen.drawSignalIcon(sim868.readBaseStationPowerImage());
 	}
 
 	if ((millis() - start_time) >= 3000 + TX_timeout_random_piece) // режим отправки и отправка
@@ -75,6 +77,7 @@ void loop()
 		{
 			my_screen.draw_in_coordinates(my_screen.cord.Mode_Xpos, my_screen.cord.Mode_Ypos, "Internet");
 			sim868.try_send_to_server();
+			// int iiii = sim868.readBaseStationPWR();
 			Terminal_UART.println("===========================================================================================");
 		}
 
