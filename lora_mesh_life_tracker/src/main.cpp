@@ -80,7 +80,7 @@ void loop()
 			// int iiii = sim868.readBaseStationPWR();
 			Terminal_UART.println("===========================================================================================");
 		}
-
+		// Terminal_UART.println()
 		state_SW1 = !digitalRead(STM_SW1);
 		state_SW2 = !digitalRead(STM_SW2);
 		state_SW3 = !digitalRead(STM_SW3);

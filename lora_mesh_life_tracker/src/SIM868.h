@@ -13,7 +13,8 @@ private:
     String mData_transmitt = "";
     String mData_transmitt_old = "";
     int mCounter_TX_pack = 0;
-    bool mConnect_flag = 0;
+    bool mConnect_flag = 1;
+    bool mPrevious_power_status = 0;
 
 public:
     int random_piece_upper_limit = 2000;

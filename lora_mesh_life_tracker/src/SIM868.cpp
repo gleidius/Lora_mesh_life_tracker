@@ -36,10 +36,12 @@ bool SIM868::send_to_server(String prefix, String end_of_message) // отпра�
 
     if (connection_status.indexOf("ERROR") != -1)
     {
+        // mPrevious_power_status == 0;
         return (0);
     }
     else
     {
+
         return (1);
     }
 }
@@ -84,9 +86,9 @@ void SIM868::try_connect_to_server() // выполняем попытку под
         read_SIM868();
     delay(100);
 
-    mSIM868_UART.println("AT+CIPCLOSE"); // закрываем старые TCP соединения
-    delay(500);
-    read_SIM868();
+    // mSIM868_UART.println("AT+CIPCLOSE"); // закрываем старые TCP соединения
+    // delay(500);
+    // read_SIM868();
 
     mSIM868_UART.println("AT+CSQ");
     read_SIM868();
@@ -155,6 +157,8 @@ void SIM868::power_ON(int SIM868_PWR_Pin) // включаем/выключаем
         pinMode(SIM868_PWR_Pin, INPUT);
 
         mTerminal_UART.println("Power ON");
+
+        // mPrevious_power_status = 0;
     }
 }
 
@@ -274,7 +278,7 @@ String SIM868::get_telemetry(String Module_ADDR, int status_count, String altitu
 
 void SIM868::try_send_to_server() // отправляем данные на сервер и проверяем статус подключения
 {
-    if (mConnect_flag == 0)
+    if ((mConnect_flag == 0) /*and (mPrevious_power_status == 0)*/)
     {
         try_connect_to_server();                   // пытаемя подключиьтся к серверу
         mConnect_flag = check_connect_to_server(); // проверяем получилось ли подключиться
