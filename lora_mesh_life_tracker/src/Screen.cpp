@@ -9,6 +9,7 @@ Screen::Screen(HardwareSerial &Serial1)
 
 void Screen::begin()
 {
+  delay(1000);
   if (!my_display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) // инициализация дисплея    !!!!! спросить у Александра почему так !!!!!
   {
     mTerminal_UART.println(F("SSD1306 allocation failed"));
@@ -120,5 +121,4 @@ void Screen::drawSignalIcon(int icon_number)
   {
     drawBitmap(x_cord, y_cord, very_good_signal, width, height, SSD1306_WHITE);
   }
- 
 }

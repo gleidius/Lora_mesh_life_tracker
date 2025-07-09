@@ -15,4 +15,4 @@ extern HardwareSerial SIM868_UART;
 // LoRa URAT
 extern uint8_t UART2_TX;
 extern uint8_t UART2_RX;
-extern HardwareSerial S_Serial;
+extern HardwareSerial LoRa_UART;

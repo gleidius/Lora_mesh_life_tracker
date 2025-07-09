@@ -16,7 +16,7 @@ void SIM868::send_AT_command(String command) // отправка АТ коман
 {
     mSIM868_UART.println(command);
     read_SIM868();
-    delay(100);
+    // delay(100);
 }
 
 bool SIM868::send_to_server(String prefix, String end_of_message) // отправляем данные на сервер используя SIM868
@@ -26,7 +26,7 @@ bool SIM868::send_to_server(String prefix, String end_of_message) // отпра�
     mSIM868_UART.println("AT+CIPSEND=" + String(mData_transmitt.length()));
     mTerminal_UART.print("Sizeof= ");
     mTerminal_UART.println("AT+CIPSEND=" + String(mData_transmitt.length()));
-    delay(100);
+    // delay(100);
 
     String connection_status = mSIM868_UART.readString();
 
@@ -221,7 +221,7 @@ String SIM868::get_telemetry(String Module_ADDR, int status_count, String altitu
         GPS_str = mSIM868_UART.readString();
         mTerminal_UART.println(GPS_str);
     }
-    // GPS_str = "1,1,20240208183233.000,55.643222,37.336658,336.55,0.00,323.0,1,,0.9,1.2,0.8,,12,10,9,,33,,";//подмена для отладки
+    // GPS_str = "1,1,20240208183233.000,-90.000000,-180.000000,336.55,0.00,323.0,1,,0.9,1.2,0.8,,12,10,9,,33,,";//подмена для отладки
 
     GPS_buff_index = 0;
 
@@ -239,8 +239,8 @@ String SIM868::get_telemetry(String Module_ADDR, int status_count, String altitu
     speed = speed.substring(0, speed.indexOf(","));
     course = course.substring(0, course.indexOf(","));
 
-    lontitude = lontitude.substring(0, lontitude.indexOf(".") + 5);
-    lattitude = lattitude.substring(0, lattitude.indexOf(".") + 5);
+    lontitude = lontitude.substring(0, lontitude.indexOf(".") + 7); // чтобы обрезать до нужного количества знаков после точки указывать нужно на 1 больше
+    lattitude = lattitude.substring(0, lattitude.indexOf(".") + 7); // чтобы обрезать до нужного количества знаков после точки указывать нужно на 1 больше
 
     if (lattitude.length() <= 6)
     {
@@ -282,6 +282,7 @@ void SIM868::try_send_to_server() // отправляем данные на се
     {
         try_connect_to_server();                   // пытаемя подключиьтся к серверу
         mConnect_flag = check_connect_to_server(); // проверяем получилось ли подключиться
+        //get_telemetry();
     }
 
     if (mConnect_flag == 1)
@@ -291,6 +292,11 @@ void SIM868::try_send_to_server() // отправляем данные на се
 
         mData_transmitt = "";
     }
+}
+
+String SIM868::get_data_transmitt()
+{
+    return (mData_transmitt);
 }
 
 int SIM868::readBaseStationPowerImage()

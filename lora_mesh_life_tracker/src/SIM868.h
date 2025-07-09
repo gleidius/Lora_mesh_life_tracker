@@ -41,8 +41,8 @@ public:
     void power_OFF(int SIM868_PWR_Pin); // выключаем SIM
 
     String get_telemetry(String Module_ADDR, int status_count, String altitude_rate); // получаем телеметрию
-
-    void try_send_to_server(); // пытаемся отправить данные на сервер
+    String get_data_transmitt();                                                      // нужно выцзывать до отправки на сервер, т.к после неё обнуляется
+    void try_send_to_server();                                                        // пытаемся отправить данные на сервер
 
     int readBaseStationPowerImage(); // получаем мощность сигнала от базовой станциии определяем что рисовать на экране
 };

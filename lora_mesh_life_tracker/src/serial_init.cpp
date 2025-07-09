@@ -13,4 +13,4 @@ HardwareSerial SIM868_UART(UART3_RX, UART3_TX);
 // LoRa URAT
 uint8_t UART2_TX = PA2;
 uint8_t UART2_RX = PA3;
-HardwareSerial S_Serial(UART2_RX, UART2_TX);
+HardwareSerial LoRa_UART(UART2_RX, UART2_TX);
