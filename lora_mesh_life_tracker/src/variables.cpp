@@ -17,7 +17,7 @@ int TX_timeout_random_piece = 0;
 // String data_transmitt_old = "";
 String router_hop = "E";
 
-String module_ADDR = "2222"; // устанавливаем и запоминаем адрес Е52
+String module_ADDR = "EF10"; // устанавливаем и запоминаем адрес Е52
 
 int state_SW1, state_SW2, state_SW3, state_SW4, state_SW5, state_SW6 = 0;
 int old_state_SW1, old_state_SW2, old_state_SW3, old_state_SW4;

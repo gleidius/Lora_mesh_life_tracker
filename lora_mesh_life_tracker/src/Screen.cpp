@@ -54,7 +54,7 @@ Display_coordinates Screen::draw_menu(String module_address) // отрисовы
   my_display.setCursor(0, 0);
   my_display.println("    === " + module_address + " ==="); // !!!!!!!!!!!!! можно попробовать заменить все инты на структуру и потом её return();
 
-  my_display.print("Power (5), dBm: ");
+  my_display.print("Power, dBm: ");
   coordinates.Power_Xpos = my_display.getCursorX(); // позиция Х курсора при написании мощности
   coordinates.Power_Ypos = my_display.getCursorY(); // позиция Y курсора при написании мощности
   my_display.println("22");

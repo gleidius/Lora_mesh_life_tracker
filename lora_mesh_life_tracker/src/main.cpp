@@ -13,10 +13,9 @@ Screen my_screen(Terminal_UART);
 
 void setup()
 {
-	//delay(1000);				 //========================== SETUP ===========================
+	// delay(1000);				 //========================== SETUP ===========================
 	Terminal_UART.begin(115200); // обычный serial
-	LoRa_UART.begin(115200);
-	SIM868_UART.begin(115200); // serial SIM868
+	SIM868_UART.begin(115200);	 // serial SIM868
 
 	init_pinout();
 
@@ -44,6 +43,7 @@ void setup()
 	}
 
 	my_screen.cord = my_screen.draw_menu(module_ADDR);
+	LoRa_UART.begin(115200);
 }
 
 void loop()
@@ -70,10 +70,10 @@ void loop()
 		if (digitalRead(STM_SW6) == false) // ==================== MESH ========================
 		{
 			my_screen.draw_in_coordinates(my_screen.cord.Mode_Xpos, my_screen.cord.Mode_Ypos, "Mesh");
-			LoRa_UART.println(sim868.get_data_transmitt());
+			LoRa_UART.println("GL " + sim868.get_data_transmitt());
 			Terminal_UART.print("Lora_Pack =");
-			Terminal_UART.println(sim868.get_data_transmitt());
-			sim868.try_send_to_server();
+			Terminal_UART.println("GL " + sim868.get_data_transmitt());
+			sim868.try_send_to_server(1);
 		}
 
 		if (digitalRead(STM_SW6) == true) // INTERNET

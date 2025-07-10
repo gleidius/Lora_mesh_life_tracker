@@ -19,6 +19,32 @@ void SIM868::send_AT_command(String command) // отправка АТ коман
     // delay(100);
 }
 
+bool SIM868::send_to_server(String message) // отправляем данные на сервер используя SIM868, без префиксов и окончаний
+{
+    mTerminal_UART.println("Sending data to server ===>");
+    mSIM868_UART.println("AT+CIPSEND=" + String(message.length()));
+    mTerminal_UART.print("Sizeof= ");
+    mTerminal_UART.println("AT+CIPSEND=" + String(message.length()));
+    // delay(100);
+
+    String connection_status = mSIM868_UART.readString();
+
+    mSIM868_UART.println(message); // отправляем пакет // если нету модуля то заменить аргументы в скобках на строку: " 1111 56.45205 84.96131 450 1.5 50 2"
+    mTerminal_UART.print("pack = ");
+    mTerminal_UART.println(message);
+
+    if (connection_status.indexOf("ERROR") != -1)
+    {
+        // mPrevious_power_status == 0;
+        return (0);
+    }
+    else
+    {
+
+        return (1);
+    }
+}
+
 bool SIM868::send_to_server(String prefix, String end_of_message) // отправляем данные на сервер используя SIM868
 {
     mData_transmitt = prefix + " " + mData_transmitt + " " + end_of_message;
@@ -156,10 +182,11 @@ void SIM868::power_ON(int SIM868_PWR_Pin) // включаем/выключаем
         delay(3000);
         pinMode(SIM868_PWR_Pin, INPUT);
 
-        mTerminal_UART.println("Power ON");
+        // mTerminal_UART.println("Power ON");
 
         // mPrevious_power_status = 0;
     }
+    mTerminal_UART.println("Power ON");
 }
 
 void SIM868::power_OFF(int SIM868_PWR_Pin) // включаем/выключаем SIM
@@ -197,7 +224,7 @@ void SIM868::filter_incorrect_data()
     mTerminal_UART.println(mData_transmitt);
 }
 
-String SIM868::get_telemetry(String Module_ADDR, int status_count, String altitude_rate) // получаем телеметрию
+String SIM868::get_telemetry(String Module_ADDR, int status_count, String altitude_rate)
 {
     String lattitude = "lattitude";
     String lontitude = "lontitude";
@@ -276,13 +303,72 @@ String SIM868::get_telemetry(String Module_ADDR, int status_count, String altitu
     return (mData_transmitt);
 }
 
+String SIM868::get_telemetry_min(String Module_ADDR)
+{
+    String lattitude = "lattitude";
+    String lontitude = "lontitude";
+    String altitude = "altitude";
+
+    int index1 = 0;
+    String GPS_str = "GPS";
+
+    // =============================== ПОЛУЧЕНИЕ ТЕЛЕМЕТРИИ ==============================
+    mTerminal_UART.print("Get GPS:");
+
+    read_SIM868(); // на всякиий случай, перед получением корд читаем юарт, чтобы буфер был гарантированно пуст
+    mSIM868_UART.write("AT+CGNSINF\n");
+
+    delay(5);
+    while (mSIM868_UART.available())
+    {
+        GPS_str = mSIM868_UART.readString();
+        mTerminal_UART.println(GPS_str);
+    }
+    // GPS_str = "1,1,20240208183233.000,-90.000000,-180.000000,336.55,0.00,323.0,1,,0.9,1.2,0.8,,12,10,9,,33,,";//подмена для отладки
+
+    index1 = (GPS_str.indexOf(".") + 5);
+    GPS_str = GPS_str.substring(index1);
+
+    lattitude = GPS_str.substring(0, GPS_str.indexOf(","));
+    lontitude = GPS_str.substring(GPS_str.indexOf(",") + 1);
+    altitude = lontitude.substring(lontitude.indexOf(",") + 1);
+
+    lontitude = lontitude.substring(0, lontitude.indexOf(","));
+    altitude = altitude.substring(0, altitude.indexOf(","));
+
+    lontitude = lontitude.substring(0, lontitude.indexOf(".") + 7); // чтобы обрезать до нужного количества знаков после точки указывать нужно на 1 больше
+    lattitude = lattitude.substring(0, lattitude.indexOf(".") + 7); // чтобы обрезать до нужного количества знаков после точки указывать нужно на 1 больше
+
+    if (lattitude.length() <= 6)
+    {
+        lattitude = "E";
+    }
+    if (lontitude.length() <= 6)
+    {
+        lontitude = "E";
+    }
+    if (altitude.length() < 3)
+    {
+        altitude = "E";
+    }
+
+    String mData_transmitt = //
+        Module_ADDR + " "    //
+        + lattitude + " "    //
+        + lontitude + " "    //
+        + altitude;          //
+
+    mData_transmitt_old = mData_transmitt;
+    return (mData_transmitt);
+}
+
 void SIM868::try_send_to_server() // отправляем данные на сервер и проверяем статус подключения
 {
     if ((mConnect_flag == 0) /*and (mPrevious_power_status == 0)*/)
     {
         try_connect_to_server();                   // пытаемя подключиьтся к серверу
         mConnect_flag = check_connect_to_server(); // проверяем получилось ли подключиться
-        //get_telemetry();
+        // get_telemetry();
     }
 
     if (mConnect_flag == 1)
@@ -291,6 +377,46 @@ void SIM868::try_send_to_server() // отправляем данные на се
         mConnect_flag = send_to_server("GL", String(mCounter_TX_pack)); // если получилось подключиться то отправляем данные
 
         mData_transmitt = "";
+    }
+}
+
+void SIM868::try_send_to_server(bool i) // отправляем данные на сервер дублируя и проверяем статус подключения
+{
+    if ((mConnect_flag == 0) /*and (mPrevious_power_status == 0)*/)
+    {
+        try_connect_to_server();                   // пытаемя подключиьтся к серверу
+        mConnect_flag = check_connect_to_server(); // проверяем получилось ли подключиться
+        // get_telemetry();
+    }
+
+    if (mConnect_flag == 1)
+    {
+        mCounter_TX_pack++;
+        mConnect_flag = send_to_server("GV", String(mCounter_TX_pack)); // если получилось подключиться то отправляем данные
+
+        mData_transmitt = "";
+    }
+}
+
+void SIM868::connect_and_send_buffer(String message, int length_buffer)
+{
+    if ((mConnect_flag == 0) /*and (mPrevious_power_status == 0)*/)
+    {
+        try_connect_to_server();                   // пытаемя подключиьтся к серверу
+        mConnect_flag = check_connect_to_server(); // проверяем получилось ли подключиться
+        // get_telemetry();
+    }
+
+    mTransmittionBuffer = mTransmittionBuffer + message; // буффер для передщачи
+    mBuffer_counter++;                                   // счетчик количяества пакетов которые уже положили в буффер
+
+    if ((mConnect_flag == 1) and (mBuffer_counter >= length_buffer))
+    {
+        mConnect_flag = send_to_server("GV", String(mCounter_TX_pack)); // если получилось подключиться то отправляем данные
+
+        mTransmittionBuffer = "";
+        mBuffer_counter = 0;
+        // mData_transmitt = "";
     }
 }
 
