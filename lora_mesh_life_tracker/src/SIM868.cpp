@@ -437,6 +437,24 @@ void SIM868::try_send_to_server() // отправляем данные на се
     }
 }
 
+void SIM868::try_send_to_server(String TX_pack) // отправляем данные на сервер и проверяем статус подключения
+{
+    if ((mConnect_flag == 0) /*and (mPrevious_power_status == 0)*/)
+    {
+        try_connect_to_server();                   // пытаемя подключиьтся к серверу
+        mConnect_flag = check_connect_to_server(); // проверяем получилось ли подключиться
+        // get_telemetry();
+    }
+
+    if (mConnect_flag == 1)
+    {
+        mCounter_TX_pack++;
+        mConnect_flag = send_to_server(TX_pack); // если получилось подключиться то отправляем данные
+
+        mData_transmitt = "";
+    }
+}
+
 void SIM868::try_send_to_server(bool i) // отправляем данные на сервер дублируя и проверяем статус подключения
 {
     if ((mConnect_flag == 0) /*and (mPrevious_power_status == 0)*/)

@@ -15,7 +15,7 @@ private:
 
     String mTransmittionBuffer = "";
     int mCounter_TX_pack = 0;
-    bool mConnect_flag = 1;
+    bool mConnect_flag = 0;
     bool mPrevious_power_status = 0;
     int mBuffer_counter = 0;
 
@@ -180,6 +180,8 @@ public:
     Использует ключ GV т.е дублирует данные
     */
     void try_send_to_server(bool i);
+
+    void try_send_to_server(String TX_pack);
 
     /*
         Функция отправки на сервер данных из буфера и пополнения буфера

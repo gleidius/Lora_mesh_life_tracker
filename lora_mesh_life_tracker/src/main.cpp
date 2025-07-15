@@ -4,39 +4,104 @@
 #include "logo.h"
 
 #include "Screen.h"
+#include "BMP280.h"
 #include "SIM868.h"
 
-// #define MESH_STATUS_PIN PB7
+SIM868 sim868(Terminal_UART, SIM868_UART);
+BMP280 bmp;
+Screen my_screen(Terminal_UART);
 
 uint8_t MESH_STATUS_PIN = PB5;
 
-SIM868 sim868(Terminal_UART, SIM868_UART);
-Screen my_screen(Terminal_UART);
-
 void setup()
 {
-	// delay(1000);				 //========================== SETUP ===========================
+	// // delay(1000);				 //========================== SETUP ===========================
 	Terminal_UART.begin(115200); // обычный serial
 	SIM868_UART.begin(115200);	 // serial SIM868
+	// LoRa_UART.begin(115200);
 
-	my_screen.begin();
+	init_pinout();
 
-	my_screen.drawBitmap(0, 0, PODNEBESE_LOGO, 128, 64, SSD1306_WHITE);
+	// my_screen.begin();
+	// bmp.begin();
+
+	// my_screen.drawBitmap(0, 0, PODNEBESE_LOGO, 128, 64, SSD1306_WHITE);
+
+	// my_screen.fillRect(0, 50, 128, 16, SSD1306_BLACK);
+	// my_screen.display();
 
 	sim868.power_ON(SIM_PWRK);
-	sim868.PowerUp_gps();
-	my_screen.fillRect(0, 0, 128, 64, SSD1306_BLACK);
-	my_screen.display();
-	pinMode(MESH_STATUS_PIN, INPUT);
-}
-bool state_MESH;
+	delay(15000);
+	// sim868.PowerUp_gps();
+	sim868.setup_gprs_parameter();
 
+	// my_screen.fillRect(0, 50, 28, 8, SSD1306_WHITE);
+	// my_screen.display();
+
+	// float logoTimer = millis();
+	// while (millis() - logoTimer < 15000)
+	// {
+	// 	float width = (((millis() - logoTimer) / 15000) * 100) + 28;
+	// 	my_screen.fillRect(0, 50, width, 8, SSD1306_WHITE);
+	// 	my_screen.display();
+	// }
+	pinMode(MESH_STATUS_PIN, INPUT);
+	// my_screen.cord = my_screen.draw_menu(module_ADDR);
+	LoRa_UART.begin(115200);
+}
+int timeout = millis();
+String Lora_data = "";
+String packet = "";
+int packetLength_counter = 0;
+bool state_MESH;
 void loop()
 {
-	Terminal_UART.println("loop");
-	state_MESH = digitalRead(MESH_STATUS_PIN);
-	Terminal_UART.println(state_MESH);
+	/*
+		if ((millis() - timeout) >= 2500)
+		{
+			LoRa_UART.println("GL 1234 90.000000 180.000000 165.165");
+			timeout = millis();
+		}*/
 
+	// if (LoRa_UART.available())
+	// {
+
+	Lora_data = LoRa_UART.readString();
+
+	Terminal_UART.print("readString =");
+	Terminal_UART.println(Lora_data);
+	// }
+
+	if (Lora_data != "")
+	{
+		Terminal_UART.print("Lora_data =");
+		Terminal_UART.println(Lora_data);
+
+		packet = packet + " " + Lora_data;
+		Lora_data = "";
+		packetLength_counter++;
+
+		Terminal_UART.print("packetLength_counter =");
+		Terminal_UART.println(packetLength_counter);
+
+		Terminal_UART.print("packet =");
+		Terminal_UART.println(packet);
+	}
+
+	if (((millis() - start_time) >= 10000) or (packetLength_counter >= 10)) // режим отправки и отправка
+	{
+		start_time = millis();
+		packetLength_counter = 0;
+
+		// TX_timeout_random_piece = random(0, sim868.random_piece_upper_limit);
+
+		// my_screen.draw_in_coordinates(my_screen.cord.Mode_Xpos, my_screen.cord.Mode_Ypos, "Internet");
+		sim868.try_send_to_server(packet);
+
+		packet = "";
+	}
+
+	state_MESH = digitalRead(MESH_STATUS_PIN);
 	if (state_MESH == 0)
 	{
 		my_screen.draw_in_coordinates(0, 0, "DISCONNECT MESH");
@@ -45,4 +110,5 @@ void loop()
 	{
 		my_screen.draw_in_coordinates(0, 0, "CONNECT MESH");
 	}
+	// Terminal_UART.println("===========================================================================================");
 }
