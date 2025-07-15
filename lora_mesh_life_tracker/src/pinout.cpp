@@ -36,7 +36,7 @@ uint8_t switches[] = {
 uint8_t SIM_SLEEP = PA4;
 uint8_t SIM_PWRK = PB15;
 
-void init_pinout() // инициализируем пины и настройки экранчика !!!достать отсюда пины
+void init_pinout() // инициализируем пины и настройки экранчика
 {
     pinMode(STM_LT, INPUT); // инициализируем кнопочки
     pinMode(STM_DN, INPUT);

@@ -36,4 +36,6 @@ public:
     Display_coordinates draw_menu(String module_address); // отрисовываем меню
 
     void drawSignalIcon(int icon_number);
+
+    void clear();
 };
