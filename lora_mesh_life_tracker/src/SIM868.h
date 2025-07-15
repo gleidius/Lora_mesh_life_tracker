@@ -133,6 +133,20 @@ public:
     String get_telemetry_min(String Module_ADDR);
 
     /*
+    Получаем минимум телеметрии (широта, долгота, высота) телеметрию, отправляем в SIM запрос CGNSINF и после этого распаршиваем на составляющие
+    Ключ на этом этапе не добавляется
+
+    Module_ADDR - адрес который необходимо добавить в пакет
+
+    return mData_transmitt
+    mData_transmitt = String mData_transmitt =
+    lattitude + " "     //
+        + lontitude + " "     //
+        + altitude
+    */
+    String get_telemetry_min();
+
+    /*
     Метод для получения строки с телеметрией из класса SIM без чтения данных от GPS
     Метод просто возвращает последние рассчные на момент вызова данные
     Необходимо вызывать до отправки данных на сервер используя методы try_send_to_server() или
@@ -173,7 +187,7 @@ public:
         message - сообщение которое необходимо добавить в буффер
         length_buffer - длинна буффера, при достижении которой происходит отправка данных на сервер (можно динамически менять)
     */
-    void SIM868::connect_and_send_buffer(String message, int length_buffer);
+    void connect_and_send_buffer(String message, int length_buffer);
 
     /*
     Получаем мощность сигнала от 2G базовой станции и определяем диапазон мощностей. Мощность используемая

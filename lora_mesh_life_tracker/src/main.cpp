@@ -56,7 +56,8 @@ void loop()
 		timeout_altrate = millis();
 
 		altitude_rate = bmp.get_ar_with_filter();
-		sim868.get_telemetry(module_ADDR, status_count, altitude_rate); //!!!!!!!!!!!!1
+		// sim868.get_telemetry(module_ADDR, status_count, altitude_rate); //!!!!!!!!!!!!1
+		sim868.get_telemetry_min();
 		sim868.filter_incorrect_data();
 
 		my_screen.drawSignalIcon(sim868.readBaseStationPowerImage());
@@ -70,9 +71,14 @@ void loop()
 		if (digitalRead(STM_SW6) == false) // ==================== MESH ========================
 		{
 			my_screen.draw_in_coordinates(my_screen.cord.Mode_Xpos, my_screen.cord.Mode_Ypos, "Mesh");
-			LoRa_UART.println("GL " + sim868.get_data_transmitt());
+			// LoRa_UART.println("GL " + sim868.get_data_transmitt());
+
+			LoRa_UART.println(sim868.get_data_transmitt());
 			Terminal_UART.print("Lora_Pack =");
-			Terminal_UART.println("GL " + sim868.get_data_transmitt());
+			Terminal_UART.println(sim868.get_data_transmitt());
+
+			// Terminal_UART.print("Lora_Pack =");
+			// Terminal_UART.println("GL " + sim868.get_data_transmitt());
 			sim868.try_send_to_server(1);
 		}
 

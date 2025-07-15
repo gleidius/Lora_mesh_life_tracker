@@ -362,6 +362,63 @@ String SIM868::get_telemetry_min(String Module_ADDR)
     return (mData_transmitt);
 }
 
+String SIM868::get_telemetry_min()
+{
+    String lattitude = "lattitude";
+    String lontitude = "lontitude";
+    String altitude = "altitude";
+
+    int index1 = 0;
+    String GPS_str = "GPS";
+
+    // =============================== ПОЛУЧЕНИЕ ТЕЛЕМЕТРИИ ==============================
+    mTerminal_UART.print("Get GPS:");
+
+    read_SIM868(); // на всякиий случай, перед получением корд читаем юарт, чтобы буфер был гарантированно пуст
+    mSIM868_UART.write("AT+CGNSINF\n");
+
+    delay(5);
+    while (mSIM868_UART.available())
+    {
+        GPS_str = mSIM868_UART.readString();
+        mTerminal_UART.println(GPS_str);
+    }
+    // GPS_str = "1,1,20240208183233.000,-90.000000,-180.000000,336.55,0.00,323.0,1,,0.9,1.2,0.8,,12,10,9,,33,,";//подмена для отладки
+
+    index1 = (GPS_str.indexOf(".") + 5);
+    GPS_str = GPS_str.substring(index1);
+
+    lattitude = GPS_str.substring(0, GPS_str.indexOf(","));
+    lontitude = GPS_str.substring(GPS_str.indexOf(",") + 1);
+    altitude = lontitude.substring(lontitude.indexOf(",") + 1);
+
+    lontitude = lontitude.substring(0, lontitude.indexOf(","));
+    altitude = altitude.substring(0, altitude.indexOf(","));
+
+    lontitude = lontitude.substring(0, lontitude.indexOf(".") + 7); // чтобы обрезать до нужного количества знаков после точки указывать нужно на 1 больше
+    lattitude = lattitude.substring(0, lattitude.indexOf(".") + 7); // чтобы обрезать до нужного количества знаков после точки указывать нужно на 1 больше
+
+    if (lattitude.length() <= 6)
+    {
+        lattitude = "E";
+    }
+    if (lontitude.length() <= 6)
+    {
+        lontitude = "E";
+    }
+    if (altitude.length() < 3)
+    {
+        altitude = "E";
+    }
+
+    String mData_transmitt = lattitude + " "   //
+                             + lontitude + " " //
+                             + altitude;       //
+
+    mData_transmitt_old = mData_transmitt;
+    return (mData_transmitt);
+}
+
 void SIM868::try_send_to_server() // отправляем данные на сервер и проверяем статус подключения
 {
     if ((mConnect_flag == 0) /*and (mPrevious_power_status == 0)*/)
@@ -392,7 +449,7 @@ void SIM868::try_send_to_server(bool i) // отправляем данные н�
     if (mConnect_flag == 1)
     {
         mCounter_TX_pack++;
-        mConnect_flag = send_to_server("GV", String(mCounter_TX_pack)); // если получилось подключиться то отправляем данные
+        mConnect_flag = send_to_server("GV 4321", String(mCounter_TX_pack)); // если получилось подключиться то отправляем данные
 
         mData_transmitt = "";
     }
