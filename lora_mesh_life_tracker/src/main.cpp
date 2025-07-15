@@ -18,35 +18,16 @@ void setup()
 	// // delay(1000);				 //========================== SETUP ===========================
 	Terminal_UART.begin(115200); // обычный serial
 	SIM868_UART.begin(115200);	 // serial SIM868
-	// LoRa_UART.begin(115200);
 
 	init_pinout();
 
 	my_screen.begin();
-	// bmp.begin();
-
-	// my_screen.drawBitmap(0, 0, PODNEBESE_LOGO, 128, 64, SSD1306_WHITE);
-
-	// my_screen.fillRect(0, 50, 128, 16, SSD1306_BLACK);
-	// my_screen.display();
 
 	sim868.power_ON(SIM_PWRK);
 	delay(15000);
 	// sim868.PowerUp_gps();
 	sim868.setup_gprs_parameter();
 
-	// my_screen.fillRect(0, 50, 28, 8, SSD1306_WHITE);
-	// my_screen.display();
-
-	// float logoTimer = millis();
-	// while (millis() - logoTimer < 15000)
-	// {
-	// 	float width = (((millis() - logoTimer) / 15000) * 100) + 28;
-	// 	my_screen.fillRect(0, 50, width, 8, SSD1306_WHITE);
-	// 	my_screen.display();
-	// }
-	// pinMode(MESH_STATUS_PIN, INPUT);
-	// my_screen.cord = my_screen.draw_menu(module_ADDR);
 	LoRa_UART.begin(115200);
 }
 
@@ -97,10 +78,6 @@ void loop()
 		{
 			start_time = millis();
 			packetLength_counter = 0;
-
-			// TX_timeout_random_piece = random(0, sim868.random_piece_upper_limit);
-
-			// my_screen.draw_in_coordinates(my_screen.cord.Mode_Xpos, my_screen.cord.Mode_Ypos, "Internet");
 			sim868.try_send_to_server(packet);
 
 			packet = "";
