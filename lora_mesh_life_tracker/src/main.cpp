@@ -22,7 +22,7 @@ void setup()
 
 	init_pinout();
 
-	// my_screen.begin();
+	my_screen.begin();
 	// bmp.begin();
 
 	// my_screen.drawBitmap(0, 0, PODNEBESE_LOGO, 128, 64, SSD1306_WHITE);
@@ -45,70 +45,76 @@ void setup()
 	// 	my_screen.fillRect(0, 50, width, 8, SSD1306_WHITE);
 	// 	my_screen.display();
 	// }
-	pinMode(MESH_STATUS_PIN, INPUT);
+	// pinMode(MESH_STATUS_PIN, INPUT);
 	// my_screen.cord = my_screen.draw_menu(module_ADDR);
 	LoRa_UART.begin(115200);
 }
-int timeout = millis();
-String Lora_data = "";
-String packet = "";
-int packetLength_counter = 0;
-bool state_MESH;
+
 void loop()
 {
-	/*
-		if ((millis() - timeout) >= 2500)
+	Terminal_UART.print("marker");
+	int timeout = millis();
+	String Lora_data = "";
+	String packet = "";
+	int packetLength_counter = 0;
+	// bool state_MESH;
+
+	while (true)
+	{
+
+		/*
+		if ((millis() - timeout) >= 1000)
 		{
 			LoRa_UART.println("GL 1234 90.000000 180.000000 165.165");
 			timeout = millis();
-		}*/
+			}*/
 
-	// if (LoRa_UART.available())
-	// {
+		Terminal_UART.print("marker2");
 
-	Lora_data = LoRa_UART.readString();
+		Lora_data = LoRa_UART.readStringUntil('\n');
 
-	Terminal_UART.print("readString =");
-	Terminal_UART.println(Lora_data);
-	// }
-
-	if (Lora_data != "")
-	{
-		Terminal_UART.print("Lora_data =");
+		Terminal_UART.print("readString =");
 		Terminal_UART.println(Lora_data);
+		// }
 
-		packet = packet + " " + Lora_data;
-		Lora_data = "";
-		packetLength_counter++;
+		if (Lora_data != "")
+		{
+			Terminal_UART.print("Lora_data =");
+			Terminal_UART.println(Lora_data);
 
-		Terminal_UART.print("packetLength_counter =");
-		Terminal_UART.println(packetLength_counter);
+			packet = packet + " " + Lora_data + '\n';
+			Lora_data = "";
+			packetLength_counter++;
 
-		Terminal_UART.print("packet =");
-		Terminal_UART.println(packet);
+			Terminal_UART.print("packetLength_counter =");
+			Terminal_UART.println(packetLength_counter);
+
+			Terminal_UART.print("packet =");
+			Terminal_UART.println(packet);
+		}
+
+		if (((millis() - start_time) >= 10000) or (packetLength_counter >= 10)) // режим отправки и отправка
+		{
+			start_time = millis();
+			packetLength_counter = 0;
+
+			// TX_timeout_random_piece = random(0, sim868.random_piece_upper_limit);
+
+			// my_screen.draw_in_coordinates(my_screen.cord.Mode_Xpos, my_screen.cord.Mode_Ypos, "Internet");
+			sim868.try_send_to_server(packet);
+
+			packet = "";
+		}
+
+		// state_MESH = digitalRead(MESH_STATUS_PIN);
+		// if (state_MESH == 0)
+		// {
+		// 	my_screen.draw_in_coordinates(0, 0, "DISCONNECT MESH");
+		// }
+		// if (state_MESH == 1)
+		// {
+		// 	my_screen.draw_in_coordinates(0, 0, "CONNECT MESH");
+		// }
+		// Terminal_UART.println("===========================================================================================");
 	}
-
-	if (((millis() - start_time) >= 10000) or (packetLength_counter >= 10)) // режим отправки и отправка
-	{
-		start_time = millis();
-		packetLength_counter = 0;
-
-		// TX_timeout_random_piece = random(0, sim868.random_piece_upper_limit);
-
-		// my_screen.draw_in_coordinates(my_screen.cord.Mode_Xpos, my_screen.cord.Mode_Ypos, "Internet");
-		sim868.try_send_to_server(packet);
-
-		packet = "";
-	}
-
-	state_MESH = digitalRead(MESH_STATUS_PIN);
-	if (state_MESH == 0)
-	{
-		my_screen.draw_in_coordinates(0, 0, "DISCONNECT MESH");
-	}
-	if (state_MESH == 1)
-	{
-		my_screen.draw_in_coordinates(0, 0, "CONNECT MESH");
-	}
-	// Terminal_UART.println("===========================================================================================");
 }

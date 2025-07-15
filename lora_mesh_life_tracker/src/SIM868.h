@@ -15,7 +15,7 @@ private:
 
     String mTransmittionBuffer = "";
     int mCounter_TX_pack = 0;
-    bool mConnect_flag = 0;
+    bool mConnect_flag = 1;
     bool mPrevious_power_status = 0;
     int mBuffer_counter = 0;
 

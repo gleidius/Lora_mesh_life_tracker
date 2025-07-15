@@ -112,9 +112,9 @@ void SIM868::try_connect_to_server() // выполняем попытку под
         read_SIM868();
     delay(100);
 
-    // mSIM868_UART.println("AT+CIPCLOSE"); // закрываем старые TCP соединения
-    // delay(500);
-    // read_SIM868();
+    mSIM868_UART.println("AT+CIPCLOSE"); // закрываем старые TCP соединения
+    delay(500);
+    read_SIM868();
 
     mSIM868_UART.println("AT+CSQ");
     read_SIM868();
