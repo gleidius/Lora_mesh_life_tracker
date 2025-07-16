@@ -24,8 +24,13 @@ void setup()
 	my_screen.begin();
 
 	sim868.power_ON(SIM_PWRK);
+
+	sim868.PowerUp_gps();
+	delay(2000);
+
+	sim868.send_AT_command(("AT+CGNSCMD=0,\"$PMTK353,1,1,1,0,0*2A\""));
 	delay(15000);
-	// sim868.PowerUp_gps();
+
 	sim868.setup_gprs_parameter();
 
 	LoRa_UART.begin(115200);
@@ -33,7 +38,7 @@ void setup()
 
 void loop()
 {
-	Terminal_UART.print("marker");
+	// Terminal_UART.print("marker");
 	int timeout = millis();
 	String Lora_data = "";
 	String packet = "";
@@ -50,7 +55,7 @@ void loop()
 			timeout = millis();
 			}*/
 
-		Terminal_UART.print("marker2");
+		// Terminal_UART.print("marker2");
 
 		Lora_data = LoRa_UART.readStringUntil('\n');
 
