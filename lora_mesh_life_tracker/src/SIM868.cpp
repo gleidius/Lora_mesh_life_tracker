@@ -112,9 +112,9 @@ void SIM868::try_connect_to_server() // выполняем попытку под
         read_SIM868();
     delay(100);
 
-    // mSIM868_UART.println("AT+CIPCLOSE"); // закрываем старые TCP соединения
-    // delay(500);
-    // read_SIM868();
+    mSIM868_UART.println("AT+CIPCLOSE"); // закрываем старые TCP соединения
+    delay(500);
+    read_SIM868();
 
     mSIM868_UART.println("AT+CSQ");
     read_SIM868();
@@ -431,7 +431,7 @@ void SIM868::try_send_to_server() // отправляем данные на се
     if (mConnect_flag == 1)
     {
         mCounter_TX_pack++;
-        mConnect_flag = send_to_server("GL", String(mCounter_TX_pack)); // если получилось подключиться то отправляем данные
+        mConnect_flag = send_to_server("GL 4563", String(mCounter_TX_pack)); // если получилось подключиться то отправляем данные
 
         mData_transmitt = "";
     }
