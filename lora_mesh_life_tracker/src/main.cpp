@@ -43,7 +43,8 @@ void loop()
 	String Lora_data = "";
 	String packet = "";
 	int packetLength_counter = 0;
-	// bool state_MESH;
+	// my_screen.begin();
+	//  bool state_MESH;
 
 	while (true)
 	{
@@ -86,6 +87,10 @@ void loop()
 			sim868.try_send_to_server(packet);
 
 			packet = "";
+
+			my_screen.drawSignalIcon(sim868.readBaseStationPowerImage());
+
+			// my_screen.drawSignalIcon(sim868.readBaseStationPowerImage());
 		}
 
 		// state_MESH = digitalRead(MESH_STATUS_PIN);

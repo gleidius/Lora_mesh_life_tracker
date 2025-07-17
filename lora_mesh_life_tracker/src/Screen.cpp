@@ -121,6 +121,7 @@ void Screen::drawSignalIcon(int icon_number)
   {
     drawBitmap(x_cord, y_cord, very_good_signal, width, height, SSD1306_WHITE);
   }
+  my_display.display();
 }
 
 void Screen::clear()
