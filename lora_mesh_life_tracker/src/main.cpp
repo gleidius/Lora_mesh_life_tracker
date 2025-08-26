@@ -34,18 +34,18 @@ void setup()
 
 	// sim868.send_AT_command(("AT+CFUN=4"));
 	// delay(1000);
-	// sim868.send_AT_command(("AT+BTPOWER=0"));
-	// delay(1000);
-	// sim868.send_AT_command(("AT+CGNSPWR=1"));
-	// delay(1000);
-	// sim868.send_AT_command(("AT+CGNSPWR=1"));
-	// delay(1000);
-	// sim868.send_AT_command(("AT+CGNSCMD=0,\"$PMTK353,1,1,1,0,0*2A\""));
-	// delay(1000);
-	// sim868.send_AT_command(("AT+CGNSTST=1"));
-	// delay(1000);
-	// sim868.send_AT_command(("AT+CGNSCMD=0,\"$PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*34\""));
-	// delay(1000);
+	sim868.send_AT_command(("AT+BTPOWER=0"));
+	delay(1000);
+	sim868.send_AT_command(("AT+CGNSPWR=1"));
+	delay(1000);
+	sim868.send_AT_command(("AT+CGNSPWR=1"));
+	delay(1000);
+	sim868.send_AT_command(("AT+CGNSCMD=0,\"$PMTK353,1,1,1,0,0*2A\""));
+	delay(1000);
+	sim868.send_AT_command(("AT+CGNSTST=1"));
+	delay(1000);
+	sim868.send_AT_command(("AT+CGNSCMD=0,\"$PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*34\""));
+	delay(1000);
 
 	// sim868.setup_gprs_parameter();
 
@@ -125,6 +125,7 @@ void loop()
 
 		if (((millis() - start_time) >= timeout_sending_length) or (packetLength_counter >= max_pack_in_string)) // режим отправки и отправка
 		{
+			sim868.send_AT_command(("AT+CGNSTST=0"));
 			start_time = millis();
 			packetLength_counter = 0;
 
@@ -135,7 +136,7 @@ void loop()
 			packet = "";
 
 			my_screen.drawSignalIcon(sim868.readBaseStationPowerImage());
-
+			sim868.send_AT_command(("AT+CGNSTST=1"));
 			// my_screen.drawSignalIcon(sim868.readBaseStationPowerImage());
 		}
 
