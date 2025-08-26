@@ -15,7 +15,8 @@ private:
 
     String mTransmittionBuffer = "";
     int mCounter_TX_pack = 0;
-    bool mConnect_flag = 1;
+    bool mConnect_flag = 0;       // флажок отображающий статус подключения в данный момент
+    bool mFirst_connect_flag = 0; // флажок отоброжающий произошло ли подключение первый раз
     bool mPrevious_power_status = 0;
     int mBuffer_counter = 0;
 
@@ -48,7 +49,7 @@ public:
         return 1 - если отправлено без ошибок
         return 0 - если при отправке произошла ошибка
     */
-    bool send_to_server(String prefix, String end_of_message);
+    void send_to_server(String prefix, String end_of_message);
 
     /*
     Отправляем данные на сервер используя SIM868, без префиксов и окончаний
@@ -58,7 +59,7 @@ public:
     return 1 - если отправлено без ошибок
     return 0 - если при отправке произошла ошибка
     */
-    bool send_to_server(String message);
+    void send_to_server(String message);
 
     /*
     Метод проверки соединения с сервером
@@ -67,7 +68,7 @@ public:
     return 1 - удачное подключение
     return 0 - подключение не удалось
     */
-    bool check_connect_to_server();
+    void check_connect_to_server();
 
     // выполняем попытку подключиться к серверу
     void try_connect_to_server();

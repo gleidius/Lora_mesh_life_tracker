@@ -19,7 +19,7 @@ void SIM868::send_AT_command(String command) // отправка АТ коман
     // delay(100);
 }
 
-bool SIM868::send_to_server(String message) // отправляем данные на сервер используя SIM868, без префиксов и окончаний
+void SIM868::send_to_server(String message) // отправляем данные на сервер используя SIM868, без префиксов и окончаний
 {
     mTerminal_UART.println("Sending data to server ===>");
     mSIM868_UART.println("AT+CIPSEND=" + String(message.length()));
@@ -36,16 +36,16 @@ bool SIM868::send_to_server(String message) // отправляем данные
     if (connection_status.indexOf("ERROR") != -1)
     {
         // mPrevious_power_status == 0;
-        return (0);
+        mConnect_flag = 0;
     }
     else
     {
 
-        return (1);
+        mConnect_flag = 1;
     }
 }
 
-bool SIM868::send_to_server(String prefix, String end_of_message) // отправляем данные на сервер используя SIM868
+void SIM868::send_to_server(String prefix, String end_of_message) // отправляем данные на сервер используя SIM868
 {
     mData_transmitt = prefix + " " + mData_transmitt + " " + end_of_message;
     mTerminal_UART.println("Sending data to server ===>");
@@ -63,19 +63,19 @@ bool SIM868::send_to_server(String prefix, String end_of_message) // отпра�
     if (connection_status.indexOf("ERROR") != -1)
     {
         // mPrevious_power_status == 0;
-        return (0);
+        mConnect_flag = 0;
     }
     else
     {
 
-        return (1);
+        mConnect_flag = 1;
     }
 }
 
-bool SIM868::check_connect_to_server() // функция проверки соединения с сервером
+void SIM868::check_connect_to_server() // функция проверки соединения с сервером
 
 {
-    bool connect_flag = 0;
+    // bool connect_flag = 0;
     String connect = "connect";
     char CONNECT_buf[150] = "Nothing";
     int CONNECT_buf_index = 0;
@@ -94,52 +94,73 @@ bool SIM868::check_connect_to_server() // функция проверки сое
     if (connect.lastIndexOf("FAIL") != -1)
     {
         mTerminal_UART.println("CONNECT TO SERVER FAIL");
-        connect_flag = 0;
+        mConnect_flag = 0;
     }
     else if (connect.lastIndexOf("CONNECT OK") != -1)
     {
         mTerminal_UART.println("CONNECT TO SERVER OK");
-        connect_flag = 1;
+        mConnect_flag = 1;
+        mFirst_connect_flag = 1;
     }
 
-    return (connect_flag);
+    // return (mConnect_flag);
 }
 
 void SIM868::try_connect_to_server() // выполняем попытку подключиться к серверу
 {
-    mSIM868_UART.println("ATE0");
-    while (mSIM868_UART.available())
+    if (mFirst_connect_flag == 1)
+    {
+        mSIM868_UART.println("AT+CIPSHUT ");
         read_SIM868();
-    delay(100);
+        delay(100);
+        mSIM868_UART.println("AT+CIPCLOSE"); // закрываем старые TCP соединения
+        delay(500);
+        read_SIM868();
+        mSIM868_UART.println(CipStartAddr); // Example: CipStartAddr = "AT+CIPSTART=\"TCP\",\"<ip addres>\",<port>"
+        // delay(200);
+        // mSIM868_UART.readStringUntil('\n');
+        delay(3000);
+    }
+    else
+    {
 
-    mSIM868_UART.println("AT+CIPCLOSE"); // закрываем старые TCP соединения
-    delay(500);
-    read_SIM868();
+        mSIM868_UART.println("ATE0");
+        while (mSIM868_UART.available())
+            read_SIM868();
+        delay(100);
 
-    mSIM868_UART.println("AT+CSQ");
-    read_SIM868();
-    delay(100);
+        mSIM868_UART.println("AT+CIPCLOSE"); // закрываем старые TCP соединения
+        delay(500);
+        read_SIM868();
 
-    mSIM868_UART.println("AT+CREG?");
-    read_SIM868();
-    delay(100);
+        mSIM868_UART.println("AT+CSQ");
+        read_SIM868();
+        delay(100);
 
-    mSIM868_UART.println("AT+CGATT?");
-    read_SIM868();
-    delay(100);
+        mSIM868_UART.println("AT+CREG?");
+        read_SIM868();
+        delay(100);
 
-    mSIM868_UART.println("AT+CSTT=\"CMNET\"");
-    read_SIM868();
-    delay(100);
+        mSIM868_UART.println("AT+CGATT?");
+        read_SIM868();
+        delay(100);
 
-    mSIM868_UART.println("AT+CIICR");
-    delay(100);
+        mSIM868_UART.println("AT+CSTT=\"CMNET\"");
+        read_SIM868();
+        delay(100);
 
-    mSIM868_UART.println("AT+CIFSR");
-    read_SIM868();
+        mSIM868_UART.println("AT+CIICR");
+        delay(100);
 
-    mSIM868_UART.println(CipStartAddr); // Example: CipStartAddr = "AT+CIPSTART=\"TCP\",\"<ip addres>\",<port>"
-    delay(3000);
+        mSIM868_UART.println("AT+CIFSR");
+        delay(100);
+        read_SIM868();
+
+        mSIM868_UART.println(CipStartAddr); // Example: CipStartAddr = "AT+CIPSTART=\"TCP\",\"<ip addres>\",<port>"
+        // delay(200);
+        // mSIM868_UART.readStringUntil('\n');
+        delay(3000);
+    }
 }
 
 void SIM868::setup_gprs_parameter() // настраиваем ппараметры GPRS (APN)
@@ -149,7 +170,7 @@ void SIM868::setup_gprs_parameter() // настраиваем ппараметр
     mSIM868_UART.println("AT+SAPBR=3,1,\"Contype\",\"GPRS\"");
     read_SIM868();
     delay(100);
-    mSIM868_UART.println("AT+SAPBR=3,1,\"APN\",\"internet.mts.ru\"");
+    mSIM868_UART.println("AT+SAPBR=3,1,\"APN\",\"internet.tele2.ru\"");
     read_SIM868();
     delay(100);
     mSIM868_UART.println("AT+SAPBR=1,1");
@@ -423,15 +444,15 @@ void SIM868::try_send_to_server() // отправляем данные на се
 {
     if ((mConnect_flag == 0) /*and (mPrevious_power_status == 0)*/)
     {
-        try_connect_to_server();                   // пытаемя подключиьтся к серверу
-        mConnect_flag = check_connect_to_server(); // проверяем получилось ли подключиться
+        try_connect_to_server();   // пытаемя подключиьтся к серверу
+        check_connect_to_server(); // проверяем получилось ли подключиться
         // get_telemetry();
     }
 
     if (mConnect_flag == 1)
     {
         mCounter_TX_pack++;
-        mConnect_flag = send_to_server("GL", String(mCounter_TX_pack)); // если получилось подключиться то отправляем данные
+        send_to_server("GL", String(mCounter_TX_pack)); // если получилось подключиться то отправляем данные
 
         mData_transmitt = "";
     }
@@ -441,15 +462,15 @@ void SIM868::try_send_to_server(String TX_pack) // отправляем данн
 {
     if ((mConnect_flag == 0) /*and (mPrevious_power_status == 0)*/)
     {
-        try_connect_to_server();                   // пытаемя подключиьтся к серверу
-        mConnect_flag = check_connect_to_server(); // проверяем получилось ли подключиться
+        try_connect_to_server();   // пытаемя подключиьтся к серверу
+        check_connect_to_server(); // проверяем получилось ли подключиться
         // get_telemetry();
     }
 
     if (mConnect_flag == 1)
     {
         mCounter_TX_pack++;
-        mConnect_flag = send_to_server(TX_pack); // если получилось подключиться то отправляем данные
+        send_to_server(TX_pack); // если получилось подключиться то отправляем данные
 
         mData_transmitt = "";
     }
@@ -459,15 +480,15 @@ void SIM868::try_send_to_server(bool i) // отправляем данные н�
 {
     if ((mConnect_flag == 0) /*and (mPrevious_power_status == 0)*/)
     {
-        try_connect_to_server();                   // пытаемя подключиьтся к серверу
-        mConnect_flag = check_connect_to_server(); // проверяем получилось ли подключиться
+        try_connect_to_server();   // пытаемя подключиьтся к серверу
+        check_connect_to_server(); // проверяем получилось ли подключиться
         // get_telemetry();
     }
 
     if (mConnect_flag == 1)
     {
         mCounter_TX_pack++;
-        mConnect_flag = send_to_server("GV 4321", String(mCounter_TX_pack)); // если получилось подключиться то отправляем данные
+        send_to_server("GV 4321", String(mCounter_TX_pack)); // если получилось подключиться то отправляем данные
 
         mData_transmitt = "";
     }
@@ -477,8 +498,8 @@ void SIM868::connect_and_send_buffer(String message, int length_buffer)
 {
     if ((mConnect_flag == 0) /*and (mPrevious_power_status == 0)*/)
     {
-        try_connect_to_server();                   // пытаемя подключиьтся к серверу
-        mConnect_flag = check_connect_to_server(); // проверяем получилось ли подключиться
+        try_connect_to_server();   // пытаемя подключиьтся к серверу
+        check_connect_to_server(); // проверяем получилось ли подключиться
         // get_telemetry();
     }
 
@@ -487,7 +508,7 @@ void SIM868::connect_and_send_buffer(String message, int length_buffer)
 
     if ((mConnect_flag == 1) and (mBuffer_counter >= length_buffer))
     {
-        mConnect_flag = send_to_server("GV", String(mCounter_TX_pack)); // если получилось подключиться то отправляем данные
+        send_to_server("GV", String(mCounter_TX_pack)); // если получилось подключиться то отправляем данные
 
         mTransmittionBuffer = "";
         mBuffer_counter = 0;
@@ -511,12 +532,15 @@ int SIM868::readBaseStationPowerImage()
 
     response = response.substring(response.indexOf(":") + 2);
     response = response.substring(0, response.indexOf(","));
+    mTerminal_UART.print("response =");
+    mTerminal_UART.println(response);
 
     int response_int = response.toInt();
-    mTerminal_UART.print("base_signal_PWR =");
-    mTerminal_UART.println(response);
     mTerminal_UART.print("response_int =");
     mTerminal_UART.println(response_int);
+    mTerminal_UART.print("base_signal_PWR = ");
+    mTerminal_UART.print(-110 + (response_int * 2));
+    mTerminal_UART.println(" dBm");
 
     if ((response_int == 1) or (response_int == 0))
     {

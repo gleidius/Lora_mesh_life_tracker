@@ -19,19 +19,35 @@ void setup()
 	Terminal_UART.begin(115200); // обычный serial
 	SIM868_UART.begin(115200);	 // serial SIM868
 
+	Terminal_UART.println("START_SETTINGS");
 	init_pinout();
 
 	my_screen.begin();
 
 	sim868.power_ON(SIM_PWRK);
-
+	delay(15000);
 	sim868.PowerUp_gps();
 	delay(2000);
-
-	sim868.send_AT_command(("AT+CGNSCMD=0,\"$PMTK353,1,1,1,0,0*2A\""));
-	delay(15000);
-
 	sim868.setup_gprs_parameter();
+
+	sim868.send_AT_command(("AT+CFUN=1"));
+
+	// sim868.send_AT_command(("AT+CFUN=4"));
+	// delay(1000);
+	// sim868.send_AT_command(("AT+BTPOWER=0"));
+	// delay(1000);
+	// sim868.send_AT_command(("AT+CGNSPWR=1"));
+	// delay(1000);
+	// sim868.send_AT_command(("AT+CGNSPWR=1"));
+	// delay(1000);
+	// sim868.send_AT_command(("AT+CGNSCMD=0,\"$PMTK353,1,1,1,0,0*2A\""));
+	// delay(1000);
+	// sim868.send_AT_command(("AT+CGNSTST=1"));
+	// delay(1000);
+	// sim868.send_AT_command(("AT+CGNSCMD=0,\"$PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*34\""));
+	// delay(1000);
+
+	// sim868.setup_gprs_parameter();
 
 	LoRa_UART.begin(115200);
 }
@@ -60,14 +76,14 @@ void loop()
 
 		Lora_data = LoRa_UART.readStringUntil('\n');
 
-		Terminal_UART.print("readString =");
-		Terminal_UART.println(Lora_data);
+		// Terminal_UART.print("readString =");
+		// Terminal_UART.println(Lora_data);
 		// }
 
 		if (Lora_data != "")
 		{
-			Terminal_UART.print("Lora_data =");
-			Terminal_UART.println(Lora_data);
+			// Terminal_UART.print("Lora_data =");
+			// Terminal_UART.println(Lora_data);
 
 			packet = packet + " " + Lora_data + '\n';
 			Lora_data = "";
@@ -84,6 +100,9 @@ void loop()
 		{
 			start_time = millis();
 			packetLength_counter = 0;
+
+			// packet = "GL 1234 90.000000 180.000000 165.165"; //!!!!!!!!!! заглушка для тестов !!!!!!!!!
+
 			sim868.try_send_to_server(packet);
 
 			packet = "";
