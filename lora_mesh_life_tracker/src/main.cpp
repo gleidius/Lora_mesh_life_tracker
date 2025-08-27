@@ -24,7 +24,7 @@ void setup()
 	my_screen.drawBitmap(0, 0, PODNEBESE_LOGO, 128, 64, SSD1306_WHITE);
 
 	sim868.power_ON(SIM_PWRK);
-	// sim868.PowerUp_gps();
+	sim868.PowerUp_gps();
 	// delay(2000);
 	// sim868.send_AT_command("AT+CGNSCMD=0,\"$PMTK353,1,1,1,0,0*2A\"");
 
