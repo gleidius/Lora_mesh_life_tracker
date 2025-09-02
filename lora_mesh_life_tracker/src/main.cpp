@@ -56,8 +56,15 @@ void loop()
 {
 	// Terminal_UART.print("marker");
 	int timeout = millis();
+	int timeout_sending_length = 10000; // таймаут в миллисекундах по прошествии которого данные отправляются на сервер независимо от их количества
+	bool first_read_past_send = 0;		// флажок необходимый для определения первой вычитки юарт, после отправки данных на сервер
+
+	int max_pack_length = 90;	 // максимальная длинна одного пакета
+	int max_pack_in_string = 10; // максимальное количество пакетов которое будет упаковано в один для отправки на сервер
 	String Lora_data = "";
+	Lora_data.reserve(max_pack_length);
 	String packet = "";
+	packet.reserve(max_pack_in_string * max_pack_length);
 	int packetLength_counter = 0;
 	// my_screen.begin();
 	//  bool state_MESH;
@@ -74,29 +81,49 @@ void loop()
 
 		// Terminal_UART.print("marker2");
 
+		// while (true)
+		//{
 		Lora_data = LoRa_UART.readStringUntil('\n');
+		// Lora_data = LoRa_UART.readString();
 
-		// Terminal_UART.print("readString =");
-		// Terminal_UART.println(Lora_data);
+		Terminal_UART.print("readString =");
+		Terminal_UART.println(Lora_data);
+		//}
+
 		// }
 
 		if (Lora_data != "")
 		{
-			// Terminal_UART.print("Lora_data =");
-			// Terminal_UART.println(Lora_data);
+			if (Lora_data.substring(2).indexOf("GL") == -1)
+			{
 
-			packet = packet + " " + Lora_data + '\n';
-			Lora_data = "";
-			packetLength_counter++;
+				Terminal_UART.print("Lora_data =");
+				Terminal_UART.println(Lora_data);
 
-			Terminal_UART.print("packetLength_counter =");
-			Terminal_UART.println(packetLength_counter);
+				// packet += packet; // подобная конструкция необходима для экономии времени при сборке строки
+				// packet += " ";
+				// packet += Lora_data;
+				// packet += '\n';
+				packet = packet + " " + Lora_data + '\n';
 
-			Terminal_UART.print("packet =");
-			Terminal_UART.println(packet);
+				Lora_data = "";
+				packetLength_counter++;
+
+				Terminal_UART.print("packetLength_counter =");
+				Terminal_UART.println(packetLength_counter);
+
+				Terminal_UART.print("packet =");
+				Terminal_UART.println(packet);
+
+				// Terminal_UART.print("Point 1");
+			}
+			else
+			{
+				Lora_data = "";
+			}
 		}
 
-		if (((millis() - start_time) >= 10000) or (packetLength_counter >= 10)) // режим отправки и отправка
+		if (((millis() - start_time) >= timeout_sending_length) or (packetLength_counter >= max_pack_in_string)) // режим отправки и отправка
 		{
 			start_time = millis();
 			packetLength_counter = 0;
